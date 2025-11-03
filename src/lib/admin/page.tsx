@@ -1,13 +1,13 @@
 "use client";
 
 import { useState, useEffect } from 'react';
+import Image from 'next/image';
 import { SchoolService } from '@/lib/schoolService';
 import { School } from '@/lib/supabase';
 
 export default function AdminPage() {
   const [schools, setSchools] = useState<School[]>([]);
   const [loading, setLoading] = useState(true);
-  const [editingSchool, setEditingSchool] = useState<School | null>(null);
   const [showAddForm, setShowAddForm] = useState(false);
   const [newSchool, setNewSchool] = useState<Partial<School>>({});
 
@@ -28,19 +28,7 @@ export default function AdminPage() {
     }
   };
 
-  const handleEdit = (school: School) => {
-    setEditingSchool(school);
-  };
-
-  const handleSave = async (school: School) => {
-    try {
-      await SchoolService.updateSchool(school.id!, school);
-      await loadSchools();
-      setEditingSchool(null);
-    } catch (error) {
-      console.error('Error updating school:', error);
-    }
-  };
+  // Editing flow is not implemented yet
 
   const handleDelete = async (id: number) => {
     if (confirm('Are you sure you want to delete this school?')) {
@@ -188,10 +176,12 @@ export default function AdminPage() {
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="flex items-center">
                           <div className="flex-shrink-0 h-10 w-10">
-                            <img
+                            <Image
                               className="h-10 w-10 rounded-full object-contain"
                               src={school.logo_banner}
                               alt={school.school_name}
+                              width={40}
+                              height={40}
                             />
                           </div>
                           <div className="ml-4">
@@ -211,12 +201,6 @@ export default function AdminPage() {
                         {school.curriculum_tags}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                        <button
-                          onClick={() => handleEdit(school)}
-                          className="text-[#774BE5] hover:text-[#6B3FD6] mr-3"
-                        >
-                          Edit
-                        </button>
                         <button
                           onClick={() => handleDelete(school.id!)}
                           className="text-red-600 hover:text-red-900"

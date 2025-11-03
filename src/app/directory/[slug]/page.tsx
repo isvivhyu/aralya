@@ -215,7 +215,7 @@ const SchoolDetails = () => {
 
             <div className="grid md:grid-cols-4 grid-cols-2 w-full gap-4">
               <Link
-                href={`tel:${school?.contact_number || ""}`}
+                href={`tel:${(school?.contact_number || "").split(",")[0]?.trim() || ""}`}
                 className="bg-[#774BE5] rounded-lg px-4 py-2"
               >
                 <p className="text-white text-center font-semibold text-sm">
@@ -223,7 +223,7 @@ const SchoolDetails = () => {
                 </p>
               </Link>
               <Link
-                href={`sms:${school?.contact_number || ""}`}
+                href={`sms:${(school?.contact_number || "").split(",")[0]?.trim() || ""}`}
                 className="bg-[#774BE5] rounded-lg px-4 py-2"
               >
                 <p className="text-white text-center font-semibold text-sm">
@@ -401,6 +401,23 @@ const SchoolDetails = () => {
               {" "}↗
             </a>
           </p>
+          <div className="mt-4">
+            <a
+              href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
+                school?.location && school.location.trim() !== ""
+                  ? `${school.location}, Philippines`
+                  : school?.city && school.city.trim() !== ""
+                  ? `${school.city}, Philippines`
+                  : "Philippines"
+              )}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="bg-[#774BE5] rounded-lg px-4 py-2 inline-flex items-center gap-2 text-white font-semibold text-sm"
+            >
+              <i className="ri-map-pin-line text-white text-base"></i>
+              Open in Google Maps
+            </a>
+          </div>
         </div>
       </div>
     </section>
