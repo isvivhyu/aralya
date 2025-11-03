@@ -206,7 +206,8 @@ export default function Home() {
               <h4 className="text-[#0F0F0F] md:text-2xl text-base font-medium">
               Search schools around Metro Manila
               </h4>
-              <p className="text-black"><span className="font-semibold">Now listing:</span> Taguig <i className="ri-checkbox-blank-circle-fill"></i> Makati <i className="ri-checkbox-blank-circle-fill"></i> Pasig <i className="ri-checkbox-blank-circle-fill"></i> Mandaluyong <i className="ri-checkbox-blank-circle-fill"></i> Quezon City <i className="ri-checkbox-blank-circle-fill"></i> Laguna</p>
+              <p className="text-[#774BE5] text-xs flex flex-wrap items-center gap-0.5"><span className="font-semibold">Now listing:</span> Taguig <i className="ri-checkbox-blank-circle-fill text-[6px] mt-1"></i> Makati <i className="ri-checkbox-blank-circle-fill text-[6px] mt-1"></i> Pasig <i className="ri-checkbox-blank-circle-fill text-[6px] mt-1"></i> Mandaluyong <i className="ri-checkbox-blank-circle-fill text-[6px] mt-1"></i> Quezon City <i className="ri-checkbox-blank-circle-fill text-[6px] mt-1"></i> Laguna</p>
+            <p className="text-[#774BE5] text-xs font-normal mt-1">We&apos;re still adding more schools each week.</p>
               <div className="flex flex-col md:flex-row md:mt-6 mt-3 gap-2.5 rounded-2xl">
                 <div className="bg-[#f5f5f5] w-full md:w-[710px] p-3 md:p-4 md:rounded-[10px] rounded-full overflow-hidden flex items-center gap-3 md:gap-5 relative">
                   <input
