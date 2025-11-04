@@ -8,12 +8,12 @@ const Footer = () => {
       <div className="w-full flex md:flex-col flex-col-reverse gap-10">
         <div className="flex items-center justify-between">
           <Link href="/">
-          <Image
-            src="/images/logo-white.png"
-            alt="logo"
-            width={100}
-            height={100}
-          />
+            <Image
+              src="/images/logo-white.png"
+              alt="logo"
+              width={100}
+              height={100}
+            />
           </Link>
           <div className="flex items-center gap-2">
             <Link

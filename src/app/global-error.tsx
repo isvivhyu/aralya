@@ -1,13 +1,13 @@
-'use client'
+"use client";
 
-import Link from 'next/link'
+import Link from "next/link";
 
 export default function GlobalError({
-  error,
+  error: _error,
   reset,
 }: {
-  error: Error & { digest?: string }
-  reset: () => void
+  error: Error & { digest?: string };
+  reset: () => void;
 }) {
   return (
     <html>
@@ -38,5 +38,5 @@ export default function GlobalError({
         </div>
       </body>
     </html>
-  )
+  );
 }

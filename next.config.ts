@@ -4,8 +4,8 @@ const nextConfig: NextConfig = {
   // Remove output: 'export' to allow dynamic routes
   trailingSlash: true,
   images: {
-    unoptimized: false
-  }
+    unoptimized: false,
+  },
 };
 
 export default nextConfig;

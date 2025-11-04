@@ -48,7 +48,11 @@ const SchoolCard = ({
       </div>
       <div className="flex items-center justify-between mt-auto pt-5">
         <div className="bg-white rounded-full py-1 px-3 font-medium flex items-center justify-center w-fit">
-          <p className="text-base text-[#774BE5]">{priceRange.split(' ').length > 3 ? priceRange.split(' ').slice(0, 3).join(' ') + '...' : priceRange}</p>
+          <p className="text-base text-[#774BE5]">
+            {priceRange.split(" ").length > 3
+              ? priceRange.split(" ").slice(0, 3).join(" ") + "..."
+              : priceRange}
+          </p>
         </div>
         <Link
           href={schoolSlug ? `/directory/${schoolSlug}` : "/directory"}

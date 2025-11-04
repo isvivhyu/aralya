@@ -1,20 +1,20 @@
-'use client'
+"use client";
 
-import { useEffect } from 'react'
-import Link from 'next/link'
-import Navbar from '@/components/Navbar'
+import { useEffect } from "react";
+import Link from "next/link";
+import Navbar from "@/components/Navbar";
 
 export default function Error({
   error,
   reset,
 }: {
-  error: Error & { digest?: string }
-  reset: () => void
+  error: Error & { digest?: string };
+  reset: () => void;
 }) {
   useEffect(() => {
     // Log the error to an error reporting service
-    console.error(error)
-  }, [error])
+    console.error(error);
+  }, [error]);
 
   return (
     <section className="w-full bg-[#F9FAFB] flex flex-col items-center pb-40 px-5">
@@ -46,5 +46,5 @@ export default function Error({
         </div>
       </div>
     </section>
-  )
+  );
 }

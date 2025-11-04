@@ -25,11 +25,11 @@ const HowItWorksSection = ({
       <p className="mt-4 text-[#0E1C29] text-base text-center font-semibold">
         {description}
       </p>
-      <div className="w-full grid md:grid-cols-3 grid-cols-1 gap-2.5 mt-8">
+      <div className="w-full flex md:flex-row flex-col  gap-2.5 mt-8">
         {steps.map((step, index) => (
           <div
             key={index}
-            className="bg-white p-4 rounded-[20px] flex flex-col items-center"
+            className="bg-white w-full p-4 rounded-[20px] h-48 flex flex-col items-center"
           >
             {/* <Image
               src={step.iconSrc}

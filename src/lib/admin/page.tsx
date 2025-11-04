@@ -1,9 +1,9 @@
 "use client";
 
-import { useState, useEffect } from 'react';
-import Image from 'next/image';
-import { SchoolService } from '@/lib/schoolService';
-import { School } from '@/lib/supabase';
+import { useState, useEffect } from "react";
+import Image from "next/image";
+import { SchoolService } from "@/lib/schoolService";
+import { School } from "@/lib/supabase";
 
 export default function AdminPage() {
   const [schools, setSchools] = useState<School[]>([]);
@@ -22,7 +22,7 @@ export default function AdminPage() {
       const data = await SchoolService.getAllSchools();
       setSchools(data);
     } catch (error) {
-      console.error('Error loading schools:', error);
+      console.error("Error loading schools:", error);
     } finally {
       setLoading(false);
     }
@@ -31,24 +31,26 @@ export default function AdminPage() {
   // Editing flow is not implemented yet
 
   const handleDelete = async (id: number) => {
-    if (confirm('Are you sure you want to delete this school?')) {
+    if (confirm("Are you sure you want to delete this school?")) {
       try {
         await SchoolService.deleteSchool(id);
         await loadSchools();
       } catch (error) {
-        console.error('Error deleting school:', error);
+        console.error("Error deleting school:", error);
       }
     }
   };
 
   const handleAdd = async () => {
     try {
-      await SchoolService.addSchool(newSchool as Omit<School, 'id' | 'created_at' | 'updated_at'>);
+      await SchoolService.addSchool(
+        newSchool as Omit<School, "id" | "created_at" | "updated_at">,
+      );
       await loadSchools();
       setShowAddForm(false);
       setNewSchool({});
     } catch (error) {
-      console.error('Error adding school:', error);
+      console.error("Error adding school:", error);
     }
   };
 
@@ -69,7 +71,9 @@ export default function AdminPage() {
         <div className="bg-white shadow rounded-lg">
           <div className="px-4 py-5 sm:p-6">
             <div className="flex justify-between items-center mb-6">
-              <h1 className="text-2xl font-bold text-gray-900">School Management</h1>
+              <h1 className="text-2xl font-bold text-gray-900">
+                School Management
+              </h1>
               <button
                 onClick={() => setShowAddForm(true)}
                 className="bg-[#774BE5] text-white px-4 py-2 rounded-lg hover:bg-[#6B3FD6] transition-colors"
@@ -89,8 +93,13 @@ export default function AdminPage() {
                     </label>
                     <input
                       type="text"
-                      value={newSchool.school_name || ''}
-                      onChange={(e) => setNewSchool({...newSchool, school_name: e.target.value})}
+                      value={newSchool.school_name || ""}
+                      onChange={(e) =>
+                        setNewSchool({
+                          ...newSchool,
+                          school_name: e.target.value,
+                        })
+                      }
                       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#774BE5]"
                     />
                   </div>
@@ -100,8 +109,10 @@ export default function AdminPage() {
                     </label>
                     <input
                       type="text"
-                      value={newSchool.city || ''}
-                      onChange={(e) => setNewSchool({...newSchool, city: e.target.value})}
+                      value={newSchool.city || ""}
+                      onChange={(e) =>
+                        setNewSchool({ ...newSchool, city: e.target.value })
+                      }
                       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#774BE5]"
                     />
                   </div>
@@ -111,8 +122,13 @@ export default function AdminPage() {
                     </label>
                     <input
                       type="text"
-                      value={newSchool.min_tuition || ''}
-                      onChange={(e) => setNewSchool({...newSchool, min_tuition: e.target.value})}
+                      value={newSchool.min_tuition || ""}
+                      onChange={(e) =>
+                        setNewSchool({
+                          ...newSchool,
+                          min_tuition: e.target.value,
+                        })
+                      }
                       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#774BE5]"
                     />
                   </div>
@@ -122,8 +138,13 @@ export default function AdminPage() {
                     </label>
                     <input
                       type="text"
-                      value={newSchool.max_tuition || ''}
-                      onChange={(e) => setNewSchool({...newSchool, max_tuition: e.target.value})}
+                      value={newSchool.max_tuition || ""}
+                      onChange={(e) =>
+                        setNewSchool({
+                          ...newSchool,
+                          max_tuition: e.target.value,
+                        })
+                      }
                       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#774BE5]"
                     />
                   </div>
