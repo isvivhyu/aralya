@@ -53,6 +53,9 @@ const SchoolDirectoryContent = () => {
   const [curriculumFilter, setCurriculumFilter] = useState("");
   const [initialLoading, setInitialLoading] = useState(true);
   const [isMobile, setIsMobile] = useState(false);
+  const [availableCities, setAvailableCities] = useState<
+    { city: string; schoolCount: number }[]
+  >([]);
   const observerRef = useRef<HTMLDivElement>(null);
   const searchRef = useRef<HTMLFormElement>(null);
 
@@ -162,6 +165,21 @@ const SchoolDirectoryContent = () => {
       isMobile,
     );
   }, [activeFilter, isMobile]);
+
+  // Load available cities from database
+  useEffect(() => {
+    const loadCities = async () => {
+      try {
+        const cities = await SchoolService.searchCities("");
+        setAvailableCities(cities);
+      } catch (error) {
+        console.error("Error loading cities:", error);
+        setAvailableCities([]);
+      }
+    };
+
+    loadCities();
+  }, []);
 
   // Detect mobile screen size
   useEffect(() => {
@@ -641,36 +659,32 @@ const SchoolDirectoryContent = () => {
                   onMouseDown={(e) => e.stopPropagation()}
                 >
                   <div className="py-1.5">
-                    {[
-                      "Angeles City",
-                      "Las Pinas City",
-                      "Laguna",
-                      "Makati City",
-                      "Mandaluyong",
-                      "Manila City",
-                      "Pasay",
-                      "Pasig City",
-                      "Quezon City",
-                      "San Juan City",
-                      "Taguig City",
-                    ].map((city) => (
-                      <button
-                        type="button"
-                        key={city}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setCityFilter(cityFilter === city ? "" : city);
-                          setActiveFilter("all");
-                        }}
-                        className={`w-full text-left px-3 py-1.5 text-xs hover:bg-gray-50 transition-colors ${
-                          cityFilter === city
-                            ? "bg-[#774BE5] hover:bg-[#774BE5]/90 text-white font-medium"
-                            : "hover:text-[#774BE5] text-gray-700"
-                        }`}
-                      >
-                        {city}
-                      </button>
-                    ))}
+                    {availableCities.length === 0 ? (
+                      <div className="px-3 py-1.5 text-xs text-gray-500">
+                        Loading cities...
+                      </div>
+                    ) : (
+                      availableCities.map((cityData) => (
+                        <button
+                          type="button"
+                          key={cityData.city}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setCityFilter(
+                              cityFilter === cityData.city ? "" : cityData.city,
+                            );
+                            setActiveFilter("all");
+                          }}
+                          className={`w-full text-left px-3 py-1.5 text-xs hover:bg-gray-50 transition-colors ${
+                            cityFilter === cityData.city
+                              ? "bg-[#774BE5] hover:bg-[#774BE5]/90 text-white font-medium"
+                              : "hover:text-[#774BE5] text-gray-700"
+                          }`}
+                        >
+                          {cityData.city}
+                        </button>
+                      ))
+                    )}
                   </div>
                 </div>
               )}
@@ -922,43 +936,41 @@ const SchoolDirectoryContent = () => {
                 </div>
               </div>
               <div className="p-2.5">
-                <div className="grid grid-cols-2 gap-1.5">
-                  {[
-                    "Angeles City",
-                    "Las Pinas City",
-                    "Laguna",
-                    "Makati City",
-                    "Mandaluyong",
-                    "Manila City",
-                    "Pasay",
-                    "Pasig City",
-                    "Quezon City",
-                    "San Juan City",
-                    "Taguig City",
-                  ].map((city) => (
-                    <button
-                      key={city}
-                      onClick={(e) => {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        console.log("City filter clicked:", city);
-                        setCityFilter(cityFilter === city ? "" : city);
-                      }}
-                      className={`px-2.5 py-2 rounded-lg text-xs font-medium transition-all duration-200 ${
-                        cityFilter === city
-                          ? "bg-[#774BE5] text-white"
-                          : "bg-gray-50 hover:bg-gray-100 text-gray-700 border border-gray-200"
-                      }`}
-                    >
-                      <div className="flex items-center gap-1.5 justify-between">
-                        <span className="truncate text-left">{city}</span>
-                        {cityFilter === city && (
-                          <i className="ri-check-line text-white text-xs flex-shrink-0"></i>
-                        )}
-                      </div>
-                    </button>
-                  ))}
-                </div>
+                {availableCities.length === 0 ? (
+                  <div className="text-center py-4 text-xs text-gray-500">
+                    Loading cities...
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-2 gap-1.5">
+                    {availableCities.map((cityData) => (
+                      <button
+                        key={cityData.city}
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          console.log("City filter clicked:", cityData.city);
+                          setCityFilter(
+                            cityFilter === cityData.city ? "" : cityData.city,
+                          );
+                        }}
+                        className={`px-2.5 py-2 rounded-lg text-xs font-medium transition-all duration-200 ${
+                          cityFilter === cityData.city
+                            ? "bg-[#774BE5] text-white"
+                            : "bg-gray-50 hover:bg-gray-100 text-gray-700 border border-gray-200"
+                        }`}
+                      >
+                        <div className="flex items-center gap-1.5 justify-between">
+                          <span className="truncate text-left">
+                            {cityData.city}
+                          </span>
+                          {cityFilter === cityData.city && (
+                            <i className="ri-check-line text-white text-xs flex-shrink-0"></i>
+                          )}
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                )}
               </div>
             </div>
           )}
