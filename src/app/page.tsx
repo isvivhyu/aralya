@@ -19,26 +19,33 @@ export default function Home() {
   const [searchResults, setSearchResults] = useState<
     { city: string; schoolCount: number }[]
   >([]);
+  const [allCities, setAllCities] = useState<
+    { city: string; schoolCount: number }[]
+  >([]);
   const [showResults, setShowResults] = useState(false);
   const [featuredSchools, setFeaturedSchools] = useState<School[]>([]);
-  const [searchLoading, setSearchLoading] = useState(false);
   const router = useRouter();
   const searchRef = useRef<HTMLFormElement>(null);
 
-  // Load featured schools on component mount
+  // Load featured schools and all cities on component mount
   useEffect(() => {
-    const loadFeaturedSchools = async () => {
+    const loadData = async () => {
       try {
+        // Load featured schools
         const schools = await SchoolService.getFeaturedSchools();
         setFeaturedSchools(schools);
+
+        // Load all cities once
+        const cities = await SchoolService.searchCities("");
+        setAllCities(cities || []);
       } catch (error) {
-        console.error("Error loading featured schools:", error);
-        // Fallback to empty array or show error message
+        console.error("Error loading data:", error);
         setFeaturedSchools([]);
+        setAllCities([]);
       }
     };
 
-    loadFeaturedSchools();
+    loadData();
   }, []);
 
   // Helper function to create URL-friendly slugs
@@ -51,40 +58,34 @@ export default function Home() {
       .trim();
   };
 
-  // Search function for cities - fetches from cities table in Supabase
-  const searchCities = async (query: string) => {
-    try {
-      // Fetch cities from cities table (empty query returns all cities)
-      const results = await SchoolService.searchCities(query.trim());
-      return results || [];
-    } catch (error) {
-      console.error("Error searching cities from cities table:", error);
-      return [];
+  // Filter cities locally (no API calls)
+  const filterCities = (query: string) => {
+    if (!query.trim()) {
+      return allCities;
     }
+    
+    const queryLower = query.toLowerCase().trim();
+    return allCities.filter((cityData) =>
+      cityData.city.toLowerCase().includes(queryLower)
+    );
   };
 
-  // Handle search input changes
-  const handleSearchChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  // Handle search input changes - filter locally
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const query = e.target.value;
     setSearchQuery(query);
-
-    setSearchLoading(true);
     setShowResults(true);
 
-    // Fetch cities from cities table
-    const results = await searchCities(query);
-    setSearchResults(results || []);
-    setSearchLoading(false);
+    // Filter already-loaded cities
+    const filtered = filterCities(query);
+    setSearchResults(filtered);
   };
 
-  // Show all cities when input gains focus/clicked - fetches from cities table
-  const handleSearchFocus = async () => {
+  // Show all cities when input gains focus - no API call needed
+  const handleSearchFocus = () => {
     setShowResults(true);
-    setSearchLoading(true);
-    // Fetch all cities from cities table
-    const allCities = await searchCities("");
-    setSearchResults(allCities || []);
-    setSearchLoading(false);
+    // Show all cities from already-loaded data
+    setSearchResults(allCities);
   };
 
   // Handle search functionality
@@ -214,26 +215,7 @@ export default function Home() {
             {showResults && (
               <div className="absolute top-full left-2 right-2 md:left-5 md:right-5 mt-2 bg-white rounded-2xl shadow-xl border border-gray-200 z-10 max-h-80 overflow-y-auto">
                 <div className="p-3 md:p-4">
-                  {searchLoading ? (
-                    <>
-                      <div className="animate-pulse">
-                        <div className="h-4 w-24 bg-gray-200 rounded mb-3"></div>
-                        {Array.from({ length: 3 }).map((_, index) => (
-                          <div
-                            key={index}
-                            className="flex items-center gap-3 p-3 mb-2"
-                          >
-                            <div className="w-10 h-10 md:w-12 md:h-12 bg-gray-200 rounded-xl flex-shrink-0"></div>
-                            <div className="flex-1 space-y-2">
-                              <div className="h-4 bg-gray-200 rounded w-3/4"></div>
-                              <div className="h-3 bg-gray-200 rounded w-1/2"></div>
-                            </div>
-                            <div className="w-4 h-4 bg-gray-200 rounded"></div>
-                          </div>
-                        ))}
-                      </div>
-                    </>
-                  ) : searchResults.length > 0 ? (
+                  {searchResults.length > 0 ? (
                     <>
                       <h5 className="text-sm font-semibold text-gray-600 mb-3 px-1">
                         Cities ({searchResults.length})

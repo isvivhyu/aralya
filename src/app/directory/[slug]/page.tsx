@@ -4,7 +4,6 @@ import { useEffect, useState } from "react";
 import Navbar from "@/components/Navbar";
 import Image from "next/image";
 import Link from "next/link";
-import { SchoolService } from "@/lib/schoolService";
 import { School } from "@/lib/supabase";
 import { useParams } from "next/navigation";
 import { SkeletonLoader } from "@/components/SkeletonLoader";
@@ -17,20 +16,12 @@ const SchoolDetails = () => {
   const [school, setSchool] = useState<School | null>(null);
   const [loading, setLoading] = useState(true);
 
-  // Load school data from Supabase
+  // Load school data from API
   useEffect(() => {
     const loadSchool = async () => {
       try {
-        const schools = await SchoolService.getAllSchools();
-        const foundSchool = schools.find((s) => {
-          const schoolSlug = s.school_name
-            .toLowerCase()
-            .replace(/[^a-z0-9\s-]/g, "")
-            .replace(/\s+/g, "-")
-            .replace(/-+/g, "-")
-            .trim();
-          return schoolSlug === slug;
-        });
+        const { apiClient } = await import("@/lib/apiClient");
+        const foundSchool = await apiClient.getSchoolBySlug(slug);
         setSchool(foundSchool || null);
       } catch (error) {
         console.error("Error loading school:", error);

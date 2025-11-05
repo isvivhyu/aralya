@@ -1,53 +1,38 @@
-import { supabase, School, City } from "./supabase";
+import { School } from "./supabase";
+import { apiClient } from "./apiClient";
 
 export class SchoolService {
   // Get all schools
   static async getAllSchools(): Promise<School[]> {
-    const { data, error } = await supabase
-      .from("schools")
-      .select("*")
-      .order("school_name");
-
-    if (error) {
+    try {
+      return await apiClient.getSchools();
+    } catch (error) {
       console.error("Error fetching schools:", error);
       throw error;
     }
-
-    return data || [];
   }
 
-  // Get school by ID
+  // Get school by ID (deprecated - use getSchoolBySlug instead)
   static async getSchoolById(id: number): Promise<School | null> {
-    const { data, error } = await supabase
-      .from("schools")
-      .select("*")
-      .eq("id", id)
-      .single();
-
-    if (error) {
-      console.error("Error fetching school:", error);
+    // For backward compatibility, we'll need to fetch all and find by ID
+    // Consider migrating to slug-based lookups
+    try {
+      const schools = await apiClient.getSchools();
+      return schools.find((s) => s.id === id) || null;
+    } catch (error) {
+      console.error("Error fetching school by ID:", error);
       return null;
     }
-
-    return data;
   }
 
   // Search schools
   static async searchSchools(query: string): Promise<School[]> {
-    const { data, error } = await supabase
-      .from("schools")
-      .select("*")
-      .or(
-        `school_name.ilike.%${query}%, city.ilike.%${query}%, curriculum_tags.ilike.%${query}%`,
-      )
-      .order("school_name");
-
-    if (error) {
+    try {
+      return await apiClient.getSchools({ query });
+    } catch (error) {
       console.error("Error searching schools:", error);
       throw error;
     }
-
-    return data || [];
   }
 
   // Get schools by city (case-insensitive, handles comma-separated cities and variations)
@@ -58,97 +43,116 @@ export class SchoolService {
 
     const searchCity = city.trim().toLowerCase();
 
-    // Fetch all schools and filter in JavaScript to handle comma-separated cities and variations
-    const { data, error } = await supabase
-      .from("schools")
-      .select("*")
-      .order("school_name");
+    try {
+      // Fetch all schools from API and filter client-side to handle comma-separated cities
+      const schools = await apiClient.getSchools({ city });
 
-    if (error) {
+      if (!schools || schools.length === 0) {
+        return [];
+      }
+
+      // Filter schools where the city field contains the search city
+      // Handle comma-separated cities by splitting and comparing lowercase
+      const filtered = schools.filter((school) => {
+        if (!school.city) return false;
+
+        // Split by comma and trim each city
+        const cities = school.city
+          .split(",")
+          .map((c: string) => c.trim().toLowerCase());
+
+        // Check if any city matches (case-insensitive, handles variations like "Pasig" vs "Pasig City")
+        return cities.some((c: string) => this.citiesMatch(searchCity, c));
+      });
+
+      return filtered;
+    } catch (error) {
       console.error("Error fetching schools by city:", error);
       throw error;
     }
-
-    if (!data || data.length === 0) {
-      return [];
-    }
-
-    // Filter schools where the city field contains the search city
-    // Handle comma-separated cities by splitting and comparing lowercase
-    const filtered = data.filter((school) => {
-      if (!school.city) return false;
-
-      // Split by comma and trim each city
-      const cities = school.city
-        .split(",")
-        .map((c: string) => c.trim().toLowerCase());
-
-      // Check if any city matches (case-insensitive, handles variations like "Pasig" vs "Pasig City")
-      return cities.some((c: string) => this.citiesMatch(searchCity, c));
-    });
-
-    return filtered;
   }
 
   // Get schools by curriculum
   static async getSchoolsByCurriculum(curriculum: string): Promise<School[]> {
-    const { data, error } = await supabase
-      .from("schools")
-      .select("*")
-      .contains("curriculum_tags", curriculum)
-      .order("school_name");
-
-    if (error) {
+    try {
+      return await apiClient.getSchools({ curriculum });
+    } catch (error) {
       console.error("Error fetching schools by curriculum:", error);
       throw error;
     }
-
-    return data || [];
   }
 
-  // Add new school
+  // Add new school (admin only - uses admin API)
   static async addSchool(
     school: Omit<School, "id" | "created_at" | "updated_at">,
   ): Promise<School> {
-    const { data, error } = await supabase
-      .from("schools")
-      .insert([school])
-      .select()
-      .single();
+    try {
+      const response = await fetch("/api/admin/schools", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          // Add authentication header if needed
+          // "Authorization": `Bearer ${adminApiKey}`
+        },
+        body: JSON.stringify(school),
+      });
 
-    if (error) {
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.error || "Failed to add school");
+      }
+
+      const data = await response.json();
+      return data.school;
+    } catch (error) {
       console.error("Error adding school:", error);
       throw error;
     }
-
-    return data;
   }
 
-  // Update school
+  // Update school (admin only - uses admin API)
   static async updateSchool(
     id: number,
     updates: Partial<School>,
   ): Promise<School> {
-    const { data, error } = await supabase
-      .from("schools")
-      .update({ ...updates, updated_at: new Date().toISOString() })
-      .eq("id", id)
-      .select()
-      .single();
+    try {
+      const response = await fetch("/api/admin/schools", {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          // Add authentication header if needed
+        },
+        body: JSON.stringify({ id, ...updates }),
+      });
 
-    if (error) {
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.error || "Failed to update school");
+      }
+
+      const data = await response.json();
+      return data.school;
+    } catch (error) {
       console.error("Error updating school:", error);
       throw error;
     }
-
-    return data;
   }
 
-  // Delete school
+  // Delete school (admin only - uses admin API)
   static async deleteSchool(id: number): Promise<void> {
-    const { error } = await supabase.from("schools").delete().eq("id", id);
+    try {
+      const response = await fetch(`/api/admin/schools/${id}`, {
+        method: "DELETE",
+        headers: {
+          // Add authentication header if needed
+        },
+      });
 
-    if (error) {
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.error || "Failed to delete school");
+      }
+    } catch (error) {
       console.error("Error deleting school:", error);
       throw error;
     }
@@ -156,57 +160,43 @@ export class SchoolService {
 
   // Get featured schools (first 3)
   static async getFeaturedSchools(): Promise<School[]> {
-    const { data, error } = await supabase
-      .from("schools")
-      .select("*")
-      .order("school_name")
-      .limit(3);
-
-    if (error) {
+    try {
+      return await apiClient.getSchools({ featured: true });
+    } catch (error) {
       console.error("Error fetching featured schools:", error);
       throw error;
     }
-
-    return data || [];
   }
 
   // Get unique cities
   static async getUniqueCities(): Promise<string[]> {
-    const { data, error } = await supabase
-      .from("schools")
-      .select("city")
-      .order("city");
-
-    if (error) {
+    try {
+      const cities = await apiClient.getCities();
+      return cities.map((c) => c.city);
+    } catch (error) {
       console.error("Error fetching cities:", error);
       throw error;
     }
-
-    // Extract unique cities
-    const uniqueCities = [...new Set(data?.map((item) => item.city) || [])];
-    return uniqueCities;
   }
 
   // Get unique curriculum tags
   static async getUniqueCurriculumTags(): Promise<string[]> {
-    const { data, error } = await supabase
-      .from("schools")
-      .select("curriculum_tags");
+    try {
+      const schools = await apiClient.getSchools();
+      
+      // Extract and flatten all curriculum tags
+      const allTags =
+        schools?.flatMap(
+          (item) =>
+            item.curriculum_tags?.split(", ").map((tag: string) => tag.trim()) ||
+            [],
+        ) || [];
 
-    if (error) {
+      return [...new Set(allTags)].sort();
+    } catch (error) {
       console.error("Error fetching curriculum tags:", error);
       throw error;
     }
-
-    // Extract and flatten all curriculum tags
-    const allTags =
-      data?.flatMap(
-        (item) =>
-          item.curriculum_tags?.split(", ").map((tag: string) => tag.trim()) ||
-          [],
-      ) || [];
-
-    return [...new Set(allTags)].sort();
   }
 
   // Helper function to check if two city names match (handles variations like "Pasig" vs "Pasig City")
@@ -247,13 +237,33 @@ export class SchoolService {
       return 0;
     }
 
-    const searchCity = city.trim().toLowerCase();
+    try {
+      // Fetch all schools from API and filter in JavaScript to handle comma-separated cities
+      const schools = await apiClient.getSchools();
 
-    // Fetch all schools and filter in JavaScript to handle comma-separated cities
-    // This is more reliable than trying to match with SQL patterns
-    const { data, error } = await supabase.from("schools").select("city");
+      if (!schools || schools.length === 0) {
+        return 0;
+      }
 
-    if (error) {
+      const searchCity = city.trim().toLowerCase();
+
+      // Count schools where the city field contains the search city
+      // Handle comma-separated cities by splitting and comparing lowercase
+      const count = schools.filter((school) => {
+        if (!school.city) return false;
+
+        // Split by comma and trim each city
+        const cities = school.city
+          .split(",")
+          .map((c: string) => c.trim().toLowerCase());
+
+        // Check if any city matches (case-insensitive, handles variations like "Pasig" vs "Pasig City")
+        return cities.some((c: string) => this.citiesMatch(searchCity, c));
+      }).length;
+
+      console.log(`School count for "${city}": ${count}`);
+      return count;
+    } catch (error) {
       console.error(
         "Error getting school count by city:",
         error,
@@ -262,128 +272,17 @@ export class SchoolService {
       );
       throw error;
     }
-
-    if (!data || data.length === 0) {
-      return 0;
-    }
-
-    // Count schools where the city field contains the search city
-    // Handle comma-separated cities by splitting and comparing lowercase
-    const count = data.filter((school) => {
-      if (!school.city) return false;
-
-      // Split by comma and trim each city
-      const cities = school.city
-        .split(",")
-        .map((c: string) => c.trim().toLowerCase());
-
-      // Check if any city matches (case-insensitive, handles variations like "Pasig" vs "Pasig City")
-      return cities.some((c: string) => this.citiesMatch(searchCity, c));
-    }).length;
-
-    console.log(`School count for "${city}": ${count}`);
-    return count;
   }
 
-  // Search cities by query with school counts - fetches ONLY from cities table
+  // Search cities by query with school counts - uses API endpoint
   static async searchCities(
     query: string,
   ): Promise<{ city: string; schoolCount: number }[]> {
-    let queryBuilder = supabase.from("cities").select("*");
-
-    // If query is provided, filter by city name
-    if (query.trim().length > 0) {
-      queryBuilder = queryBuilder.ilike("city", `%${query.trim()}%`);
-    } else {
-      queryBuilder = queryBuilder.order("city", { ascending: true });
-    }
-
-    const { data, error } = await queryBuilder;
-
-    if (error) {
-      console.error("Error querying cities table:", error);
-      throw error;
-    }
-
-    console.log(
-      `Successfully fetched ${data?.length || 0} cities from cities table`,
-    );
-    return this.processCitiesData(data, "city");
-  }
-
-  // Helper method to process cities data
-  private static async processCitiesData(
-    data: City[] | null,
-    _cityColumnName: string,
-  ): Promise<{ city: string; schoolCount: number }[]> {
-    if (!data || data.length === 0) {
-      console.log("No cities data returned from cities table");
-      return [];
-    }
-
-    console.log(
-      `Processing ${data.length} cities from cities table. Sample record:`,
-      data[0],
-    );
-
-    const citiesWithCounts = await Promise.all(
-      data.map(async (cityRecord: City) => {
-        const cityName = cityRecord.city || "";
-
-        // Always calculate the actual school count from the schools table
-        // This ensures accuracy even if the cached count in cities table is outdated
-        const schoolCount = cityName
-          ? await this.getSchoolCountByCity(cityName)
-          : 0;
-
-        return {
-          city: cityName,
-          schoolCount,
-        };
-      }),
-    );
-
-    console.log(`Processed ${citiesWithCounts.length} cities`);
-    return citiesWithCounts;
-  }
-
-  // Fallback method: search cities from schools table (for backward compatibility)
-  private static async searchCitiesFromSchools(
-    query: string,
-  ): Promise<{ city: string; schoolCount: number }[]> {
-    if (query.trim().length === 0) {
-      const cities = await this.getUniqueCities();
-      const citiesWithCounts = await Promise.all(
-        cities.map(async (city) => ({
-          city,
-          schoolCount: await this.getSchoolCountByCity(city),
-        })),
-      );
-      return citiesWithCounts;
-    }
-
-    const { data, error } = await supabase
-      .from("schools")
-      .select("city")
-      .ilike("city", `%${query}%`)
-      .order("city");
-
-    if (error) {
+    try {
+      return await apiClient.getCities(query);
+    } catch (error) {
       console.error("Error searching cities:", error);
       throw error;
     }
-
-    // Extract unique cities from results
-    const uniqueCities = [...new Set(data?.map((item) => item.city) || [])];
-
-    // Get school counts for each city
-    const citiesWithCounts = await Promise.all(
-      uniqueCities.map(async (city) => ({
-        city,
-        schoolCount: await this.getSchoolCountByCity(city),
-      })),
-    );
-
-    return citiesWithCounts;
   }
 }

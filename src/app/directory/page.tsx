@@ -71,83 +71,34 @@ const SchoolDirectoryContent = () => {
       .trim();
   };
 
-  // Enhanced search function for cities using Supabase
-  const searchCities = async (query: string) => {
-    try {
-      // Allow empty queries to pass through to get all cities
-      return await SchoolService.searchCities(query.trim());
-    } catch (error) {
-      console.error("Error searching cities:", error);
-      return [];
+  // Filter cities locally (no API calls)
+  const filterCities = (query: string) => {
+    if (!query.trim()) {
+      return availableCities;
     }
+    
+    const queryLower = query.toLowerCase().trim();
+    return availableCities.filter((cityData) =>
+      cityData.city.toLowerCase().includes(queryLower)
+    );
   };
 
-  // Handle local search input changes
-  const handleSearchChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  // Handle local search input changes - filter locally
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const query = e.target.value;
     setLocalSearchQuery(query);
-
-    // When empty, show all cities
-    if (query.trim().length === 0) {
-      let allCities = await searchCities("");
-      // Fallback: derive cities client-side if none returned
-      if (!allCities || allCities.length === 0) {
-        try {
-          const allSchools = await SchoolService.getAllSchools();
-          const cityToCount: Record<string, number> = {};
-          allSchools.forEach((s) => {
-            s.city
-              .split(",")
-              .map((c) => c.trim())
-              .forEach((c) => {
-                if (!c) return;
-                cityToCount[c] = (cityToCount[c] || 0) + 1;
-              });
-          });
-          allCities = Object.entries(cityToCount)
-            .map(([city, schoolCount]) => ({ city, schoolCount }))
-            .sort((a, b) => a.city.localeCompare(b.city));
-        } catch (err) {
-          console.error("Fallback city derivation failed:", err);
-        }
-      }
-      setSearchResults(allCities || []);
-      setShowResults(true);
-      return;
-    }
-
-    // Otherwise, filter by query
-    const filtered = await searchCities(query);
-    setSearchResults(filtered);
     setShowResults(true);
+
+    // Filter already-loaded cities
+    const filtered = filterCities(query);
+    setSearchResults(filtered);
   };
 
-  // Show all cities when input gains focus/clicked
-  const handleSearchFocus = async () => {
-    let allCities = await searchCities("");
-    // Fallback: derive cities client-side if none returned
-    if (!allCities || allCities.length === 0) {
-      try {
-        const allSchools = await SchoolService.getAllSchools();
-        const cityToCount: Record<string, number> = {};
-        allSchools.forEach((s) => {
-          s.city
-            .split(",")
-            .map((c) => c.trim())
-            .forEach((c) => {
-              if (!c) return;
-              cityToCount[c] = (cityToCount[c] || 0) + 1;
-            });
-        });
-        allCities = Object.entries(cityToCount)
-          .map(([city, schoolCount]) => ({ city, schoolCount }))
-          .sort((a, b) => a.city.localeCompare(b.city));
-      } catch (err) {
-        console.error("Fallback city derivation failed:", err);
-      }
-    }
-    setSearchResults(allCities || []);
+  // Show all cities when input gains focus - no API call needed
+  const handleSearchFocus = () => {
     setShowResults(true);
+    // Show all cities from already-loaded data
+    setSearchResults(availableCities);
   };
 
   // Handle clicking on a city search result
@@ -480,7 +431,7 @@ const SchoolDirectoryContent = () => {
         </div>
       </section>
 
-      <section className="w-full md:px-10 px-5 py-25 bg-white">
+      <section className="w-full md:px-10 px-5 pb-25 pt-10  bg-white">
         {(searchQuery || cityQuery) && (
           <div className="mb-6">
             <h2 className="text-2xl font-semibold text-[#0E1C29] mb-2">
