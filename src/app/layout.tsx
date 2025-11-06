@@ -13,6 +13,8 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://aralya.com";
+
 export const metadata: Metadata = {
   title: "Aralya | Compare Preschools in Metro Manila",
   description: "Aralya helps Filipino parents compare preschools across Metro Manila — updated tuition, curriculum, schedules & contact info in one easy place.",
@@ -26,10 +28,13 @@ export const metadata: Metadata = {
   icons: {
     icon: "/images/favicon.ico",
   },
+  alternates: {
+    canonical: `${baseUrl}/`,
+  },
   openGraph: {
     title: "Aralya | Compare Preschools in Metro Manila",
     description: "Aralya helps Filipino parents compare preschools across Metro Manila — updated tuition, curriculum, schedules & contact info in one easy place.",
-    url: process.env.NEXT_PUBLIC_SITE_URL || "https://aralya.com",
+    url: baseUrl,
     siteName: "Aralya",
     images: [
       {
@@ -59,7 +64,7 @@ export const metadata: Metadata = {
       "max-snippet": -1,
     },
   },
-  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || "https://aralya.com"),
+  metadataBase: new URL(baseUrl),
 };
 
 export default function RootLayout({
