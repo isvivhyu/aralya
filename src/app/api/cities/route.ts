@@ -78,7 +78,7 @@ export async function GET(request: NextRequest) {
     response.headers.set("X-RateLimit-Remaining", String(result.remaining));
     response.headers.set("X-RateLimit-Reset", String(result.reset));
     return response;
-  } catch (_error) {
+  } catch {
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }

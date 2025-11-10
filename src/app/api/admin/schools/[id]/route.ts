@@ -75,7 +75,7 @@ export async function DELETE(
     response.headers.set("X-RateLimit-Remaining", String(rateLimitResult.remaining));
     response.headers.set("X-RateLimit-Reset", String(rateLimitResult.reset));
     return response;
-  } catch (_error) {
+  } catch {
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }

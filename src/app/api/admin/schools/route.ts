@@ -64,7 +64,7 @@ export async function GET(request: NextRequest) {
     response.headers.set("X-RateLimit-Remaining", String(rateLimitResult.remaining));
     response.headers.set("X-RateLimit-Reset", String(rateLimitResult.reset));
     return response;
-  } catch (_error) {
+  } catch {
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }
@@ -130,7 +130,7 @@ export async function POST(request: NextRequest) {
     response.headers.set("X-RateLimit-Remaining", String(rateLimitResult.remaining));
     response.headers.set("X-RateLimit-Reset", String(rateLimitResult.reset));
     return response;
-  } catch (_error) {
+  } catch {
     return NextResponse.json(
       { error: "Invalid request body" },
       { status: 400 }
@@ -203,7 +203,7 @@ export async function PUT(request: NextRequest) {
     response.headers.set("X-RateLimit-Remaining", String(rateLimitResult.remaining));
     response.headers.set("X-RateLimit-Reset", String(rateLimitResult.reset));
     return response;
-  } catch (_error) {
+  } catch {
     return NextResponse.json(
       { error: "Invalid request body" },
       { status: 400 }

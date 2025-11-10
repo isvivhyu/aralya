@@ -3,12 +3,14 @@
 import Link from "next/link";
 
 export default function GlobalError({
-  error: _error,
+  error,
   reset,
 }: {
   error: Error & { digest?: string };
   reset: () => void;
 }) {
+  // Error is available but not used in this component
+  void error;
   return (
     <html>
       <body>
