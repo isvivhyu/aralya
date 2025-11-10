@@ -17,7 +17,7 @@ const FAQSection = ({ title, description, faqs }: FAQSectionProps) => {
 
   const toggleFAQ = (index: number) => {
     setOpenIndex(openIndex === index ? null : index);
-  };
+  };   
 
   return (
     <section className="w-full md:px-10 px-5 py-25 bg-white">
