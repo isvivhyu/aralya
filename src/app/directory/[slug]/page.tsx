@@ -16,6 +16,23 @@ const SchoolDetails = () => {
   const [school, setSchool] = useState<School | null>(null);
   const [loading, setLoading] = useState(true);
 
+  // Format date to "Month Year" format
+  const formatLastUpdated = (dateString?: string): string => {
+    if (!dateString) {
+      // Fallback to current date if no date provided
+      const now = new Date();
+      return now.toLocaleDateString("en-US", { month: "long", year: "numeric" });
+    }
+    try {
+      const date = new Date(dateString);
+      return date.toLocaleDateString("en-US", { month: "long", year: "numeric" });
+    } catch {
+      // Fallback to current date if date parsing fails
+      const now = new Date();
+      return now.toLocaleDateString("en-US", { month: "long", year: "numeric" });
+    }
+  };
+
   // Load school data from API
   useEffect(() => {
     const loadSchool = async () => {
@@ -165,9 +182,20 @@ const SchoolDetails = () => {
               />
             </div>
             <div className="flex flex-col gap-2">
-              <h4 className="text-[#0E1C29] md:text-4xl text-base md:font-medium font-semibold">
-                {school?.school_name || "School Name"}
-              </h4>
+              <div className="flex items-center gap-2">
+                <h4 className="text-[#0E1C29] md:text-4xl text-base md:font-medium font-semibold">
+                  {school?.school_name || "School Name"}
+                </h4>
+                <div className="relative group">
+                  <i className="ri-verified-badge-fill text-[#774BE5] text-xl md:text-2xl cursor-pointer"></i>
+                  <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-1.5 bg-[#774BE5] text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-10">
+                    Verified by Aralya
+                    <div className="absolute top-full left-1/2 transform -translate-x-1/2 -mt-1">
+                      <div className="border-4 border-transparent border-t-[#774BE5]"></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
               <div className="flex items-center my-1">
                 <i className="ri-map-pin-line text-[#374151] text-lg"></i>
                 <p className="text-base font-medium text-[#374151]">
@@ -187,6 +215,11 @@ const SchoolDetails = () => {
                   </a>
                 </div>
               )}
+              <div className="flex items-center my-1">
+                <p className="text-sm font-medium text-[#374151]">
+                  Last Updated: {formatLastUpdated(school?.updated_at)}
+                </p>
+              </div>
               <div className="bg-[#774BE5] rounded-lg px-4 py-2 w-fit">
                 <p className="text-white font-semibold text-sm">
                   {school?.min_tuition || "N/A"} -{" "}

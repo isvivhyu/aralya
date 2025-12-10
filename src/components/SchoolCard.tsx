@@ -31,7 +31,18 @@ const SchoolCard = ({
           className="w-full h-full rounded-[10px] object-contain"
         />
       </div>
-      <h4 className="text-black text-lg font-medium">{schoolName}</h4>
+      <div className="flex items-center gap-2">
+        <h4 className="text-black text-lg font-medium">{schoolName}</h4>
+        <div className="relative group">
+          <i className="ri-verified-badge-fill text-[#774BE5] text-xl cursor-pointer"></i>
+          <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-1.5 bg-[#774BE5] text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-10">
+            Verified by Aralya
+            <div className="absolute top-full left-1/2 transform -translate-x-1/2 -mt-1">
+              <div className="border-4 border-transparent border-t-[#774BE5]"></div>
+            </div>
+          </div>
+        </div>
+      </div>
       <div className="flex items-center gap-2 mt-5">
         <i className="ri-map-pin-line text-[#374151] text-lg"></i>
         <p className="text-base font-medium text-[#374151]">{location}</p>
