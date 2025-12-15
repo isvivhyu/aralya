@@ -46,6 +46,7 @@ const SchoolDirectoryContent = () => {
   const [searchResults, setSearchResults] = useState<
     { city: string; schoolCount: number }[]
   >([]);
+  const [schoolSearchResults, setSchoolSearchResults] = useState<School[]>([]);
   const [showResults, setShowResults] = useState(false);
   const [activeFilter, setActiveFilter] = useState("all");
   const [budgetFilter, setBudgetFilter] = useState("");
@@ -83,15 +84,31 @@ const SchoolDirectoryContent = () => {
     );
   };
 
-  // Handle local search input changes - filter locally
-  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  // Handle local search input changes - search schools and cities
+  const handleSearchChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const query = e.target.value;
     setLocalSearchQuery(query);
     setShowResults(true);
 
+    if (query.trim().length === 0) {
+      // Show all cities when query is empty
+      setSearchResults(availableCities);
+      setSchoolSearchResults([]);
+      return;
+    }
+
     // Filter already-loaded cities
     const filtered = filterCities(query);
     setSearchResults(filtered);
+
+    // Search for schools matching the query (name, curriculum, or city)
+    try {
+      const schools = await SchoolService.searchSchools(query);
+      setSchoolSearchResults(schools.slice(0, 5)); // Limit to 5 for dropdown
+    } catch (error) {
+      console.error("Error searching schools:", error);
+      setSchoolSearchResults([]);
+    }
   };
 
   // Show all cities when input gains focus - no API call needed
@@ -99,12 +116,34 @@ const SchoolDirectoryContent = () => {
     setShowResults(true);
     // Show all cities from already-loaded data
     setSearchResults(availableCities);
+    setSchoolSearchResults([]);
   };
 
   // Handle clicking on a city search result
   const handleCityClick = (city: string) => {
     window.location.href = `/directory?city=${encodeURIComponent(city)}`;
   };
+
+  // Handle clicking on a school search result
+  const handleSchoolClick = (school: School) => {
+    const slug = createSlug(school.school_name);
+    window.location.href = `/directory/${slug}`;
+  };
+
+  // Handle form submission - update URL with search query
+  const handleSearchSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (localSearchQuery.trim()) {
+      window.location.href = `/directory?search=${encodeURIComponent(localSearchQuery.trim())}`;
+    } else {
+      window.location.href = `/directory`;
+    }
+  };
+
+  // Sync localSearchQuery with URL searchQuery
+  useEffect(() => {
+    setLocalSearchQuery(searchQuery);
+  }, [searchQuery]);
 
   // Debug activeFilter changes
   useEffect(() => {
@@ -236,8 +275,8 @@ const SchoolDirectoryContent = () => {
       try {
         let searchFiltered;
         if (searchQuery.trim().length > 0) {
-          // If there's a search query, search for schools in that city
-          searchFiltered = await SchoolService.getSchoolsByCity(searchQuery);
+          // If there's a search query, search across school name, curriculum, and city
+          searchFiltered = await SchoolService.searchSchools(searchQuery);
         } else {
           // Otherwise, get all schools
           searchFiltered = await SchoolService.getAllSchools();
@@ -360,6 +399,7 @@ const SchoolDirectoryContent = () => {
           <form
             className="bg-white w-full md:rounded-3xl rounded-full mt-6 relative"
             ref={searchRef}
+            onSubmit={handleSearchSubmit}
           >
             <div className="flex flex-col md:flex-row gap-2.5 rounded-2xl">
               <div className="w-full p-4 md:rounded-[10px] rounded-full overflow-hidden flex items-center gap-5 relative">
@@ -369,7 +409,7 @@ const SchoolDirectoryContent = () => {
                   value={localSearchQuery}
                   onChange={handleSearchChange}
                   onFocus={handleSearchFocus}
-                  placeholder="Search schools around Metro Manila"
+                  placeholder="Search by school name, curriculum, or city…"
                   className="bg-transparent w-full text-base text-[#0E1C29] placeholder-[#999999] focus:outline-none"
                   style={{ fontSize: "16px" }}
                 />
@@ -379,6 +419,7 @@ const SchoolDirectoryContent = () => {
                     onClick={() => {
                       setLocalSearchQuery("");
                       setSearchResults([]);
+                      setSchoolSearchResults([]);
                       setShowResults(false);
                     }}
                     className="text-[#0E1C29]/40 hover:text-[#0E1C29]/60 transition-colors"
@@ -390,39 +431,76 @@ const SchoolDirectoryContent = () => {
             </div>
 
             {/* Search Results Dropdown */}
-            {showResults && (
+            {showResults && (searchResults.length > 0 || schoolSearchResults.length > 0 || localSearchQuery.trim().length > 0) && (
               <div className="absolute top-full left-5 right-5 mt-2 bg-white rounded-2xl border border-gray-200 shadow-xl max-h-80 overflow-auto z-[10001]">
                 <div className="p-4">
-                  <h5 className="text-sm font-semibold text-gray-600 mb-3">
-                    Cities ({searchResults.length})
-                  </h5>
-                  {searchResults.length === 0 ? (
+                  {/* Schools Section */}
+                  {schoolSearchResults.length > 0 && (
+                    <>
+                      <h5 className="text-sm font-semibold text-gray-600 mb-3">
+                        Schools ({schoolSearchResults.length})
+                      </h5>
+                      {schoolSearchResults.map((school, index) => (
+                        <div
+                          key={`${school.school_name}-${index}`}
+                          onClick={() => handleSchoolClick(school)}
+                          className="flex items-center gap-3 p-3 hover:bg-gray-50 rounded-lg cursor-pointer transition-colors mb-2"
+                        >
+                          <div className="w-12 h-12 rounded-lg bg-[#774BE5]/10 flex items-center justify-center flex-shrink-0">
+                            <i className="ri-school-line text-[#774BE5] text-xl"></i>
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <h6 className="font-semibold text-[#0E1C29] text-sm truncate">
+                              {school.school_name}
+                            </h6>
+                            <p className="text-xs text-gray-500 mt-0.5 truncate">
+                              {school.city}
+                              {school.curriculum_tags && ` • ${school.curriculum_tags.split(", ")[0]}`}
+                            </p>
+                          </div>
+                          <i className="ri-arrow-right-s-line text-gray-400"></i>
+                        </div>
+                      ))}
+                      {searchResults.length > 0 && <div className="border-t border-gray-200 my-3"></div>}
+                    </>
+                  )}
+
+                  {/* Cities Section */}
+                  {searchResults.length > 0 && (
+                    <>
+                      <h5 className="text-sm font-semibold text-gray-600 mb-3">
+                        Cities ({searchResults.length})
+                      </h5>
+                      {searchResults.map((cityData, index) => (
+                        <div
+                          key={`${cityData.city}-${index}`}
+                          onClick={() => handleCityClick(cityData.city)}
+                          className="flex items-center gap-3 p-3 hover:bg-gray-50 rounded-lg cursor-pointer transition-colors"
+                        >
+                          <div className="w-12 h-12 rounded-lg bg-[#774BE5]/10 flex items-center justify-center flex-shrink-0">
+                            <i className="ri-map-pin-line text-[#774BE5] text-xl"></i>
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <h6 className="font-semibold text-[#0E1C29] text-sm truncate">
+                              {cityData.city}
+                            </h6>
+                            <p className="text-xs text-gray-500 mt-0.5">
+                              {cityData.schoolCount}{" "}
+                              {cityData.schoolCount === 1 ? "school" : "schools"}{" "}
+                              available
+                            </p>
+                          </div>
+                          <i className="ri-arrow-right-s-line text-gray-400"></i>
+                        </div>
+                      ))}
+                    </>
+                  )}
+
+                  {/* No Results */}
+                  {searchResults.length === 0 && schoolSearchResults.length === 0 && localSearchQuery.trim().length > 0 && (
                     <div className="text-sm text-gray-500 p-2">
-                      No cities found
+                      This school is not in our database yet. We are adding more schools weekly
                     </div>
-                  ) : (
-                    searchResults.map((cityData, index) => (
-                      <div
-                        key={`${cityData.city}-${index}`}
-                        onClick={() => handleCityClick(cityData.city)}
-                        className="flex items-center gap-3 p-3 hover:bg-gray-50 rounded-lg cursor-pointer transition-colors"
-                      >
-                        <div className="w-12 h-12 rounded-lg bg-[#774BE5]/10 flex items-center justify-center flex-shrink-0">
-                          <i className="ri-map-pin-line text-[#774BE5] text-xl"></i>
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <h6 className="font-semibold text-[#0E1C29] text-sm truncate">
-                            {cityData.city}
-                          </h6>
-                          <p className="text-xs text-gray-500 mt-0.5">
-                            {cityData.schoolCount}{" "}
-                            {cityData.schoolCount === 1 ? "school" : "schools"}{" "}
-                            available
-                          </p>
-                        </div>
-                        <i className="ri-arrow-right-s-line text-gray-400"></i>
-                      </div>
-                    ))
                   )}
                 </div>
               </div>
@@ -1001,10 +1079,13 @@ const SchoolDirectoryContent = () => {
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <h3 className="text-lg font-semibold text-[#0E1C29]">
-                {filteredSchools.length} School
-                {filteredSchools.length !== 1 ? "s" : ""} Found
+                {filteredSchools.length > 0 ? (
+                  `${filteredSchools.length} School${filteredSchools.length !== 1 ? "s" : ""} Found`
+                ) : (
+                  "This school is not in our database yet. We are adding more schools weekly."
+                )}
               </h3>
-              {(budgetFilter || cityFilter || curriculumFilter) && (
+              {(budgetFilter || cityFilter || curriculumFilter || filteredSchools.length > 0) && (
                 <div className="w-2 h-2 bg-[#774BE5] rounded-full animate-pulse"></div>
               )}
             </div>
@@ -1023,8 +1104,11 @@ const SchoolDirectoryContent = () => {
               No schools found
             </h3>
             <p className="text-gray-600 mb-6 max-w-md mx-auto">
-              Try adjusting your filters or search criteria to find more
-              schools.
+              {searchQuery.trim() ? (
+                "This school is not in our database yet. We are adding more schools weekly."
+              ) : (
+                "This school is not in our database yet. We are adding more schools weekly.weekly."
+              )}
             </p>
             <button
               onClick={() => {
