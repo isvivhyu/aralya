@@ -25,8 +25,14 @@ export default function Home() {
   >([]);
   const [showResults, setShowResults] = useState(false);
   const [featuredSchools, setFeaturedSchools] = useState<School[]>([]);
+  const [activeFilter, setActiveFilter] = useState("all");
+  const [budgetFilter, setBudgetFilter] = useState("");
+  const [cityFilter, setCityFilter] = useState("");
+  const [curriculumFilter, setCurriculumFilter] = useState("");
+  const [isMobile, setIsMobile] = useState(false);
   const router = useRouter();
   const searchRef = useRef<HTMLFormElement>(null);
+  const filterRef = useRef<HTMLDivElement>(null);
 
   // Load featured schools and all cities on component mount
   useEffect(() => {
@@ -129,6 +135,43 @@ export default function Home() {
     window.location.href = `/directory/${slug}`;
   };
 
+  // Detect mobile screen size
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+
+    checkMobile();
+    window.addEventListener("resize", checkMobile);
+
+    return () => window.removeEventListener("resize", checkMobile);
+  }, []);
+
+  // Handle filter selection and redirect to directory
+  const handleFilterRedirect = (filterType?: string, filterValue?: string) => {
+    const params = new URLSearchParams();
+    if (searchQuery.trim()) {
+      params.set("search", searchQuery.trim());
+    }
+    // If a specific filter was just set, include it
+    if (filterType === "city" && filterValue) {
+      params.set("city", filterValue);
+    } else if (cityFilter) {
+      params.set("city", cityFilter);
+    }
+    if (filterType === "budget" && filterValue) {
+      params.set("budget", filterValue);
+    } else if (budgetFilter) {
+      params.set("budget", budgetFilter);
+    }
+    if (filterType === "curriculum" && filterValue) {
+      params.set("curriculum", filterValue);
+    } else if (curriculumFilter) {
+      params.set("curriculum", curriculumFilter);
+    }
+    router.push(`/directory?${params.toString()}`);
+  };
+
   // Initialize AOS and handle click outside
   useEffect(() => {
     // Initialize AOS
@@ -146,6 +189,16 @@ export default function Home() {
       ) {
         setShowResults(false);
       }
+
+      if (isMobile) {
+        return;
+      }
+
+      // Desktop behavior - close filter dropdowns when clicking outside
+      const target = event.target as Element;
+      if (filterRef.current && !filterRef.current.contains(target)) {
+        setActiveFilter("all");
+      }
     };
 
     // Use click instead of mousedown so option onClick handlers fire first
@@ -153,7 +206,7 @@ export default function Home() {
     return () => {
       document.removeEventListener("click", handleClickOutside);
     };
-  }, []);
+  }, [isMobile]);
 
   return (
     <>
@@ -309,8 +362,488 @@ export default function Home() {
               </div>
             )}
           </form>
-        </div>
 
+          {/* Filter Section - Right below search bar */}
+          <div className="w-full mt-6 relative z-[999]" ref={filterRef}>
+            {/* Desktop Filter Bar - Made bigger and more prominent */}
+            <div className="hidden md:flex items-center justify-center gap-3 flex-wrap">
+              <button
+                onClick={() => {
+                  setActiveFilter("all");
+                  setBudgetFilter("");
+                  setCityFilter("");
+                  setCurriculumFilter("");
+                }}
+                className={`min-w-[100px] px-6 py-3 rounded-xl text-sm font-semibold flex items-center justify-center gap-2 transition-all duration-200 ${
+                  activeFilter === "all" && !budgetFilter && !cityFilter && !curriculumFilter
+                    ? "bg-[#774BE5] text-white shadow-md"
+                    : "bg-white text-gray-700 hover:bg-gray-50 border border-gray-200 shadow-sm"
+                }`}
+              >
+                <i className="ri-grid-line text-base"></i>
+                <span>All</span>
+              </button>
+
+              <div className="relative filter-dropdown">
+                <button
+                  type="button"
+                  onClick={() =>
+                    setActiveFilter(activeFilter === "budget" ? "all" : "budget")
+                  }
+                  className={`min-w-[130px] px-6 py-3 rounded-xl text-sm font-semibold flex items-center justify-center gap-2 transition-all duration-200 ${
+                    activeFilter === "budget" || budgetFilter
+                      ? "bg-[#774BE5] text-white shadow-md"
+                      : "bg-white text-gray-700 hover:bg-gray-50 border border-gray-200 shadow-sm"
+                  }`}
+                >
+                  <i className="ri-money-dollar-circle-line text-base"></i>
+                  <span>Budget</span>
+                  {budgetFilter && (
+                    <span className="w-1.5 h-1.5 bg-white rounded-full"></span>
+                  )}
+                  <i className={`ri-arrow-down-s-line text-xs transition-transform duration-200 ${activeFilter === "budget" ? "rotate-180" : ""}`}></i>
+                </button>
+
+                {activeFilter === "budget" && (
+                  <div
+                    className="absolute top-full left-0 mt-2 bg-white rounded-lg border border-gray-200 shadow-lg min-w-[180px] max-w-[220px] z-50"
+                    onMouseDown={(e) => e.stopPropagation()}
+                  >
+                    <div className="py-2">
+                      {[
+                        { key: "under-100k", label: "Under ₱100k" },
+                        { key: "100k-200k", label: "₱100k - ₱200k" },
+                        { key: "200k-300k", label: "₱200k - ₱300k" },
+                        { key: "300k-500k", label: "₱300k - ₱500k" },
+                        { key: "over-500k", label: "Over ₱500k" },
+                      ].map((option) => (
+                        <button
+                          type="button"
+                          key={option.key}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            const newValue = budgetFilter === option.key ? "" : option.key;
+                            setBudgetFilter(newValue);
+                            setActiveFilter("all");
+                            if (newValue) {
+                              handleFilterRedirect("budget", newValue);
+                            }
+                          }}
+                          className={`w-full text-left px-4 py-2 text-sm transition-colors ${
+                            budgetFilter === option.key
+                              ? "bg-[#774BE5] text-white font-medium"
+                              : "hover:bg-gray-50 text-gray-700"
+                          }`}
+                        >
+                          <div className="flex items-center justify-between">
+                            <span>{option.label}</span>
+                            {budgetFilter === option.key && (
+                              <i className="ri-check-line text-sm"></i>
+                            )}
+                          </div>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              <div className="relative filter-dropdown">
+                <button
+                  type="button"
+                  onClick={() =>
+                    setActiveFilter(activeFilter === "city" ? "all" : "city")
+                  }
+                  className={`min-w-[130px] px-6 py-3 rounded-xl text-sm font-semibold flex items-center justify-center gap-2 transition-all duration-200 ${
+                    activeFilter === "city" || cityFilter
+                      ? "bg-[#774BE5] text-white shadow-md"
+                      : "bg-white text-gray-700 hover:bg-gray-50 border border-gray-200 shadow-sm"
+                  }`}
+                >
+                  <i className="ri-map-pin-line text-base"></i>
+                  <span>City</span>
+                  {cityFilter && (
+                    <span className="w-1.5 h-1.5 bg-white rounded-full"></span>
+                  )}
+                  <i className={`ri-arrow-down-s-line text-xs transition-transform duration-200 ${activeFilter === "city" ? "rotate-180" : ""}`}></i>
+                </button>
+
+                {activeFilter === "city" && (
+                  <div
+                    className="absolute top-full left-0 mt-2 bg-white rounded-lg border border-gray-200 shadow-lg min-w-[180px] max-w-[220px] max-h-[320px] overflow-y-auto z-50"
+                    onMouseDown={(e) => e.stopPropagation()}
+                  >
+                    <div className="py-2">
+                      {allCities.length === 0 ? (
+                        <div className="px-4 py-2.5 text-sm text-gray-500">
+                          Loading cities...
+                        </div>
+                      ) : (
+                        allCities.map((cityData) => (
+                          <button
+                            type="button"
+                            key={cityData.city}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              const newValue = cityFilter === cityData.city ? "" : cityData.city;
+                              setCityFilter(newValue);
+                              setActiveFilter("all");
+                              if (newValue) {
+                                handleFilterRedirect("city", newValue);
+                              }
+                            }}
+                            className={`w-full text-left px-4 py-2 text-sm transition-colors ${
+                              cityFilter === cityData.city
+                                ? "bg-[#774BE5] text-white font-medium"
+                                : "hover:bg-gray-50 text-gray-700"
+                            }`}
+                          >
+                            <div className="flex items-center justify-between">
+                              <span>{cityData.city}</span>
+                              {cityFilter === cityData.city && (
+                                <i className="ri-check-line text-sm"></i>
+                              )}
+                            </div>
+                          </button>
+                        ))
+                      )}
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              <div className="relative filter-dropdown z-[100]">
+                <button
+                  type="button"
+                  onClick={() =>
+                    setActiveFilter(
+                      activeFilter === "curriculum" ? "all" : "curriculum",
+                    )
+                  }
+                  className={`min-w-[150px] px-6 py-3 rounded-xl text-sm font-semibold flex items-center justify-center gap-2 transition-all duration-200 ${
+                    activeFilter === "curriculum" || curriculumFilter
+                      ? "bg-[#774BE5] text-white shadow-md"
+                      : "bg-white text-gray-700 hover:bg-gray-50 border border-gray-200 shadow-sm"
+                  }`}
+                >
+                  <i className="ri-book-open-line text-base"></i>
+                  <span>Curriculum</span>
+                  {curriculumFilter && (
+                    <span className="w-1.5 h-1.5 bg-white rounded-full"></span>
+                  )}
+                  <i className={`ri-arrow-down-s-line text-xs transition-transform duration-200 ${activeFilter === "curriculum" ? "rotate-180" : ""}`}></i>
+                </button>
+
+                {activeFilter === "curriculum" && (
+                  <div
+                    className="absolute top-full left-0 mt-2 bg-white rounded-lg border border-gray-200 shadow-lg z-[9999] min-w-[180px] max-w-[220px]"
+                    onMouseDown={(e) => e.stopPropagation()}
+                  >
+                    <div className="py-2">
+                      {[
+                        "DepEd",
+                        "Montessori",
+                        "Christian",
+                        "Progressive",
+                        "Waldorf",
+                        "Reggio Emilia",
+                        "IB",
+                      ].map((curriculum) => (
+                        <button
+                          type="button"
+                          key={curriculum}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            const newValue = curriculumFilter === curriculum ? "" : curriculum;
+                            setCurriculumFilter(newValue);
+                            setActiveFilter("all");
+                            if (newValue) {
+                              handleFilterRedirect("curriculum", newValue);
+                            }
+                          }}
+                          className={`w-full text-left px-4 py-2 text-sm transition-colors ${
+                            curriculumFilter === curriculum
+                              ? "bg-[#774BE5] text-white font-medium"
+                              : "hover:bg-gray-50 text-gray-700"
+                          }`}
+                        >
+                          <div className="flex items-center justify-between">
+                            <span>{curriculum}</span>
+                            {curriculumFilter === curriculum && (
+                              <i className="ri-check-line text-sm"></i>
+                            )}
+                          </div>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Mobile Filter Section */}
+            <div className="md:hidden mobile-filter-section mt-4">
+              {/* Mobile Filter Header */}
+              <div className="mb-3">
+                <div className="flex items-center justify-between mb-2">
+                  <h2 className="text-base font-semibold text-white">
+                    Filters
+                  </h2>
+                  {[budgetFilter, cityFilter, curriculumFilter].filter(Boolean)
+                    .length > 0 && (
+                    <button
+                      onClick={() => {
+                        setActiveFilter("all");
+                        setBudgetFilter("");
+                        setCityFilter("");
+                        setCurriculumFilter("");
+                      }}
+                      className="text-xs text-white font-medium hover:text-white/80 transition-colors"
+                    >
+                      Clear all
+                    </button>
+                  )}
+                </div>
+
+                {/* Quick Filter Pills - Made bigger with cool design */}
+                <div className="flex flex-wrap gap-2.5 mb-3">
+                  <button
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      setActiveFilter(activeFilter === "budget" ? "all" : "budget");
+                    }}
+                    className={`px-4 py-2.5 rounded-lg text-sm font-semibold flex items-center gap-2 transition-all duration-200 ${
+                      activeFilter === "budget" || budgetFilter
+                        ? "bg-[#774BE5] text-white shadow-md"
+                        : "bg-white text-gray-700 hover:bg-gray-50 border border-gray-200 shadow-sm"
+                    }`}
+                  >
+                    <i className={`ri-money-dollar-circle-line text-lg ${activeFilter === "budget" || budgetFilter ? "drop-shadow-sm" : ""}`}></i>
+                    <span>Budget</span>
+                    {budgetFilter && (
+                      <span className="w-2.5 h-2.5 bg-white rounded-full animate-pulse"></span>
+                    )}
+                  </button>
+
+                  <button
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      setActiveFilter(activeFilter === "city" ? "all" : "city");
+                    }}
+                    className={`px-4 py-2.5 rounded-lg text-sm font-semibold flex items-center gap-2 transition-all duration-200 ${
+                      activeFilter === "city" || cityFilter
+                        ? "bg-[#774BE5] text-white shadow-md"
+                        : "bg-white text-gray-700 hover:bg-gray-50 border border-gray-200 shadow-sm"
+                    }`}
+                  >
+                    <i className={`ri-map-pin-line text-lg ${activeFilter === "city" || cityFilter ? "drop-shadow-sm" : ""}`}></i>
+                    <span>City</span>
+                    {cityFilter && (
+                      <span className="w-2.5 h-2.5 bg-white rounded-full animate-pulse"></span>
+                    )}
+                  </button>
+
+                  <button
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      setActiveFilter(
+                        activeFilter === "curriculum" ? "all" : "curriculum",
+                      );
+                    }}
+                    className={`px-4 py-2.5 rounded-lg text-sm font-semibold flex items-center gap-2 transition-all duration-200 ${
+                      activeFilter === "curriculum" || curriculumFilter
+                        ? "bg-[#774BE5] text-white shadow-md"
+                        : "bg-white text-gray-700 hover:bg-gray-50 border border-gray-200 shadow-sm"
+                    }`}
+                  >
+                    <i className={`ri-book-open-line text-lg ${activeFilter === "curriculum" || curriculumFilter ? "drop-shadow-sm" : ""}`}></i>
+                    <span>Curriculum</span>
+                    {curriculumFilter && (
+                      <span className="w-2.5 h-2.5 bg-white rounded-full animate-pulse"></span>
+                    )}
+                  </button>
+                </div>
+              </div>
+
+              {/* Mobile Filter Panels */}
+              {activeFilter === "budget" && (
+                <div className="mb-4 bg-white border border-gray-200 rounded-lg overflow-hidden shadow-md">
+                  <div className="bg-gray-50 px-4 py-3 border-b border-gray-200">
+                    <div className="flex items-center justify-between">
+                      <h3 className="text-sm font-semibold text-[#0E1C29] flex items-center gap-1.5">
+                        <div className="w-6 h-6 bg-[#774BE5] rounded-md flex items-center justify-center">
+                          <i className="ri-money-dollar-circle-line text-white text-xs"></i>
+                        </div>
+                        Budget
+                      </h3>
+                      <button
+                        onClick={() => setActiveFilter("all")}
+                        className="w-6 h-6 bg-gray-200 hover:bg-gray-300 rounded-md flex items-center justify-center transition-colors"
+                      >
+                        <i className="ri-close-line text-gray-600 text-xs"></i>
+                      </button>
+                    </div>
+                  </div>
+                  <div className="p-2.5 space-y-1.5">
+                    {[
+                      { key: "under-100k", label: "Under ₱100k" },
+                      { key: "100k-200k", label: "₱100k - ₱200k" },
+                      { key: "200k-300k", label: "₱200k - ₱300k" },
+                      { key: "300k-500k", label: "₱300k - ₱500k" },
+                      { key: "over-500k", label: "Over ₱500k" },
+                    ].map((option) => (
+                      <button
+                        key={option.key}
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          const newValue = budgetFilter === option.key ? "" : option.key;
+                          setBudgetFilter(newValue);
+                          if (newValue) {
+                            handleFilterRedirect("budget", newValue);
+                          }
+                        }}
+                        className={`w-full text-left px-4 py-2 text-sm transition-colors ${
+                          budgetFilter === option.key
+                            ? "bg-[#774BE5] text-white font-medium"
+                            : "bg-gray-50 hover:bg-gray-100 text-gray-700 border border-gray-200"
+                        }`}
+                      >
+                        <div className="flex items-center justify-between">
+                          <span>{option.label}</span>
+                          {budgetFilter === option.key && (
+                            <i className="ri-check-line text-white text-xs"></i>
+                          )}
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {activeFilter === "city" && (
+                <div className="mb-4 bg-white border border-gray-200 rounded-lg overflow-hidden shadow-md">
+                  <div className="bg-gray-50 px-4 py-3 border-b border-gray-200">
+                    <div className="flex items-center justify-between">
+                      <h3 className="text-sm font-semibold text-[#0E1C29] flex items-center gap-1.5">
+                        <div className="w-6 h-6 bg-[#774BE5] rounded-md flex items-center justify-center">
+                          <i className="ri-map-pin-line text-white text-xs"></i>
+                        </div>
+                        City
+                      </h3>
+                      <button
+                        onClick={() => setActiveFilter("all")}
+                        className="w-6 h-6 bg-gray-200 hover:bg-gray-300 rounded-md flex items-center justify-center transition-colors"
+                      >
+                        <i className="ri-close-line text-gray-600 text-xs"></i>
+                      </button>
+                    </div>
+                  </div>
+                  <div className="p-2.5">
+                    {allCities.length === 0 ? (
+                      <div className="text-center py-4 text-xs text-gray-500">
+                        Loading cities...
+                      </div>
+                    ) : (
+                      <div className="grid grid-cols-2 gap-1.5">
+                        {allCities.map((cityData) => (
+                          <button
+                            key={cityData.city}
+                          onClick={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            const newValue = cityFilter === cityData.city ? "" : cityData.city;
+                            setCityFilter(newValue);
+                            if (newValue) {
+                              handleFilterRedirect("city", newValue);
+                            }
+                          }}
+                            className={`px-3 py-2 rounded-lg text-sm transition-colors ${
+                              cityFilter === cityData.city
+                                ? "bg-[#774BE5] text-white font-medium"
+                                : "bg-gray-50 hover:bg-gray-100 text-gray-700 border border-gray-200"
+                            }`}
+                          >
+                            <div className="flex items-center gap-1.5 justify-between">
+                              <span className="truncate text-left">
+                                {cityData.city}
+                              </span>
+                              {cityFilter === cityData.city && (
+                                <i className="ri-check-line text-white text-xs flex-shrink-0"></i>
+                              )}
+                            </div>
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {activeFilter === "curriculum" && (
+                <div className="mb-4 bg-white border border-gray-200 rounded-lg overflow-hidden shadow-md">
+                  <div className="bg-gray-50 px-4 py-3 border-b border-gray-200">
+                    <div className="flex items-center justify-between">
+                      <h3 className="text-sm font-semibold text-[#0E1C29] flex items-center gap-1.5">
+                        <div className="w-6 h-6 bg-[#774BE5] rounded-md flex items-center justify-center">
+                          <i className="ri-book-open-line text-white text-xs"></i>
+                        </div>
+                        Curriculum
+                      </h3>
+                      <button
+                        onClick={() => setActiveFilter("all")}
+                        className="w-6 h-6 bg-gray-200 hover:bg-gray-300 rounded-md flex items-center justify-center transition-colors"
+                      >
+                        <i className="ri-close-line text-gray-600 text-xs"></i>
+                      </button>
+                    </div>
+                  </div>
+                  <div className="p-2.5">
+                    <div className="grid grid-cols-2 gap-1.5">
+                      {[
+                        "DepEd",
+                        "Montessori",
+                        "Christian",
+                        "Progressive",
+                        "Waldorf",
+                        "Reggio Emilia",
+                        "IB",
+                      ].map((curriculum) => (
+                        <button
+                          key={curriculum}
+                          onClick={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            const newValue = curriculumFilter === curriculum ? "" : curriculum;
+                            setCurriculumFilter(newValue);
+                            if (newValue) {
+                              handleFilterRedirect("curriculum", newValue);
+                            }
+                          }}
+                          className={`px-3 py-2 rounded-lg text-sm transition-colors ${
+                            curriculumFilter === curriculum
+                              ? "bg-[#774BE5] text-white font-medium"
+                              : "bg-gray-50 hover:bg-gray-100 text-gray-700 border border-gray-200"
+                          }`}
+                        >
+                          <div className="flex items-center justify-between">
+                            <span className="truncate">{curriculum}</span>
+                            {curriculumFilter === curriculum && (
+                              <i className="ri-check-line text-white text-xs flex-shrink-0"></i>
+                            )}
+                          </div>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
         <div className="w-full h-full absolute bg-black/20 z-0"></div>
       </section>
 
