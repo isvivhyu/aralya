@@ -1,10 +1,10 @@
 /**
  * Authentication utilities
- * 
+ *
  * This is a placeholder for your authentication logic.
  * Implement based on your requirements:
  * - API key authentication
- * - Session-based authentication  
+ * - Session-based authentication
  * - JWT tokens
  * - Supabase Auth
  */
@@ -14,7 +14,7 @@
  */
 export function verifyApiKey(request: Request): boolean {
   const apiKey = process.env.ADMIN_API_KEY;
-  
+
   if (!apiKey) {
     // No API key configured - deny access
     return false;
@@ -22,7 +22,7 @@ export function verifyApiKey(request: Request): boolean {
 
   const authHeader = request.headers.get("authorization");
   const providedKey = authHeader?.replace("Bearer ", "");
-  
+
   return providedKey === apiKey;
 }
 
@@ -51,4 +51,3 @@ export function isAuthenticated(request: Request): boolean {
 
   return false;
 }
-

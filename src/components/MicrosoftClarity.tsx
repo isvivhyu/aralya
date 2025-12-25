@@ -1,8 +1,8 @@
-'use client';
+"use client";
 
-import Script from 'next/script';
+import Script from "next/script";
 
-const CLARITY_ID = process.env.NEXT_PUBLIC_CLARITY_ID || 'u2q02xiknr';
+const CLARITY_ID = process.env.NEXT_PUBLIC_CLARITY_ID || "u2q02xiknr";
 
 export default function MicrosoftClarity() {
   if (!CLARITY_ID) {
@@ -25,4 +25,3 @@ export default function MicrosoftClarity() {
     />
   );
 }
-

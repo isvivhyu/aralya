@@ -183,13 +183,14 @@ export class SchoolService {
   static async getUniqueCurriculumTags(): Promise<string[]> {
     try {
       const schools = await apiClient.getSchools();
-      
+
       // Extract and flatten all curriculum tags
       const allTags =
         schools?.flatMap(
           (item) =>
-            item.curriculum_tags?.split(", ").map((tag: string) => tag.trim()) ||
-            [],
+            item.curriculum_tags
+              ?.split(", ")
+              .map((tag: string) => tag.trim()) || [],
         ) || [];
 
       return [...new Set(allTags)].sort();

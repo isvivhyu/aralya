@@ -31,7 +31,7 @@ export async function GET(request: NextRequest) {
           "X-RateLimit-Remaining": String(result.remaining),
           "X-RateLimit-Reset": String(result.reset),
         },
-      }
+      },
     );
   }
 
@@ -42,14 +42,12 @@ export async function GET(request: NextRequest) {
     const curriculum = searchParams.get("curriculum");
     const featured = searchParams.get("featured") === "true";
 
-    let queryBuilder = supabaseServer
-      .from("schools")
-      .select("*");
+    let queryBuilder = supabaseServer.from("schools").select("*");
 
     // Apply filters
     if (query) {
       queryBuilder = queryBuilder.or(
-        `school_name.ilike.%${query}%, city.ilike.%${query}%, curriculum_tags.ilike.%${query}%`
+        `school_name.ilike.%${query}%, city.ilike.%${query}%, curriculum_tags.ilike.%${query}%`,
       );
     }
 
@@ -74,7 +72,7 @@ export async function GET(request: NextRequest) {
     if (error) {
       return NextResponse.json(
         { error: "Failed to fetch schools", details: error.message },
-        { status: 500 }
+        { status: 500 },
       );
     }
 
@@ -86,8 +84,7 @@ export async function GET(request: NextRequest) {
   } catch {
     return NextResponse.json(
       { error: "Internal server error" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
-

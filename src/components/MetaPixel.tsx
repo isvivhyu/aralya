@@ -1,8 +1,9 @@
-'use client';
+"use client";
 
-import Script from 'next/script';
+import Script from "next/script";
 
-const META_PIXEL_ID = process.env.NEXT_PUBLIC_META_PIXEL_ID || '2423289874752600';
+const META_PIXEL_ID =
+  process.env.NEXT_PUBLIC_META_PIXEL_ID || "2423289874752600";
 
 export default function MetaPixel() {
   if (!META_PIXEL_ID) {
@@ -34,7 +35,7 @@ export default function MetaPixel() {
         <img
           height="1"
           width="1"
-          style={{ display: 'none' }}
+          style={{ display: "none" }}
           src={`https://www.facebook.com/tr?id=${META_PIXEL_ID}&ev=PageView&noscript=1`}
           alt=""
         />
@@ -42,4 +43,3 @@ export default function MetaPixel() {
     </>
   );
 }
-

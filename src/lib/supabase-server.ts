@@ -16,7 +16,7 @@ const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 if (!supabaseUrl || !supabaseServiceKey) {
   throw new Error(
     "Missing Supabase environment variables for server-side operations. " +
-      "Please ensure NEXT_PUBLIC_SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY are set."
+      "Please ensure NEXT_PUBLIC_SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY are set.",
   );
 }
 
@@ -28,4 +28,3 @@ export const supabaseServer = createClient(supabaseUrl, supabaseServiceKey, {
     persistSession: false,
   },
 });
-

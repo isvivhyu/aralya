@@ -19,7 +19,9 @@ import { SchoolCardSkeleton } from "@/components/SchoolCardSkeleton";
 export default function Home() {
   const [searchQuery, setSearchQuery] = useState("");
   const [featuredSchools, setFeaturedSchools] = useState<School[]>([]);
-  const [activeCategory, setActiveCategory] = useState<"all" | "city" | "budget" | "curriculum">("all");
+  const [activeCategory, setActiveCategory] = useState<
+    "all" | "city" | "budget" | "curriculum"
+  >("all");
   const [isLoadingFeatured, setIsLoadingFeatured] = useState(true);
   const [isSearching, setIsSearching] = useState(false);
   const router = useRouter();
@@ -65,7 +67,9 @@ export default function Home() {
     try {
       if (searchQuery.trim()) {
         // Redirect to directory with search query
-        router.push(`/directory?search=${encodeURIComponent(searchQuery.trim())}`);
+        router.push(
+          `/directory?search=${encodeURIComponent(searchQuery.trim())}`,
+        );
       } else {
         // If no search query, go to directory
         router.push("/directory");
@@ -105,8 +109,16 @@ export default function Home() {
   const categories = [
     { id: "all" as const, label: "All Schools", icon: "ri-grid-line" },
     { id: "city" as const, label: "By City", icon: "ri-map-pin-line" },
-    { id: "budget" as const, label: "By Budget", icon: "ri-money-dollar-circle-line" },
-    { id: "curriculum" as const, label: "By Curriculum", icon: "ri-book-open-line" },
+    {
+      id: "budget" as const,
+      label: "By Budget",
+      icon: "ri-money-dollar-circle-line",
+    },
+    {
+      id: "curriculum" as const,
+      label: "By Curriculum",
+      icon: "ri-book-open-line",
+    },
   ];
 
   return (
@@ -122,32 +134,32 @@ export default function Home() {
           <h1 className="md:text-7xl text-[32px] font-semibold text-white text-center leading-[120%]">
             Find the Right Preschool
           </h1>
-      
+
           <form
             id="search-form-mobile"
             onSubmit={handleSearch}
             className="bg-white w-full p-5 rounded-3xl mt-6 relative"
           >
-                    {/* Category Tabs Section */}
-          <div className="w-full relative z-[999]">
-            <div className="flex items-center justify-start md:justify-center gap-2 md:gap-3 overflow-x-auto scrollbar-hide md:flex-wrap flex-nowrap">
-              {categories.map((category) => (
-                <button
-                  key={category.id}
-                  type="button"
-                  onClick={() => setActiveCategory(category.id)}
-                  className={`px-4 md:px-6 py-2.5 md:py-3 text-sm font-semibold flex items-center gap-2 text-black relative shrink-0 ${
-                    activeCategory === category.id
-                      ? "border-b-2 border-black"
-                      : "border-b-2 border-transparent"
-                  } transition-all duration-300 ease-in-out`}
-                >
-                  <i className={`${category.icon} text-base`}></i>
-                  <span>{category.label}</span>
-                </button>
-              ))}
+            {/* Category Tabs Section */}
+            <div className="w-full relative z-[999]">
+              <div className="flex items-center justify-start md:justify-center gap-2 md:gap-3 overflow-x-auto scrollbar-hide md:flex-wrap flex-nowrap">
+                {categories.map((category) => (
+                  <button
+                    key={category.id}
+                    type="button"
+                    onClick={() => setActiveCategory(category.id)}
+                    className={`px-4 md:px-6 py-2.5 md:py-3 text-sm font-semibold flex items-center gap-2 text-black relative shrink-0 ${
+                      activeCategory === category.id
+                        ? "border-b-2 border-black"
+                        : "border-b-2 border-transparent"
+                    } transition-all duration-300 ease-in-out`}
+                  >
+                    <i className={`${category.icon} text-base`}></i>
+                    <span>{category.label}</span>
+                  </button>
+                ))}
+              </div>
             </div>
-          </div>
             <div className="flex flex-col md:flex-row md:mt-6 mt-3 gap-2.5 rounded-2xl">
               <div className="bg-[#f5f5f5] w-full md:w-[810px] p-3 md:p-4 md:rounded-[10px] rounded-full overflow-hidden flex items-center gap-3 md:gap-5 relative">
                 <i className="ri-search-line text-[#0E1C29]/40 text-2xl"></i>

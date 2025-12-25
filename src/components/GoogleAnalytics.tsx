@@ -1,7 +1,7 @@
-'use client';
+"use client";
 
-import Script from 'next/script';
-import { GA_MEASUREMENT_ID } from '@/lib/analytics';
+import Script from "next/script";
+import { GA_MEASUREMENT_ID } from "@/lib/analytics";
 
 export default function GoogleAnalytics() {
   if (!GA_MEASUREMENT_ID) {
@@ -31,4 +31,3 @@ export default function GoogleAnalytics() {
     </>
   );
 }
-

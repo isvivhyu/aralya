@@ -28,9 +28,7 @@ export async function generateMetadata({
       .order("school_name");
 
     if (!error && schools) {
-      const school = schools.find(
-        (s) => createSlug(s.school_name) === slug
-      );
+      const school = schools.find((s) => createSlug(s.school_name) === slug);
 
       if (school) {
         return {
@@ -49,7 +47,8 @@ export async function generateMetadata({
   // Fallback metadata
   return {
     title: "School Details | Aralya - Compare Preschools in Metro Manila",
-    description: "View school details, tuition, curriculum, and contact information on Aralya.",
+    description:
+      "View school details, tuition, curriculum, and contact information on Aralya.",
     alternates: {
       canonical: `${baseUrl}/directory/${slug}/`,
     },
@@ -63,4 +62,3 @@ export default function SchoolDetailLayout({
 }) {
   return <>{children}</>;
 }
-

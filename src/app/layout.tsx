@@ -22,7 +22,8 @@ const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://aralya.com";
 
 export const metadata: Metadata = {
   title: "Aralya | Compare Preschools in Metro Manila",
-  description: "Aralya helps Filipino parents compare preschools across Metro Manila — updated tuition, curriculum, schedules & contact info in one easy place.",
+  description:
+    "Aralya helps Filipino parents compare preschools across Metro Manila — updated tuition, curriculum, schedules & contact info in one easy place.",
   keywords: [
     "preschools in Metro Manila",
     "preschools in Taguig",
@@ -38,7 +39,8 @@ export const metadata: Metadata = {
   },
   openGraph: {
     title: "Aralya | Compare Preschools in Metro Manila",
-    description: "Aralya helps Filipino parents compare preschools across Metro Manila — updated tuition, curriculum, schedules & contact info in one easy place.",
+    description:
+      "Aralya helps Filipino parents compare preschools across Metro Manila — updated tuition, curriculum, schedules & contact info in one easy place.",
     url: baseUrl,
     siteName: "Aralya",
     images: [
@@ -55,7 +57,8 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary_large_image",
     title: "Aralya | Compare Preschools in Metro Manila",
-    description: "Aralya helps Filipino parents compare preschools across Metro Manila — updated tuition, curriculum, schedules & contact info in one easy place.",
+    description:
+      "Aralya helps Filipino parents compare preschools across Metro Manila — updated tuition, curriculum, schedules & contact info in one easy place.",
     images: ["/images/Logo.png"],
   },
   robots: {

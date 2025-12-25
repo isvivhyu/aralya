@@ -19,7 +19,7 @@ function createSlug(schoolName: string): string {
 // GET /api/schools/[slug] - Get school by slug
 export async function GET(
   request: NextRequest,
-  { params }: { params: Promise<{ slug: string }> }
+  { params }: { params: Promise<{ slug: string }> },
 ) {
   // Apply rate limiting
   const ip = getClientIP(request);
@@ -43,7 +43,7 @@ export async function GET(
           "X-RateLimit-Remaining": String(result.remaining),
           "X-RateLimit-Reset": String(result.reset),
         },
-      }
+      },
     );
   }
 
@@ -59,7 +59,7 @@ export async function GET(
     if (error) {
       return NextResponse.json(
         { error: "Failed to fetch schools", details: error.message },
-        { status: 500 }
+        { status: 500 },
       );
     }
 
@@ -69,10 +69,7 @@ export async function GET(
     });
 
     if (!school) {
-      return NextResponse.json(
-        { error: "School not found" },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: "School not found" }, { status: 404 });
     }
 
     const response = NextResponse.json({ school });
@@ -83,8 +80,7 @@ export async function GET(
   } catch {
     return NextResponse.json(
       { error: "Internal server error" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
-

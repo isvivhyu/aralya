@@ -30,7 +30,7 @@ export async function GET(request: NextRequest) {
           "X-RateLimit-Remaining": String(result.remaining),
           "X-RateLimit-Reset": String(result.reset),
         },
-      }
+      },
     );
   }
 
@@ -51,7 +51,7 @@ export async function GET(request: NextRequest) {
     if (error) {
       return NextResponse.json(
         { error: "Failed to fetch cities", details: error.message },
-        { status: 500 }
+        { status: 500 },
       );
     }
 
@@ -59,7 +59,7 @@ export async function GET(request: NextRequest) {
     const citiesWithCounts = await Promise.all(
       (data || []).map(async (cityRecord) => {
         const cityName = cityRecord.city || "";
-        
+
         // Count schools in this city
         const { count } = await supabaseServer
           .from("schools")
@@ -70,7 +70,7 @@ export async function GET(request: NextRequest) {
           city: cityName,
           schoolCount: count || 0,
         };
-      })
+      }),
     );
 
     const response = NextResponse.json({ cities: citiesWithCounts });
@@ -81,8 +81,7 @@ export async function GET(request: NextRequest) {
   } catch {
     return NextResponse.json(
       { error: "Internal server error" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
-

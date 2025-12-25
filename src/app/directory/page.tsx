@@ -82,10 +82,10 @@ const SchoolDirectoryContent = () => {
     if (!query.trim()) {
       return availableCities;
     }
-    
+
     const queryLower = query.toLowerCase().trim();
     return availableCities.filter((cityData) =>
-      cityData.city.toLowerCase().includes(queryLower)
+      cityData.city.toLowerCase().includes(queryLower),
     );
   };
 
@@ -104,7 +104,10 @@ const SchoolDirectoryContent = () => {
   };
 
   // Helper function to filter schools by budget amount
-  const filterByBudgetAmount = (schools: School[], budgetAmount: number): School[] => {
+  const filterByBudgetAmount = (
+    schools: School[],
+    budgetAmount: number,
+  ): School[] => {
     return schools.filter((school) => {
       try {
         // Skip schools with non-numeric tuition values (e.g., "Fees Disclosed upon visitation")
@@ -116,12 +119,8 @@ const SchoolDirectoryContent = () => {
         }
 
         // Parse min and max tuition, removing currency symbols and commas
-        const minPrice = parseFloat(
-          school.min_tuition.replace(/[^\d.]/g, ""),
-        );
-        const maxPrice = parseFloat(
-          school.max_tuition.replace(/[^\d.]/g, ""),
-        );
+        const minPrice = parseFloat(school.min_tuition.replace(/[^\d.]/g, ""));
+        const maxPrice = parseFloat(school.max_tuition.replace(/[^\d.]/g, ""));
 
         // Check if the entered budget amount falls within the school's tuition range
         // This means the user's budget can afford this school
@@ -160,7 +159,7 @@ const SchoolDirectoryContent = () => {
     setIsSearching(true);
     try {
       let schools: School[];
-      
+
       // Check if the query is a numeric budget amount
       if (isNumericQuery(query)) {
         // If it's a number, get all schools and filter by budget
@@ -171,7 +170,7 @@ const SchoolDirectoryContent = () => {
         // If it's text, search across school name, curriculum, and city
         schools = await SchoolService.searchSchools(query);
       }
-      
+
       setSchoolSearchResults(schools.slice(0, 5)); // Limit to 5 for dropdown
     } catch (error) {
       console.error("Error searching schools:", error);
@@ -215,8 +214,10 @@ const SchoolDirectoryContent = () => {
     if (curriculumFilter) {
       params.set("curriculum", curriculumFilter);
     }
-    
-    const url = params.toString() ? `/directory?${params.toString()}` : "/directory";
+
+    const url = params.toString()
+      ? `/directory?${params.toString()}`
+      : "/directory";
     window.history.replaceState({}, "", url);
   }, [localSearchQuery, budgetFilter, cityFilter, curriculumFilter]);
 
@@ -245,7 +246,7 @@ const SchoolDirectoryContent = () => {
 
   // Update URL when filters change (but not when syncing from URL params)
   const isSyncingFromURL = useRef(false);
-  
+
   useEffect(() => {
     if (isSyncingFromURL.current) {
       isSyncingFromURL.current = false;
@@ -400,7 +401,7 @@ const SchoolDirectoryContent = () => {
       }
       try {
         let searchFiltered: School[];
-        
+
         if (searchQuery.trim().length > 0) {
           // Check if the query is a numeric budget amount
           if (isNumericQuery(searchQuery)) {
@@ -572,86 +573,98 @@ const SchoolDirectoryContent = () => {
             </div>
 
             {/* Search Results Dropdown */}
-            {showResults && (searchResults.length > 0 || schoolSearchResults.length > 0 || localSearchQuery.trim().length > 0 || isSearching) && (
-              <div className="absolute top-full left-5 right-5 mt-2 bg-white rounded-2xl border border-gray-200 shadow-xl max-h-80 overflow-auto z-[10001]">
-                <div className="p-4">
-                  {isSearching && localSearchQuery.trim().length > 0 && (
-                    <div className="flex items-center justify-center gap-2 py-4 text-gray-500">
-                      <LoadingSpinner size="sm" />
-                      <span className="text-sm">Searching...</span>
-                    </div>
-                  )}
-                  {/* Schools Section */}
-                  {!isSearching && schoolSearchResults.length > 0 && (
-                    <>
-                      <h5 className="text-sm font-semibold text-gray-600 mb-3">
-                        Schools ({schoolSearchResults.length})
-                      </h5>
-                      {schoolSearchResults.map((school, index) => (
-                        <div
-                          key={`${school.school_name}-${index}`}
-                          onClick={() => handleSchoolClick(school)}
-                          className="flex items-center gap-3 p-3 hover:bg-gray-50 rounded-lg cursor-pointer transition-colors mb-2"
-                        >
-                          <div className="w-12 h-12 rounded-lg bg-[#774BE5]/10 flex items-center justify-center flex-shrink-0">
-                            <i className="ri-school-line text-[#774BE5] text-xl"></i>
+            {showResults &&
+              (searchResults.length > 0 ||
+                schoolSearchResults.length > 0 ||
+                localSearchQuery.trim().length > 0 ||
+                isSearching) && (
+                <div className="absolute top-full left-5 right-5 mt-2 bg-white rounded-2xl border border-gray-200 shadow-xl max-h-80 overflow-auto z-[10001]">
+                  <div className="p-4">
+                    {isSearching && localSearchQuery.trim().length > 0 && (
+                      <div className="flex items-center justify-center gap-2 py-4 text-gray-500">
+                        <LoadingSpinner size="sm" />
+                        <span className="text-sm">Searching...</span>
+                      </div>
+                    )}
+                    {/* Schools Section */}
+                    {!isSearching && schoolSearchResults.length > 0 && (
+                      <>
+                        <h5 className="text-sm font-semibold text-gray-600 mb-3">
+                          Schools ({schoolSearchResults.length})
+                        </h5>
+                        {schoolSearchResults.map((school, index) => (
+                          <div
+                            key={`${school.school_name}-${index}`}
+                            onClick={() => handleSchoolClick(school)}
+                            className="flex items-center gap-3 p-3 hover:bg-gray-50 rounded-lg cursor-pointer transition-colors mb-2"
+                          >
+                            <div className="w-12 h-12 rounded-lg bg-[#774BE5]/10 flex items-center justify-center flex-shrink-0">
+                              <i className="ri-school-line text-[#774BE5] text-xl"></i>
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <h6 className="font-semibold text-[#0E1C29] text-sm truncate">
+                                {school.school_name}
+                              </h6>
+                              <p className="text-xs text-gray-500 mt-0.5 truncate">
+                                {school.city}
+                                {school.curriculum_tags &&
+                                  ` • ${school.curriculum_tags.split(", ")[0]}`}
+                              </p>
+                            </div>
+                            <i className="ri-arrow-right-s-line text-gray-400"></i>
                           </div>
-                          <div className="flex-1 min-w-0">
-                            <h6 className="font-semibold text-[#0E1C29] text-sm truncate">
-                              {school.school_name}
-                            </h6>
-                            <p className="text-xs text-gray-500 mt-0.5 truncate">
-                              {school.city}
-                              {school.curriculum_tags && ` • ${school.curriculum_tags.split(", ")[0]}`}
-                            </p>
-                          </div>
-                          <i className="ri-arrow-right-s-line text-gray-400"></i>
-                        </div>
-                      ))}
-                      {searchResults.length > 0 && <div className="border-t border-gray-200 my-3"></div>}
-                    </>
-                  )}
+                        ))}
+                        {searchResults.length > 0 && (
+                          <div className="border-t border-gray-200 my-3"></div>
+                        )}
+                      </>
+                    )}
 
-                  {/* Cities Section */}
-                  {searchResults.length > 0 && (
-                    <>
-                      <h5 className="text-sm font-semibold text-gray-600 mb-3">
-                        Cities ({searchResults.length})
-                      </h5>
-                      {searchResults.map((cityData, index) => (
-                        <div
-                          key={`${cityData.city}-${index}`}
-                          onClick={() => handleCityClick(cityData.city)}
-                          className="flex items-center gap-3 p-3 hover:bg-gray-50 rounded-lg cursor-pointer transition-colors"
-                        >
-                          <div className="w-12 h-12 rounded-lg bg-[#774BE5]/10 flex items-center justify-center flex-shrink-0">
-                            <i className="ri-map-pin-line text-[#774BE5] text-xl"></i>
+                    {/* Cities Section */}
+                    {searchResults.length > 0 && (
+                      <>
+                        <h5 className="text-sm font-semibold text-gray-600 mb-3">
+                          Cities ({searchResults.length})
+                        </h5>
+                        {searchResults.map((cityData, index) => (
+                          <div
+                            key={`${cityData.city}-${index}`}
+                            onClick={() => handleCityClick(cityData.city)}
+                            className="flex items-center gap-3 p-3 hover:bg-gray-50 rounded-lg cursor-pointer transition-colors"
+                          >
+                            <div className="w-12 h-12 rounded-lg bg-[#774BE5]/10 flex items-center justify-center flex-shrink-0">
+                              <i className="ri-map-pin-line text-[#774BE5] text-xl"></i>
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <h6 className="font-semibold text-[#0E1C29] text-sm truncate">
+                                {cityData.city}
+                              </h6>
+                              <p className="text-xs text-gray-500 mt-0.5">
+                                {cityData.schoolCount}{" "}
+                                {cityData.schoolCount === 1
+                                  ? "school"
+                                  : "schools"}{" "}
+                                available
+                              </p>
+                            </div>
+                            <i className="ri-arrow-right-s-line text-gray-400"></i>
                           </div>
-                          <div className="flex-1 min-w-0">
-                            <h6 className="font-semibold text-[#0E1C29] text-sm truncate">
-                              {cityData.city}
-                            </h6>
-                            <p className="text-xs text-gray-500 mt-0.5">
-                              {cityData.schoolCount}{" "}
-                              {cityData.schoolCount === 1 ? "school" : "schools"}{" "}
-                              available
-                            </p>
-                          </div>
-                          <i className="ri-arrow-right-s-line text-gray-400"></i>
-                        </div>
-                      ))}
-                    </>
-                  )}
+                        ))}
+                      </>
+                    )}
 
-                  {/* No Results */}
-                  {searchResults.length === 0 && schoolSearchResults.length === 0 && localSearchQuery.trim().length > 0 && (
-                    <div className="text-sm text-gray-500 p-2">
-                      This school is not in our database yet. We are adding more schools weekly
-                    </div>
-                  )}
+                    {/* No Results */}
+                    {searchResults.length === 0 &&
+                      schoolSearchResults.length === 0 &&
+                      localSearchQuery.trim().length > 0 && (
+                        <div className="text-sm text-gray-500 p-2">
+                          This school is not in our database yet. We are adding
+                          more schools weekly
+                        </div>
+                      )}
+                  </div>
                 </div>
-              </div>
-            )}
+              )}
           </form>
 
           {/* Filter Section - Right below search bar */}
@@ -667,7 +680,10 @@ const SchoolDirectoryContent = () => {
                   window.history.replaceState({}, "", "/directory");
                 }}
                 className={`min-w-[100px] px-6 py-3 rounded-xl text-sm font-semibold flex items-center justify-center gap-2 transition-all duration-200 ${
-                  activeFilter === "all" && !budgetFilter && !cityFilter && !curriculumFilter
+                  activeFilter === "all" &&
+                  !budgetFilter &&
+                  !cityFilter &&
+                  !curriculumFilter
                     ? "bg-[#774BE5] text-white shadow-md"
                     : "bg-white text-gray-700 hover:bg-gray-50 border border-gray-200 shadow-sm"
                 }`}
@@ -680,7 +696,9 @@ const SchoolDirectoryContent = () => {
                 <button
                   type="button"
                   onClick={() =>
-                    setActiveFilter(activeFilter === "budget" ? "all" : "budget")
+                    setActiveFilter(
+                      activeFilter === "budget" ? "all" : "budget",
+                    )
                   }
                   className={`min-w-[130px] px-6 py-3 rounded-xl text-sm font-semibold flex items-center justify-center gap-2 transition-all duration-200 ${
                     activeFilter === "budget" || budgetFilter
@@ -693,7 +711,9 @@ const SchoolDirectoryContent = () => {
                   {budgetFilter && (
                     <span className="w-1.5 h-1.5 bg-white rounded-full"></span>
                   )}
-                  <i className={`ri-arrow-down-s-line text-xs transition-transform duration-200 ${activeFilter === "budget" ? "rotate-180" : ""}`}></i>
+                  <i
+                    className={`ri-arrow-down-s-line text-xs transition-transform duration-200 ${activeFilter === "budget" ? "rotate-180" : ""}`}
+                  ></i>
                 </button>
 
                 {activeFilter === "budget" && (
@@ -755,7 +775,9 @@ const SchoolDirectoryContent = () => {
                   {cityFilter && (
                     <span className="w-1.5 h-1.5 bg-white rounded-full"></span>
                   )}
-                  <i className={`ri-arrow-down-s-line text-xs transition-transform duration-200 ${activeFilter === "city" ? "rotate-180" : ""}`}></i>
+                  <i
+                    className={`ri-arrow-down-s-line text-xs transition-transform duration-200 ${activeFilter === "city" ? "rotate-180" : ""}`}
+                  ></i>
                 </button>
 
                 {activeFilter === "city" && (
@@ -773,12 +795,15 @@ const SchoolDirectoryContent = () => {
                           <button
                             type="button"
                             key={cityData.city}
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            const newValue = cityFilter === cityData.city ? "" : cityData.city;
-                            setCityFilter(newValue);
-                            setActiveFilter("all");
-                          }}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              const newValue =
+                                cityFilter === cityData.city
+                                  ? ""
+                                  : cityData.city;
+                              setCityFilter(newValue);
+                              setActiveFilter("all");
+                            }}
                             className={`w-full text-left px-4 py-2 text-sm transition-colors ${
                               cityFilter === cityData.city
                                 ? "bg-[#774BE5] text-white font-medium"
@@ -818,7 +843,9 @@ const SchoolDirectoryContent = () => {
                   {curriculumFilter && (
                     <span className="w-1.5 h-1.5 bg-white rounded-full"></span>
                   )}
-                  <i className={`ri-arrow-down-s-line text-xs transition-transform duration-200 ${activeFilter === "curriculum" ? "rotate-180" : ""}`}></i>
+                  <i
+                    className={`ri-arrow-down-s-line text-xs transition-transform duration-200 ${activeFilter === "curriculum" ? "rotate-180" : ""}`}
+                  ></i>
                 </button>
 
                 {activeFilter === "curriculum" && (
@@ -841,7 +868,8 @@ const SchoolDirectoryContent = () => {
                           key={curriculum}
                           onClick={(e) => {
                             e.stopPropagation();
-                            const newValue = curriculumFilter === curriculum ? "" : curriculum;
+                            const newValue =
+                              curriculumFilter === curriculum ? "" : curriculum;
                             setCurriculumFilter(newValue);
                             setActiveFilter("all");
                           }}
@@ -867,276 +895,287 @@ const SchoolDirectoryContent = () => {
 
             {/* Mobile Filter Section */}
             <div className="md:hidden mobile-filter-section mt-4">
-          {/* Mobile Filter Header */}
-          <div className="mb-3">
-            <div className="flex items-center justify-between mb-2">
-              <h2 className="text-base font-semibold text-[#0E1C29]">
-                Filters
-              </h2>
-              {[budgetFilter, cityFilter, curriculumFilter].filter(Boolean)
-                .length > 0 && (
-                <button
-                  onClick={() => {
-                    setActiveFilter("all");
-                    setBudgetFilter("");
-                    setCityFilter("");
-                    setCurriculumFilter("");
-                    window.history.replaceState({}, "", "/directory");
-                  }}
-                  className="text-xs text-[#774BE5] font-medium hover:text-[#774BE5]/80 transition-colors"
-                >
-                  Clear all
-                </button>
-              )}
-            </div>
+              {/* Mobile Filter Header */}
+              <div className="mb-3">
+                <div className="flex items-center justify-between mb-2">
+                  <h2 className="text-base font-semibold text-[#0E1C29]">
+                    Filters
+                  </h2>
+                  {[budgetFilter, cityFilter, curriculumFilter].filter(Boolean)
+                    .length > 0 && (
+                    <button
+                      onClick={() => {
+                        setActiveFilter("all");
+                        setBudgetFilter("");
+                        setCityFilter("");
+                        setCurriculumFilter("");
+                        window.history.replaceState({}, "", "/directory");
+                      }}
+                      className="text-xs text-[#774BE5] font-medium hover:text-[#774BE5]/80 transition-colors"
+                    >
+                      Clear all
+                    </button>
+                  )}
+                </div>
 
                 {/* Quick Filter Pills - Made bigger with cool design */}
-            <div className="flex flex-wrap gap-2.5 mb-3">
-              <button
-                onClick={(e) => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  console.log(
-                    "Budget pill clicked, current activeFilter:",
-                    activeFilter,
-                  );
-                  const newFilter =
-                    activeFilter === "budget" ? "all" : "budget";
-                  console.log("Setting activeFilter to:", newFilter);
-                  setActiveFilter(newFilter);
-                }}
-                className={`px-4 py-2.5 rounded-lg text-sm font-semibold flex items-center gap-2 transition-all duration-200 ${
-                  activeFilter === "budget" || budgetFilter
-                    ? "bg-[#774BE5] text-white shadow-md"
-                    : "bg-white text-gray-700 hover:bg-gray-50 border border-gray-200 shadow-sm"
-                }`}
-              >
-                <i className={`ri-money-dollar-circle-line text-lg ${activeFilter === "budget" || budgetFilter ? "drop-shadow-sm" : ""}`}></i>
-                <span>Budget</span>
-                {budgetFilter && (
-                  <span className="w-2.5 h-2.5 bg-white rounded-full animate-pulse"></span>
-                )}
-              </button>
-
-              <button
-                onClick={(e) => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  console.log(
-                    "City pill clicked, current activeFilter:",
-                    activeFilter,
-                  );
-                  setActiveFilter(activeFilter === "city" ? "all" : "city");
-                }}
-                className={`px-4 py-2.5 rounded-lg text-sm font-semibold flex items-center gap-2 transition-all duration-200 ${
-                  activeFilter === "city" || cityFilter
-                    ? "bg-[#774BE5] text-white shadow-md"
-                    : "bg-white text-gray-700 hover:bg-gray-50 border border-gray-200 shadow-sm"
-                }`}
-              >
-                <i className={`ri-map-pin-line text-lg ${activeFilter === "city" || cityFilter ? "drop-shadow-sm" : ""}`}></i>
-                <span>City</span>
-                {cityFilter && (
-                  <span className="w-2.5 h-2.5 bg-white rounded-full animate-pulse"></span>
-                )}
-              </button>
-
-              <button
-                onClick={(e) => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  console.log(
-                    "Curriculum pill clicked, current activeFilter:",
-                    activeFilter,
-                  );
-                  setActiveFilter(
-                    activeFilter === "curriculum" ? "all" : "curriculum",
-                  );
-                }}
-                className={`px-4 py-2.5 rounded-lg text-sm font-semibold flex items-center gap-2 transition-all duration-200 ${
-                  activeFilter === "curriculum" || curriculumFilter
-                    ? "bg-[#774BE5] text-white shadow-md"
-                    : "bg-white text-gray-700 hover:bg-gray-50 border border-gray-200 shadow-sm"
-                }`}
-              >
-                <i className={`ri-book-open-line text-lg ${activeFilter === "curriculum" || curriculumFilter ? "drop-shadow-sm" : ""}`}></i>
-                <span>Curriculum</span>
-                {curriculumFilter && (
-                  <span className="w-2.5 h-2.5 bg-white rounded-full animate-pulse"></span>
-                )}
-              </button>
-            </div>
-          </div>
-
-          {/* Mobile Filter Panels */}
-          {activeFilter === "budget" && (
-            <div className="mb-4 bg-white border border-gray-200 rounded-lg overflow-hidden shadow-md">
-              <div className="bg-gray-50 px-4 py-3 border-b border-gray-200">
-                <div className="flex items-center justify-between">
-                  <h3 className="text-sm font-semibold text-[#0E1C29] flex items-center gap-1.5">
-                    <div className="w-6 h-6 bg-[#774BE5] rounded-md flex items-center justify-center">
-                      <i className="ri-money-dollar-circle-line text-white text-xs"></i>
-                    </div>
-                    Budget
-                  </h3>
+                <div className="flex flex-wrap gap-2.5 mb-3">
                   <button
-                    onClick={() => setActiveFilter("all")}
-                    className="w-6 h-6 bg-gray-200 hover:bg-gray-300 rounded-md flex items-center justify-center transition-colors"
-                  >
-                    <i className="ri-close-line text-gray-600 text-xs"></i>
-                  </button>
-                </div>
-              </div>
-              <div className="p-2.5 space-y-1.5">
-                {[
-                  { key: "under-100k", label: "Under ₱100k" },
-                  { key: "100k-200k", label: "₱100k - ₱200k" },
-                  { key: "200k-300k", label: "₱200k - ₱300k" },
-                  { key: "300k-500k", label: "₱300k - ₱500k" },
-                  { key: "over-500k", label: "Over ₱500k" },
-                ].map((option) => (
-                  <button
-                    key={option.key}
                     onClick={(e) => {
                       e.preventDefault();
                       e.stopPropagation();
-                      console.log("Budget filter clicked:", option.key);
-                      setBudgetFilter(
-                        budgetFilter === option.key ? "" : option.key,
+                      console.log(
+                        "Budget pill clicked, current activeFilter:",
+                        activeFilter,
                       );
+                      const newFilter =
+                        activeFilter === "budget" ? "all" : "budget";
+                      console.log("Setting activeFilter to:", newFilter);
+                      setActiveFilter(newFilter);
                     }}
-                    className={`w-full text-left px-4 py-2 text-sm transition-colors ${
-                      budgetFilter === option.key
-                        ? "bg-[#774BE5] text-white font-medium"
-                        : "bg-gray-50 hover:bg-gray-100 text-gray-700 border border-gray-200"
+                    className={`px-4 py-2.5 rounded-lg text-sm font-semibold flex items-center gap-2 transition-all duration-200 ${
+                      activeFilter === "budget" || budgetFilter
+                        ? "bg-[#774BE5] text-white shadow-md"
+                        : "bg-white text-gray-700 hover:bg-gray-50 border border-gray-200 shadow-sm"
                     }`}
                   >
-                    <div className="flex items-center justify-between">
-                      <span>{option.label}</span>
-                      {budgetFilter === option.key && (
-                        <i className="ri-check-line text-white text-xs"></i>
-                      )}
-                    </div>
+                    <i
+                      className={`ri-money-dollar-circle-line text-lg ${activeFilter === "budget" || budgetFilter ? "drop-shadow-sm" : ""}`}
+                    ></i>
+                    <span>Budget</span>
+                    {budgetFilter && (
+                      <span className="w-2.5 h-2.5 bg-white rounded-full animate-pulse"></span>
+                    )}
                   </button>
-                ))}
-              </div>
-            </div>
-          )}
 
-          {activeFilter === "city" && (
-            <div className="mb-4 bg-white border border-gray-200 rounded-lg overflow-hidden shadow-md">
-              <div className="bg-gray-50 px-4 py-3 border-b border-gray-200">
-                <div className="flex items-center justify-between">
-                  <h3 className="text-sm font-semibold text-[#0E1C29] flex items-center gap-1.5">
-                    <div className="w-6 h-6 bg-[#774BE5] rounded-md flex items-center justify-center">
-                      <i className="ri-map-pin-line text-white text-xs"></i>
-                    </div>
-                    City
-                  </h3>
                   <button
-                    onClick={() => setActiveFilter("all")}
-                    className="w-6 h-6 bg-gray-200 hover:bg-gray-300 rounded-md flex items-center justify-center transition-colors"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      console.log(
+                        "City pill clicked, current activeFilter:",
+                        activeFilter,
+                      );
+                      setActiveFilter(activeFilter === "city" ? "all" : "city");
+                    }}
+                    className={`px-4 py-2.5 rounded-lg text-sm font-semibold flex items-center gap-2 transition-all duration-200 ${
+                      activeFilter === "city" || cityFilter
+                        ? "bg-[#774BE5] text-white shadow-md"
+                        : "bg-white text-gray-700 hover:bg-gray-50 border border-gray-200 shadow-sm"
+                    }`}
                   >
-                    <i className="ri-close-line text-gray-600 text-xs"></i>
+                    <i
+                      className={`ri-map-pin-line text-lg ${activeFilter === "city" || cityFilter ? "drop-shadow-sm" : ""}`}
+                    ></i>
+                    <span>City</span>
+                    {cityFilter && (
+                      <span className="w-2.5 h-2.5 bg-white rounded-full animate-pulse"></span>
+                    )}
+                  </button>
+
+                  <button
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      console.log(
+                        "Curriculum pill clicked, current activeFilter:",
+                        activeFilter,
+                      );
+                      setActiveFilter(
+                        activeFilter === "curriculum" ? "all" : "curriculum",
+                      );
+                    }}
+                    className={`px-4 py-2.5 rounded-lg text-sm font-semibold flex items-center gap-2 transition-all duration-200 ${
+                      activeFilter === "curriculum" || curriculumFilter
+                        ? "bg-[#774BE5] text-white shadow-md"
+                        : "bg-white text-gray-700 hover:bg-gray-50 border border-gray-200 shadow-sm"
+                    }`}
+                  >
+                    <i
+                      className={`ri-book-open-line text-lg ${activeFilter === "curriculum" || curriculumFilter ? "drop-shadow-sm" : ""}`}
+                    ></i>
+                    <span>Curriculum</span>
+                    {curriculumFilter && (
+                      <span className="w-2.5 h-2.5 bg-white rounded-full animate-pulse"></span>
+                    )}
                   </button>
                 </div>
               </div>
-              <div className="p-2.5">
-                {availableCities.length === 0 ? (
-                  <div className="text-center py-4 text-xs text-gray-500">
-                    Loading cities...
-                  </div>
-                ) : (
-                  <div className="grid grid-cols-2 gap-1.5">
-                    {availableCities.map((cityData) => (
+
+              {/* Mobile Filter Panels */}
+              {activeFilter === "budget" && (
+                <div className="mb-4 bg-white border border-gray-200 rounded-lg overflow-hidden shadow-md">
+                  <div className="bg-gray-50 px-4 py-3 border-b border-gray-200">
+                    <div className="flex items-center justify-between">
+                      <h3 className="text-sm font-semibold text-[#0E1C29] flex items-center gap-1.5">
+                        <div className="w-6 h-6 bg-[#774BE5] rounded-md flex items-center justify-center">
+                          <i className="ri-money-dollar-circle-line text-white text-xs"></i>
+                        </div>
+                        Budget
+                      </h3>
                       <button
-                        key={cityData.city}
+                        onClick={() => setActiveFilter("all")}
+                        className="w-6 h-6 bg-gray-200 hover:bg-gray-300 rounded-md flex items-center justify-center transition-colors"
+                      >
+                        <i className="ri-close-line text-gray-600 text-xs"></i>
+                      </button>
+                    </div>
+                  </div>
+                  <div className="p-2.5 space-y-1.5">
+                    {[
+                      { key: "under-100k", label: "Under ₱100k" },
+                      { key: "100k-200k", label: "₱100k - ₱200k" },
+                      { key: "200k-300k", label: "₱200k - ₱300k" },
+                      { key: "300k-500k", label: "₱300k - ₱500k" },
+                      { key: "over-500k", label: "Over ₱500k" },
+                    ].map((option) => (
+                      <button
+                        key={option.key}
                         onClick={(e) => {
                           e.preventDefault();
                           e.stopPropagation();
-                          console.log("City filter clicked:", cityData.city);
-                          setCityFilter(
-                            cityFilter === cityData.city ? "" : cityData.city,
+                          console.log("Budget filter clicked:", option.key);
+                          setBudgetFilter(
+                            budgetFilter === option.key ? "" : option.key,
                           );
                         }}
-                        className={`px-3 py-2 rounded-lg text-sm transition-colors ${
-                          cityFilter === cityData.city
+                        className={`w-full text-left px-4 py-2 text-sm transition-colors ${
+                          budgetFilter === option.key
                             ? "bg-[#774BE5] text-white font-medium"
                             : "bg-gray-50 hover:bg-gray-100 text-gray-700 border border-gray-200"
                         }`}
                       >
-                        <div className="flex items-center gap-1.5 justify-between">
-                          <span className="truncate text-left">
-                            {cityData.city}
-                          </span>
-                          {cityFilter === cityData.city && (
-                            <i className="ri-check-line text-white text-xs flex-shrink-0"></i>
+                        <div className="flex items-center justify-between">
+                          <span>{option.label}</span>
+                          {budgetFilter === option.key && (
+                            <i className="ri-check-line text-white text-xs"></i>
                           )}
                         </div>
                       </button>
                     ))}
                   </div>
-                )}
-              </div>
-            </div>
-          )}
+                </div>
+              )}
 
-          {activeFilter === "curriculum" && (
-            <div className="mb-4 bg-white border border-gray-200 rounded-lg overflow-hidden shadow-md">
-              <div className="bg-gray-50 px-4 py-3 border-b border-gray-200">
-                <div className="flex items-center justify-between">
-                  <h3 className="text-sm font-semibold text-[#0E1C29] flex items-center gap-1.5">
-                    <div className="w-6 h-6 bg-[#774BE5] rounded-md flex items-center justify-center">
-                      <i className="ri-book-open-line text-white text-xs"></i>
+              {activeFilter === "city" && (
+                <div className="mb-4 bg-white border border-gray-200 rounded-lg overflow-hidden shadow-md">
+                  <div className="bg-gray-50 px-4 py-3 border-b border-gray-200">
+                    <div className="flex items-center justify-between">
+                      <h3 className="text-sm font-semibold text-[#0E1C29] flex items-center gap-1.5">
+                        <div className="w-6 h-6 bg-[#774BE5] rounded-md flex items-center justify-center">
+                          <i className="ri-map-pin-line text-white text-xs"></i>
+                        </div>
+                        City
+                      </h3>
+                      <button
+                        onClick={() => setActiveFilter("all")}
+                        className="w-6 h-6 bg-gray-200 hover:bg-gray-300 rounded-md flex items-center justify-center transition-colors"
+                      >
+                        <i className="ri-close-line text-gray-600 text-xs"></i>
+                      </button>
                     </div>
-                    Curriculum
-                  </h3>
-                  <button
-                    onClick={() => setActiveFilter("all")}
-                    className="w-6 h-6 bg-gray-200 hover:bg-gray-300 rounded-md flex items-center justify-center transition-colors"
-                  >
-                    <i className="ri-close-line text-gray-600 text-xs"></i>
-                  </button>
-                </div>
-              </div>
-              <div className="p-2.5">
-                <div className="grid grid-cols-2 gap-1.5">
-                  {[
-                    "DepEd",
-                    "Montessori",
-                    "Christian",
-                    "Progressive",
-                    "Waldorf",
-                    "Reggio Emilia",
-                    "IB",
-                  ].map((curriculum) => (
-                    <button
-                      key={curriculum}
-                      onClick={(e) => {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        setCurriculumFilter(
-                          curriculumFilter === curriculum ? "" : curriculum,
-                        );
-                      }}
-                      className={`px-3 py-2 rounded-lg text-sm transition-colors ${
-                        curriculumFilter === curriculum
-                          ? "bg-[#774BE5] text-white font-medium"
-                          : "bg-gray-50 hover:bg-gray-100 text-gray-700 border border-gray-200"
-                      }`}
-                    >
-                      <div className="flex items-center justify-between">
-                        <span className="truncate">{curriculum}</span>
-                        {curriculumFilter === curriculum && (
-                          <i className="ri-check-line text-white text-xs flex-shrink-0"></i>
-                        )}
+                  </div>
+                  <div className="p-2.5">
+                    {availableCities.length === 0 ? (
+                      <div className="text-center py-4 text-xs text-gray-500">
+                        Loading cities...
                       </div>
-                    </button>
-                  ))}
+                    ) : (
+                      <div className="grid grid-cols-2 gap-1.5">
+                        {availableCities.map((cityData) => (
+                          <button
+                            key={cityData.city}
+                            onClick={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              console.log(
+                                "City filter clicked:",
+                                cityData.city,
+                              );
+                              setCityFilter(
+                                cityFilter === cityData.city
+                                  ? ""
+                                  : cityData.city,
+                              );
+                            }}
+                            className={`px-3 py-2 rounded-lg text-sm transition-colors ${
+                              cityFilter === cityData.city
+                                ? "bg-[#774BE5] text-white font-medium"
+                                : "bg-gray-50 hover:bg-gray-100 text-gray-700 border border-gray-200"
+                            }`}
+                          >
+                            <div className="flex items-center gap-1.5 justify-between">
+                              <span className="truncate text-left">
+                                {cityData.city}
+                              </span>
+                              {cityFilter === cityData.city && (
+                                <i className="ri-check-line text-white text-xs flex-shrink-0"></i>
+                              )}
+                            </div>
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
                 </div>
-              </div>
-            </div>
-          )}
+              )}
+
+              {activeFilter === "curriculum" && (
+                <div className="mb-4 bg-white border border-gray-200 rounded-lg overflow-hidden shadow-md">
+                  <div className="bg-gray-50 px-4 py-3 border-b border-gray-200">
+                    <div className="flex items-center justify-between">
+                      <h3 className="text-sm font-semibold text-[#0E1C29] flex items-center gap-1.5">
+                        <div className="w-6 h-6 bg-[#774BE5] rounded-md flex items-center justify-center">
+                          <i className="ri-book-open-line text-white text-xs"></i>
+                        </div>
+                        Curriculum
+                      </h3>
+                      <button
+                        onClick={() => setActiveFilter("all")}
+                        className="w-6 h-6 bg-gray-200 hover:bg-gray-300 rounded-md flex items-center justify-center transition-colors"
+                      >
+                        <i className="ri-close-line text-gray-600 text-xs"></i>
+                      </button>
+                    </div>
+                  </div>
+                  <div className="p-2.5">
+                    <div className="grid grid-cols-2 gap-1.5">
+                      {[
+                        "DepEd",
+                        "Montessori",
+                        "Christian",
+                        "Progressive",
+                        "Waldorf",
+                        "Reggio Emilia",
+                        "IB",
+                      ].map((curriculum) => (
+                        <button
+                          key={curriculum}
+                          onClick={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            setCurriculumFilter(
+                              curriculumFilter === curriculum ? "" : curriculum,
+                            );
+                          }}
+                          className={`px-3 py-2 rounded-lg text-sm transition-colors ${
+                            curriculumFilter === curriculum
+                              ? "bg-[#774BE5] text-white font-medium"
+                              : "bg-gray-50 hover:bg-gray-100 text-gray-700 border border-gray-200"
+                          }`}
+                        >
+                          <div className="flex items-center justify-between">
+                            <span className="truncate">{curriculum}</span>
+                            {curriculumFilter === curriculum && (
+                              <i className="ri-check-line text-white text-xs flex-shrink-0"></i>
+                            )}
+                          </div>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -1257,13 +1296,14 @@ const SchoolDirectoryContent = () => {
               ) : (
                 <>
                   <h3 className="text-lg font-semibold text-[#0E1C29]">
-                    {filteredSchools.length > 0 ? (
-                      `${filteredSchools.length} School${filteredSchools.length !== 1 ? "s" : ""} Found`
-                    ) : (
-                      "This school is not in our database yet. We are adding more schools weekly."
-                    )}
+                    {filteredSchools.length > 0
+                      ? `${filteredSchools.length} School${filteredSchools.length !== 1 ? "s" : ""} Found`
+                      : "This school is not in our database yet. We are adding more schools weekly."}
                   </h3>
-                  {(budgetFilter || cityFilter || curriculumFilter || filteredSchools.length > 0) && (
+                  {(budgetFilter ||
+                    cityFilter ||
+                    curriculumFilter ||
+                    filteredSchools.length > 0) && (
                     <div className="w-2 h-2 bg-[#774BE5] rounded-full animate-pulse"></div>
                   )}
                 </>
@@ -1292,11 +1332,9 @@ const SchoolDirectoryContent = () => {
               No schools found
             </h3>
             <p className="text-gray-600 mb-6 max-w-md mx-auto">
-              {searchQuery.trim() ? (
-                "This school is not in our database yet. We are adding more schools weekly."
-              ) : (
-                "This school is not in our database yet. We are adding more schools weekly.weekly."
-              )}
+              {searchQuery.trim()
+                ? "This school is not in our database yet. We are adding more schools weekly."
+                : "This school is not in our database yet. We are adding more schools weekly.weekly."}
             </p>
             <button
               onClick={() => {

@@ -23,18 +23,23 @@ export async function middleware(request: NextRequest) {
         {
           status: 429,
           headers: {
-            "Retry-After": String(Math.ceil((result.reset - Date.now()) / 1000)),
+            "Retry-After": String(
+              Math.ceil((result.reset - Date.now()) / 1000),
+            ),
             "X-RateLimit-Limit": String(RATE_LIMITS.sitemap.limit),
             "X-RateLimit-Remaining": String(result.remaining),
             "X-RateLimit-Reset": String(result.reset),
           },
-        }
+        },
       );
     }
 
     // Add rate limit headers
     const response = NextResponse.next();
-    response.headers.set("X-RateLimit-Limit", String(RATE_LIMITS.sitemap.limit));
+    response.headers.set(
+      "X-RateLimit-Limit",
+      String(RATE_LIMITS.sitemap.limit),
+    );
     response.headers.set("X-RateLimit-Remaining", String(result.remaining));
     response.headers.set("X-RateLimit-Reset", String(result.reset));
     return response;
@@ -57,12 +62,14 @@ export async function middleware(request: NextRequest) {
         {
           status: 429,
           headers: {
-            "Retry-After": String(Math.ceil((result.reset - Date.now()) / 1000)),
+            "Retry-After": String(
+              Math.ceil((result.reset - Date.now()) / 1000),
+            ),
             "X-RateLimit-Limit": String(RATE_LIMITS.api.limit),
             "X-RateLimit-Remaining": String(result.remaining),
             "X-RateLimit-Reset": String(result.reset),
           },
-        }
+        },
       );
     }
 
@@ -94,7 +101,7 @@ export async function middleware(request: NextRequest) {
           "X-RateLimit-Remaining": String(result.remaining),
           "X-RateLimit-Reset": String(result.reset),
         },
-      }
+      },
     );
   }
 
@@ -119,4 +126,3 @@ export const config = {
     "/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico)).*)",
   ],
 };
-

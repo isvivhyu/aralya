@@ -11,7 +11,7 @@ import { rateLimit, getClientIP, RATE_LIMITS } from "@/lib/rateLimit";
 // DELETE /api/admin/schools/[id] - Delete a school
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: Promise<{ id: string }> },
 ) {
   // Apply rate limiting
   const ip = getClientIP(request);
@@ -30,32 +30,28 @@ export async function DELETE(
       {
         status: 429,
         headers: {
-          "Retry-After": String(Math.ceil((rateLimitResult.reset - Date.now()) / 1000)),
+          "Retry-After": String(
+            Math.ceil((rateLimitResult.reset - Date.now()) / 1000),
+          ),
           "X-RateLimit-Limit": String(RATE_LIMITS.api.limit),
           "X-RateLimit-Remaining": String(rateLimitResult.remaining),
           "X-RateLimit-Reset": String(rateLimitResult.reset),
         },
-      }
+      },
     );
   }
 
   // Check authentication
   if (!isAuthenticated(request)) {
-    return NextResponse.json(
-      { error: "Unauthorized" },
-      { status: 401 }
-    );
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
   try {
     const { id } = await params;
     const schoolId = parseInt(id);
-    
+
     if (isNaN(schoolId)) {
-      return NextResponse.json(
-        { error: "Invalid school ID" },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: "Invalid school ID" }, { status: 400 });
     }
 
     const { error } = await supabaseServer
@@ -66,20 +62,22 @@ export async function DELETE(
     if (error) {
       return NextResponse.json(
         { error: "Failed to delete school", details: error.message },
-        { status: 500 }
+        { status: 500 },
       );
     }
 
     const response = NextResponse.json({ success: true });
     response.headers.set("X-RateLimit-Limit", String(RATE_LIMITS.api.limit));
-    response.headers.set("X-RateLimit-Remaining", String(rateLimitResult.remaining));
+    response.headers.set(
+      "X-RateLimit-Remaining",
+      String(rateLimitResult.remaining),
+    );
     response.headers.set("X-RateLimit-Reset", String(rateLimitResult.reset));
     return response;
   } catch {
     return NextResponse.json(
       { error: "Internal server error" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
-

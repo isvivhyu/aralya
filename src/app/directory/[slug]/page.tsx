@@ -21,15 +21,24 @@ const SchoolDetails = () => {
     if (!dateString) {
       // Fallback to current date if no date provided
       const now = new Date();
-      return now.toLocaleDateString("en-US", { month: "long", year: "numeric" });
+      return now.toLocaleDateString("en-US", {
+        month: "long",
+        year: "numeric",
+      });
     }
     try {
       const date = new Date(dateString);
-      return date.toLocaleDateString("en-US", { month: "long", year: "numeric" });
+      return date.toLocaleDateString("en-US", {
+        month: "long",
+        year: "numeric",
+      });
     } catch {
       // Fallback to current date if date parsing fails
       const now = new Date();
-      return now.toLocaleDateString("en-US", { month: "long", year: "numeric" });
+      return now.toLocaleDateString("en-US", {
+        month: "long",
+        year: "numeric",
+      });
     }
   };
 

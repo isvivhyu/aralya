@@ -4,7 +4,8 @@ const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://aralya.com";
 
 export const metadata: Metadata = {
   title: "Privacy Policy | Aralya",
-  description: "Privacy Policy for Aralya - Compare Preschools in Metro Manila.",
+  description:
+    "Privacy Policy for Aralya - Compare Preschools in Metro Manila.",
   alternates: {
     canonical: `${baseUrl}/privacy-policy/`,
   },
@@ -17,4 +18,3 @@ export default function PrivacyLayout({
 }) {
   return <>{children}</>;
 }
-

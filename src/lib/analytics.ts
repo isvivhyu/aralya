@@ -1,11 +1,12 @@
 // Google Analytics 4 utility functions
 
-export const GA_MEASUREMENT_ID = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID || 'G-2GH17661XCv';
+export const GA_MEASUREMENT_ID =
+  process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID || "G-2GH17661XCv";
 
 // Track page views
 export const pageview = (url: string) => {
-  if (typeof window !== 'undefined' && window.gtag) {
-    window.gtag('config', GA_MEASUREMENT_ID, {
+  if (typeof window !== "undefined" && window.gtag) {
+    window.gtag("config", GA_MEASUREMENT_ID, {
       page_path: url,
     });
   }
@@ -23,7 +24,7 @@ export const event = ({
   label?: string;
   value?: number;
 }) => {
-  if (typeof window !== 'undefined' && window.gtag) {
+  if (typeof window !== "undefined" && window.gtag) {
     const config: Record<string, string | number | boolean> = {
       event_category: category,
     };
@@ -33,17 +34,17 @@ export const event = ({
     if (value !== undefined) {
       config.value = value;
     }
-    window.gtag('event', action, config);
+    window.gtag("event", action, config);
   }
 };
 
 // Meta Pixel tracking functions
 export const trackMetaPixelEvent = (
   eventName: string,
-  parameters?: Record<string, string | number | boolean>
+  parameters?: Record<string, string | number | boolean>,
 ) => {
-  if (typeof window !== 'undefined' && window.fbq) {
-    window.fbq('track', eventName, parameters);
+  if (typeof window !== "undefined" && window.fbq) {
+    window.fbq("track", eventName, parameters);
   }
 };
 
@@ -51,16 +52,15 @@ export const trackMetaPixelEvent = (
 declare global {
   interface Window {
     gtag: (
-      command: 'config' | 'event' | 'js' | 'set',
+      command: "config" | "event" | "js" | "set",
       targetId: string | Date,
-      config?: Record<string, string | number | boolean>
+      config?: Record<string, string | number | boolean>,
     ) => void;
     dataLayer: Array<Record<string, unknown>>;
     fbq: (
-      command: 'init' | 'track' | 'trackCustom',
+      command: "init" | "track" | "trackCustom",
       eventName: string,
-      parameters?: Record<string, string | number | boolean>
+      parameters?: Record<string, string | number | boolean>,
     ) => void;
   }
 }
-

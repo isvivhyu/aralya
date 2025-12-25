@@ -29,21 +29,20 @@ export async function GET(request: NextRequest) {
       {
         status: 429,
         headers: {
-          "Retry-After": String(Math.ceil((rateLimitResult.reset - Date.now()) / 1000)),
+          "Retry-After": String(
+            Math.ceil((rateLimitResult.reset - Date.now()) / 1000),
+          ),
           "X-RateLimit-Limit": String(RATE_LIMITS.api.limit),
           "X-RateLimit-Remaining": String(rateLimitResult.remaining),
           "X-RateLimit-Reset": String(rateLimitResult.reset),
         },
-      }
+      },
     );
   }
 
   // Check authentication
   if (!isAuthenticated(request)) {
-    return NextResponse.json(
-      { error: "Unauthorized" },
-      { status: 401 }
-    );
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
   try {
@@ -55,19 +54,22 @@ export async function GET(request: NextRequest) {
     if (error) {
       return NextResponse.json(
         { error: "Failed to fetch schools", details: error.message },
-        { status: 500 }
+        { status: 500 },
       );
     }
 
     const response = NextResponse.json({ schools: data || [] });
     response.headers.set("X-RateLimit-Limit", String(RATE_LIMITS.api.limit));
-    response.headers.set("X-RateLimit-Remaining", String(rateLimitResult.remaining));
+    response.headers.set(
+      "X-RateLimit-Remaining",
+      String(rateLimitResult.remaining),
+    );
     response.headers.set("X-RateLimit-Reset", String(rateLimitResult.reset));
     return response;
   } catch {
     return NextResponse.json(
       { error: "Internal server error" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -91,21 +93,20 @@ export async function POST(request: NextRequest) {
       {
         status: 429,
         headers: {
-          "Retry-After": String(Math.ceil((rateLimitResult.reset - Date.now()) / 1000)),
+          "Retry-After": String(
+            Math.ceil((rateLimitResult.reset - Date.now()) / 1000),
+          ),
           "X-RateLimit-Limit": String(RATE_LIMITS.api.limit),
           "X-RateLimit-Remaining": String(rateLimitResult.remaining),
           "X-RateLimit-Reset": String(rateLimitResult.reset),
         },
-      }
+      },
     );
   }
 
   // Check authentication
   if (!isAuthenticated(request)) {
-    return NextResponse.json(
-      { error: "Unauthorized" },
-      { status: 401 }
-    );
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
   try {
@@ -121,19 +122,22 @@ export async function POST(request: NextRequest) {
     if (error) {
       return NextResponse.json(
         { error: "Failed to create school", details: error.message },
-        { status: 500 }
+        { status: 500 },
       );
     }
 
     const response = NextResponse.json({ school: data }, { status: 201 });
     response.headers.set("X-RateLimit-Limit", String(RATE_LIMITS.api.limit));
-    response.headers.set("X-RateLimit-Remaining", String(rateLimitResult.remaining));
+    response.headers.set(
+      "X-RateLimit-Remaining",
+      String(rateLimitResult.remaining),
+    );
     response.headers.set("X-RateLimit-Reset", String(rateLimitResult.reset));
     return response;
   } catch {
     return NextResponse.json(
       { error: "Invalid request body" },
-      { status: 400 }
+      { status: 400 },
     );
   }
 }
@@ -157,21 +161,20 @@ export async function PUT(request: NextRequest) {
       {
         status: 429,
         headers: {
-          "Retry-After": String(Math.ceil((rateLimitResult.reset - Date.now()) / 1000)),
+          "Retry-After": String(
+            Math.ceil((rateLimitResult.reset - Date.now()) / 1000),
+          ),
           "X-RateLimit-Limit": String(RATE_LIMITS.api.limit),
           "X-RateLimit-Remaining": String(rateLimitResult.remaining),
           "X-RateLimit-Reset": String(rateLimitResult.reset),
         },
-      }
+      },
     );
   }
 
   // Check authentication
   if (!isAuthenticated(request)) {
-    return NextResponse.json(
-      { error: "Unauthorized" },
-      { status: 401 }
-    );
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
   try {
@@ -180,7 +183,7 @@ export async function PUT(request: NextRequest) {
     if (!id) {
       return NextResponse.json(
         { error: "School ID is required" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -194,20 +197,22 @@ export async function PUT(request: NextRequest) {
     if (error) {
       return NextResponse.json(
         { error: "Failed to update school", details: error.message },
-        { status: 500 }
+        { status: 500 },
       );
     }
 
     const response = NextResponse.json({ school: data });
     response.headers.set("X-RateLimit-Limit", String(RATE_LIMITS.api.limit));
-    response.headers.set("X-RateLimit-Remaining", String(rateLimitResult.remaining));
+    response.headers.set(
+      "X-RateLimit-Remaining",
+      String(rateLimitResult.remaining),
+    );
     response.headers.set("X-RateLimit-Reset", String(rateLimitResult.reset));
     return response;
   } catch {
     return NextResponse.json(
       { error: "Invalid request body" },
-      { status: 400 }
+      { status: 400 },
     );
   }
 }
-

@@ -8,11 +8,9 @@ const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "";
 
 async function apiRequest<T>(
   endpoint: string,
-  options: RequestInit = {}
+  options: RequestInit = {},
 ): Promise<T> {
-  const url = API_BASE_URL
-    ? `${API_BASE_URL}${endpoint}`
-    : endpoint; // Use relative URLs if no base URL is set
+  const url = API_BASE_URL ? `${API_BASE_URL}${endpoint}` : endpoint; // Use relative URLs if no base URL is set
 
   const response = await fetch(url, {
     ...options,
@@ -26,12 +24,14 @@ async function apiRequest<T>(
     if (response.status === 429) {
       const retryAfter = response.headers.get("Retry-After");
       throw new Error(
-        `Rate limit exceeded. Please try again after ${retryAfter} seconds.`
+        `Rate limit exceeded. Please try again after ${retryAfter} seconds.`,
       );
     }
 
     const errorData = await response.json().catch(() => ({}));
-    throw new Error(errorData.error || `API request failed: ${response.statusText}`);
+    throw new Error(
+      errorData.error || `API request failed: ${response.statusText}`,
+    );
   }
 
   return response.json();
@@ -53,7 +53,7 @@ export const apiClient = {
 
     const queryString = searchParams.toString();
     const endpoint = `/api/schools${queryString ? `?${queryString}` : ""}`;
-    
+
     const data = await apiRequest<{ schools: School[] }>(endpoint);
     return data.schools;
   },
@@ -69,9 +69,10 @@ export const apiClient = {
     const endpoint = query
       ? `/api/cities?query=${encodeURIComponent(query)}`
       : `/api/cities`;
-    
-    const data = await apiRequest<{ cities: { city: string; schoolCount: number }[] }>(endpoint);
+
+    const data = await apiRequest<{
+      cities: { city: string; schoolCount: number }[];
+    }>(endpoint);
     return data.cities;
   },
 };
-
