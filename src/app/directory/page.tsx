@@ -894,13 +894,10 @@ const SchoolDirectoryContent = () => {
             </div>
 
             {/* Mobile Filter Section */}
-            <div className="md:hidden mobile-filter-section mt-4">
+            <div className="md:hidden mobile-filter-section mt-4 -mx-5 px-5">
               {/* Mobile Filter Header */}
               <div className="mb-3">
                 <div className="flex items-center justify-between mb-2">
-                  <h2 className="text-base font-semibold text-[#0E1C29]">
-                    Filters
-                  </h2>
                   {[budgetFilter, cityFilter, curriculumFilter].filter(Boolean)
                     .length > 0 && (
                     <button
@@ -919,7 +916,7 @@ const SchoolDirectoryContent = () => {
                 </div>
 
                 {/* Quick Filter Pills - Made bigger with cool design */}
-                <div className="flex flex-wrap gap-2.5 mb-3">
+                <div className="flex flex-nowrap gap-2.5 mb-3 overflow-x-auto overflow-y-hidden scrollbar-hide">
                   <button
                     onClick={(e) => {
                       e.preventDefault();
@@ -933,7 +930,7 @@ const SchoolDirectoryContent = () => {
                       console.log("Setting activeFilter to:", newFilter);
                       setActiveFilter(newFilter);
                     }}
-                    className={`px-4 py-2.5 rounded-lg text-sm font-semibold flex items-center gap-2 transition-all duration-200 ${
+                    className={`px-4 py-2.5 rounded-lg text-sm font-semibold flex items-center gap-2 transition-all duration-200 shrink-0 ${
                       activeFilter === "budget" || budgetFilter
                         ? "bg-[#774BE5] text-white shadow-md"
                         : "bg-white text-gray-700 hover:bg-gray-50 border border-gray-200 shadow-sm"
@@ -958,7 +955,7 @@ const SchoolDirectoryContent = () => {
                       );
                       setActiveFilter(activeFilter === "city" ? "all" : "city");
                     }}
-                    className={`px-4 py-2.5 rounded-lg text-sm font-semibold flex items-center gap-2 transition-all duration-200 ${
+                    className={`px-4 py-2.5 rounded-lg text-sm font-semibold flex items-center gap-2 transition-all duration-200 shrink-0 ${
                       activeFilter === "city" || cityFilter
                         ? "bg-[#774BE5] text-white shadow-md"
                         : "bg-white text-gray-700 hover:bg-gray-50 border border-gray-200 shadow-sm"
@@ -985,7 +982,7 @@ const SchoolDirectoryContent = () => {
                         activeFilter === "curriculum" ? "all" : "curriculum",
                       );
                     }}
-                    className={`px-4 py-2.5 rounded-lg text-sm font-semibold flex items-center gap-2 transition-all duration-200 ${
+                    className={`px-4 py-2.5 rounded-lg text-sm font-semibold flex items-center gap-2 transition-all duration-200 shrink-0 ${
                       activeFilter === "curriculum" || curriculumFilter
                         ? "bg-[#774BE5] text-white shadow-md"
                         : "bg-white text-gray-700 hover:bg-gray-50 border border-gray-200 shadow-sm"
