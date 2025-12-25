@@ -13,16 +13,21 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import AOS from "aos";
 import "aos/dist/aos.css";
+import { LoadingSpinner, ButtonWithLoading } from "@/components/LoadingSpinner";
+import { SchoolCardSkeleton } from "@/components/SchoolCardSkeleton";
 
 export default function Home() {
   const [searchQuery, setSearchQuery] = useState("");
   const [featuredSchools, setFeaturedSchools] = useState<School[]>([]);
   const [activeCategory, setActiveCategory] = useState<"all" | "city" | "budget" | "curriculum">("all");
+  const [isLoadingFeatured, setIsLoadingFeatured] = useState(true);
+  const [isSearching, setIsSearching] = useState(false);
   const router = useRouter();
 
   // Load featured schools on component mount
   useEffect(() => {
     const loadData = async () => {
+      setIsLoadingFeatured(true);
       try {
         // Load featured schools
         const schools = await SchoolService.getFeaturedSchools();
@@ -30,6 +35,8 @@ export default function Home() {
       } catch (error) {
         console.error("Error loading data:", error);
         setFeaturedSchools([]);
+      } finally {
+        setIsLoadingFeatured(false);
       }
     };
 
@@ -52,14 +59,22 @@ export default function Home() {
   };
 
   // Handle search functionality
-  const handleSearch = (e: React.FormEvent) => {
+  const handleSearch = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (searchQuery.trim()) {
-      // Redirect to directory with search query
-      router.push(`/directory?search=${encodeURIComponent(searchQuery.trim())}`);
-    } else {
-      // If no search query, go to directory
-      router.push("/directory");
+    setIsSearching(true);
+    try {
+      if (searchQuery.trim()) {
+        // Redirect to directory with search query
+        router.push(`/directory?search=${encodeURIComponent(searchQuery.trim())}`);
+      } else {
+        // If no search query, go to directory
+        router.push("/directory");
+      }
+    } catch (error) {
+      console.error("Error during search:", error);
+    } finally {
+      // Reset loading state after a short delay to allow navigation
+      setTimeout(() => setIsSearching(false), 500);
     }
   };
 
@@ -115,13 +130,13 @@ export default function Home() {
           >
                     {/* Category Tabs Section */}
           <div className="w-full relative z-[999]">
-            <div className="flex items-center justify-center gap-2 md:gap-3 flex-wrap">
+            <div className="flex items-center justify-start md:justify-center gap-2 md:gap-3 overflow-x-auto scrollbar-hide md:flex-wrap flex-nowrap">
               {categories.map((category) => (
                 <button
                   key={category.id}
                   type="button"
                   onClick={() => setActiveCategory(category.id)}
-                  className={`px-4 md:px-6 py-2.5 md:py-3 text-sm font-semibold flex items-center gap-2 text-black relative ${
+                  className={`px-4 md:px-6 py-2.5 md:py-3 text-sm font-semibold flex items-center gap-2 text-black relative shrink-0 ${
                     activeCategory === category.id
                       ? "border-b-2 border-black"
                       : "border-b-2 border-transparent"
@@ -154,13 +169,14 @@ export default function Home() {
                   </button>
                 )}
               </div>
-              <button
+              <ButtonWithLoading
                 type="submit"
-                className="bg-[#774BE5] md:w-fit w-full text-white p-4 rounded-[10px] text-sm font-semibold flex items-center justify-center gap-1 hover:bg-[#6B3FD6] transition-colors"
+                isLoading={isSearching}
+                className="bg-[#774BE5] md:w-fit w-full text-white p-4 rounded-[10px] text-sm font-semibold flex items-center justify-center gap-1 hover:bg-[#6B3FD6] transition-colors disabled:hover:bg-[#774BE5]"
               >
                 <i className="ri-search-line text-white text-lg mt-0.5"></i>
                 Search
-              </button>
+              </ButtonWithLoading>
             </div>
           </form>
         </div>
@@ -171,21 +187,29 @@ export default function Home() {
         <h2 className="text-[#0E1C29] md:text-[56px] text-4xl font-normal text-center">
           Explore Preschools
         </h2>
-        <div className="w-full grid md:grid-cols-3 grid-cols-1 gap-5 mt-11">
-          {featuredSchools.map((school, index) => (
-            <div key={`${school.school_name}-${index}`}>
-              <SchoolCard
-                imageSrc={school.logo_banner}
-                imageAlt={school.school_name}
-                schoolName={school.school_name}
-                location={school.city}
-                tags={school.curriculum_tags.split(", ")}
-                priceRange={`${school.min_tuition} - ${school.max_tuition}`}
-                schoolSlug={createSlug(school.school_name)}
-              />
-            </div>
-          ))}
-        </div>
+        {isLoadingFeatured ? (
+          <div className="w-full grid md:grid-cols-3 grid-cols-1 gap-5 mt-11">
+            {Array.from({ length: 6 }).map((_, index) => (
+              <SchoolCardSkeleton key={index} />
+            ))}
+          </div>
+        ) : (
+          <div className="w-full grid md:grid-cols-3 grid-cols-1 gap-5 mt-11">
+            {featuredSchools.map((school, index) => (
+              <div key={`${school.school_name}-${index}`}>
+                <SchoolCard
+                  imageSrc={school.logo_banner}
+                  imageAlt={school.school_name}
+                  schoolName={school.school_name}
+                  location={school.city}
+                  tags={school.curriculum_tags.split(", ")}
+                  priceRange={`${school.min_tuition} - ${school.max_tuition}`}
+                  schoolSlug={createSlug(school.school_name)}
+                />
+              </div>
+            ))}
+          </div>
+        )}
         <div className="mt-11 mb-25 flex items-center justify-center w-full">
           <div className="w-fit">
             <Link

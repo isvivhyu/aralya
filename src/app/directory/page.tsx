@@ -13,6 +13,7 @@ import React, {
   Suspense,
 } from "react";
 import { useSearchParams } from "next/navigation";
+import { LoadingSpinner, ButtonWithLoading } from "@/components/LoadingSpinner";
 
 // Helper function to check if a school is in a specific city
 // Uses the same matching logic as SchoolService for consistency
@@ -59,6 +60,8 @@ const SchoolDirectoryContent = () => {
   const [availableCities, setAvailableCities] = useState<
     { city: string; schoolCount: number }[]
   >([]);
+  const [isSearching, setIsSearching] = useState(false);
+  const [isFiltering, setIsFiltering] = useState(false);
   const observerRef = useRef<HTMLDivElement>(null);
   const searchRef = useRef<HTMLFormElement>(null);
 
@@ -86,6 +89,50 @@ const SchoolDirectoryContent = () => {
     );
   };
 
+  // Helper function to check if a string is a number (budget amount)
+  const isNumericQuery = (query: string): boolean => {
+    // Remove common currency symbols and whitespace
+    const cleaned = query.trim().replace(/[₱$,]/g, "");
+    // Check if it's a valid number
+    return /^\d+(\.\d+)?$/.test(cleaned) && parseFloat(cleaned) > 0;
+  };
+
+  // Helper function to parse budget amount from query
+  const parseBudgetAmount = (query: string): number => {
+    const cleaned = query.trim().replace(/[₱$,]/g, "");
+    return parseFloat(cleaned) || 0;
+  };
+
+  // Helper function to filter schools by budget amount
+  const filterByBudgetAmount = (schools: School[], budgetAmount: number): School[] => {
+    return schools.filter((school) => {
+      try {
+        // Skip schools with non-numeric tuition values (e.g., "Fees Disclosed upon visitation")
+        if (
+          isNaN(parseFloat(school.min_tuition.replace(/[^\d.]/g, ""))) ||
+          isNaN(parseFloat(school.max_tuition.replace(/[^\d.]/g, "")))
+        ) {
+          return false;
+        }
+
+        // Parse min and max tuition, removing currency symbols and commas
+        const minPrice = parseFloat(
+          school.min_tuition.replace(/[^\d.]/g, ""),
+        );
+        const maxPrice = parseFloat(
+          school.max_tuition.replace(/[^\d.]/g, ""),
+        );
+
+        // Check if the entered budget amount falls within the school's tuition range
+        // This means the user's budget can afford this school
+        return budgetAmount >= minPrice && budgetAmount <= maxPrice;
+      } catch (error) {
+        // If parsing fails, exclude the school
+        return false;
+      }
+    });
+  };
+
   // Handle local search input changes - search schools and cities
   const handleSearchChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const query = e.target.value;
@@ -96,20 +143,41 @@ const SchoolDirectoryContent = () => {
       // Show all cities when query is empty
       setSearchResults(availableCities);
       setSchoolSearchResults([]);
+      setIsSearching(false);
       return;
     }
 
-    // Filter already-loaded cities
-    const filtered = filterCities(query);
-    setSearchResults(filtered);
+    // Filter already-loaded cities (only if not a numeric query)
+    if (!isNumericQuery(query)) {
+      const filtered = filterCities(query);
+      setSearchResults(filtered);
+    } else {
+      // Don't show city results for numeric queries
+      setSearchResults([]);
+    }
 
-    // Search for schools matching the query (name, curriculum, or city)
+    // Search for schools matching the query
+    setIsSearching(true);
     try {
-      const schools = await SchoolService.searchSchools(query);
+      let schools: School[];
+      
+      // Check if the query is a numeric budget amount
+      if (isNumericQuery(query)) {
+        // If it's a number, get all schools and filter by budget
+        const allSchools = await SchoolService.getAllSchools();
+        const budgetAmount = parseBudgetAmount(query);
+        schools = filterByBudgetAmount(allSchools, budgetAmount);
+      } else {
+        // If it's text, search across school name, curriculum, and city
+        schools = await SchoolService.searchSchools(query);
+      }
+      
       setSchoolSearchResults(schools.slice(0, 5)); // Limit to 5 for dropdown
     } catch (error) {
       console.error("Error searching schools:", error);
       setSchoolSearchResults([]);
+    } finally {
+      setIsSearching(false);
     }
   };
 
@@ -153,17 +221,25 @@ const SchoolDirectoryContent = () => {
   }, [localSearchQuery, budgetFilter, cityFilter, curriculumFilter]);
 
   // Handle form submission - update URL with search query
-  const handleSearchSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSearchSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if (localSearchQuery.trim()) {
-      window.location.href = `/directory?search=${encodeURIComponent(localSearchQuery.trim())}${budgetFilter ? `&budget=${budgetFilter}` : ""}${cityFilter ? `&city=${encodeURIComponent(cityFilter)}` : ""}${curriculumFilter ? `&curriculum=${curriculumFilter}` : ""}`;
-    } else {
-      const params = new URLSearchParams();
-      if (budgetFilter) params.set("budget", budgetFilter);
-      if (cityFilter) params.set("city", cityFilter);
-      if (curriculumFilter) params.set("curriculum", curriculumFilter);
-      const queryString = params.toString();
-      window.location.href = `/directory${queryString ? `?${queryString}` : ""}`;
+    setIsSearching(true);
+    try {
+      if (localSearchQuery.trim()) {
+        window.location.href = `/directory?search=${encodeURIComponent(localSearchQuery.trim())}${budgetFilter ? `&budget=${budgetFilter}` : ""}${cityFilter ? `&city=${encodeURIComponent(cityFilter)}` : ""}${curriculumFilter ? `&curriculum=${curriculumFilter}` : ""}`;
+      } else {
+        const params = new URLSearchParams();
+        if (budgetFilter) params.set("budget", budgetFilter);
+        if (cityFilter) params.set("city", cityFilter);
+        if (curriculumFilter) params.set("curriculum", curriculumFilter);
+        const queryString = params.toString();
+        window.location.href = `/directory${queryString ? `?${queryString}` : ""}`;
+      }
+    } catch (error) {
+      console.error("Error during search:", error);
+    } finally {
+      // Reset after navigation starts
+      setTimeout(() => setIsSearching(false), 500);
     }
   };
 
@@ -318,11 +394,24 @@ const SchoolDirectoryContent = () => {
   // Filter schools based on search query and filters
   useEffect(() => {
     const loadFilteredSchools = async () => {
+      // Only show filtering spinner if not initial load
+      if (!initialLoading) {
+        setIsFiltering(true);
+      }
       try {
-        let searchFiltered;
+        let searchFiltered: School[];
+        
         if (searchQuery.trim().length > 0) {
-          // If there's a search query, search across school name, curriculum, and city
-          searchFiltered = await SchoolService.searchSchools(searchQuery);
+          // Check if the query is a numeric budget amount
+          if (isNumericQuery(searchQuery)) {
+            // If it's a number, get all schools and filter by budget
+            const allSchools = await SchoolService.getAllSchools();
+            const budgetAmount = parseBudgetAmount(searchQuery);
+            searchFiltered = filterByBudgetAmount(allSchools, budgetAmount);
+          } else {
+            // If it's text, search across school name, curriculum, and city
+            searchFiltered = await SchoolService.searchSchools(searchQuery);
+          }
         } else {
           // Otherwise, get all schools
           searchFiltered = await SchoolService.getAllSchools();
@@ -334,6 +423,7 @@ const SchoolDirectoryContent = () => {
         setFilteredSchools([]);
       } finally {
         setInitialLoading(false);
+        setIsFiltering(false);
       }
     };
 
@@ -459,7 +549,12 @@ const SchoolDirectoryContent = () => {
                   className="bg-transparent w-full text-base text-[#0E1C29] placeholder-[#999999] focus:outline-none"
                   style={{ fontSize: "16px" }}
                 />
-                {localSearchQuery && (
+                {isSearching && (
+                  <div className="flex-shrink-0">
+                    <LoadingSpinner size="sm" />
+                  </div>
+                )}
+                {localSearchQuery && !isSearching && (
                   <button
                     type="button"
                     onClick={() => {
@@ -477,11 +572,17 @@ const SchoolDirectoryContent = () => {
             </div>
 
             {/* Search Results Dropdown */}
-            {showResults && (searchResults.length > 0 || schoolSearchResults.length > 0 || localSearchQuery.trim().length > 0) && (
+            {showResults && (searchResults.length > 0 || schoolSearchResults.length > 0 || localSearchQuery.trim().length > 0 || isSearching) && (
               <div className="absolute top-full left-5 right-5 mt-2 bg-white rounded-2xl border border-gray-200 shadow-xl max-h-80 overflow-auto z-[10001]">
                 <div className="p-4">
+                  {isSearching && localSearchQuery.trim().length > 0 && (
+                    <div className="flex items-center justify-center gap-2 py-4 text-gray-500">
+                      <LoadingSpinner size="sm" />
+                      <span className="text-sm">Searching...</span>
+                    </div>
+                  )}
                   {/* Schools Section */}
-                  {schoolSearchResults.length > 0 && (
+                  {!isSearching && schoolSearchResults.length > 0 && (
                     <>
                       <h5 className="text-sm font-semibold text-gray-600 mb-3">
                         Schools ({schoolSearchResults.length})
@@ -1146,24 +1247,43 @@ const SchoolDirectoryContent = () => {
         <div className="mt-8 mb-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <h3 className="text-lg font-semibold text-[#0E1C29]">
-                {filteredSchools.length > 0 ? (
-                  `${filteredSchools.length} School${filteredSchools.length !== 1 ? "s" : ""} Found`
-                ) : (
-                  "This school is not in our database yet. We are adding more schools weekly."
-                )}
-              </h3>
-              {(budgetFilter || cityFilter || curriculumFilter || filteredSchools.length > 0) && (
-                <div className="w-2 h-2 bg-[#774BE5] rounded-full animate-pulse"></div>
+              {isFiltering ? (
+                <div className="flex items-center gap-2">
+                  <LoadingSpinner size="sm" />
+                  <h3 className="text-lg font-semibold text-[#0E1C29]">
+                    Filtering schools...
+                  </h3>
+                </div>
+              ) : (
+                <>
+                  <h3 className="text-lg font-semibold text-[#0E1C29]">
+                    {filteredSchools.length > 0 ? (
+                      `${filteredSchools.length} School${filteredSchools.length !== 1 ? "s" : ""} Found`
+                    ) : (
+                      "This school is not in our database yet. We are adding more schools weekly."
+                    )}
+                  </h3>
+                  {(budgetFilter || cityFilter || curriculumFilter || filteredSchools.length > 0) && (
+                    <div className="w-2 h-2 bg-[#774BE5] rounded-full animate-pulse"></div>
+                  )}
+                </>
               )}
             </div>
-            <div className="text-sm text-gray-500">
-              Showing {displayedSchools.length} of {filteredSchools.length}
-            </div>
+            {!isFiltering && (
+              <div className="text-sm text-gray-500">
+                Showing {displayedSchools.length} of {filteredSchools.length}
+              </div>
+            )}
           </div>
         </div>
 
-        {filteredSchools.length === 0 ? (
+        {isFiltering ? (
+          <div className="w-full grid md:grid-cols-3 grid-cols-1 gap-5 z-0">
+            {Array.from({ length: 6 }).map((_, index) => (
+              <SchoolCardSkeleton key={index} />
+            ))}
+          </div>
+        ) : filteredSchools.length === 0 ? (
           <div className="text-center py-16">
             <div className="w-24 h-24 bg-[#774BE5]/10 rounded-full flex items-center justify-center mx-auto mb-6">
               <i className="ri-search-line text-[#774BE5] text-3xl"></i>
