@@ -21,7 +21,7 @@ const SchoolCard = ({
   schoolSlug,
 }: SchoolCardProps) => {
   return (
-    <div className="bg-[#eeeff1] rounded-[16px] p-5 h-full flex flex-col">
+    <div className="bg-[#eeeff1] rounded-[16px] p-4 h-full flex flex-col">
       <div className="w-full h-50 rounded-[10px] overflow-hidden mb-3">
         <Image
           src={imageSrc}
@@ -31,9 +31,9 @@ const SchoolCard = ({
           className="w-full h-full rounded-[10px] object-contain"
         />
       </div>
-      <div className="flex items-center gap-2">
-        <h4 className="text-black text-lg font-medium">{schoolName}</h4>
-        <div className="relative group">
+      <h4 className="text-black text-base font-medium">
+        <span>{schoolName}</span>
+        <span className="relative group inline-block ml-1 -mt-1 align-middle">
           <i className="ri-verified-badge-fill text-[#774BE5] text-xl cursor-pointer"></i>
           <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-1.5 bg-[#774BE5] text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-10">
             Verified by Aralya
@@ -41,8 +41,8 @@ const SchoolCard = ({
               <div className="border-4 border-transparent border-t-[#774BE5]"></div>
             </div>
           </div>
-        </div>
-      </div>
+        </span>
+      </h4>
       <div className="flex items-center gap-2 mt-5">
         <i className="ri-map-pin-line text-[#374151] text-lg"></i>
         <p className="text-base font-medium text-[#374151]">{location}</p>
