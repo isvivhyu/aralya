@@ -15,6 +15,7 @@ const SchoolDetails = () => {
 
   const [school, setSchool] = useState<School | null>(null);
   const [loading, setLoading] = useState(true);
+  const [expandedItems, setExpandedItems] = useState<Record<string, boolean>>({});
 
   // Format date to "Month Year" format
   const formatLastUpdated = (dateString?: string): string => {
@@ -306,15 +307,6 @@ const SchoolDetails = () => {
 
               <div className="flex flex-col gap-2 mt-4">
                 <p className="md:text-xl text-base text-[#0E1C29] font-semibold">
-                  Programs
-                </p>
-                <p className="text-[#0E1C29] font-normal text-sm">
-                  {school?.extra_programs_elective || "Not specified"}
-                </p>
-              </div>
-
-              <div className="flex flex-col gap-2 mt-4">
-                <p className="md:text-xl text-base text-[#0E1C29] font-semibold">
                   Grade Levels
                 </p>
                 <p className="text-[#0E1C29] font-normal text-sm">
@@ -324,28 +316,28 @@ const SchoolDetails = () => {
 
               <div className="flex flex-col gap-2 mt-4">
                 <p className="md:text-xl text-base text-[#0E1C29] font-semibold">
-                  Special Programs
-                </p>
-                <p className="text-[#0E1C29] font-normal text-sm">
-                  {school?.special_education_support || "Not specified"}
-                </p>
-              </div>
-
-              <div className="flex flex-col gap-2 mt-4">
-                <p className="md:text-xl text-base text-[#0E1C29] font-semibold">
-                  Tuition Note
-                </p>
-                <p className="text-[#0E1C29] font-normal text-sm">
-                  {school?.tuition_notes || "Not specified"}
-                </p>
-              </div>
-
-              <div className="flex flex-col gap-2 mt-4">
-                <p className="md:text-xl text-base text-[#0E1C29] font-semibold">
                   Class Size
                 </p>
                 <p className="text-[#0E1C29] font-normal text-sm">
                   {school?.class_size_notes || "Not specified"}
+                </p>
+              </div>
+
+              <div className="flex flex-col gap-2 mt-4">
+                <p className="md:text-xl text-base text-[#0E1C29] font-semibold">
+                  After-school Care
+                </p>
+                <p className="text-[#0E1C29] font-normal text-sm">
+                  {school?.after_school_cares || "Not specified"}
+                </p>
+              </div>
+
+              <div className="flex flex-col gap-2 mt-4">
+                <p className="md:text-xl text-base text-[#0E1C29] font-semibold">
+                  Special Education Support
+                </p>
+                <p className="text-[#0E1C29] font-normal text-sm">
+                  {school?.special_education_support || "Not specified"}
                 </p>
               </div>
             </div>
@@ -361,46 +353,83 @@ const SchoolDetails = () => {
 
               {[
                 {
-                  icon: "ri-calendar-check-line",
-                  title: "After School Care",
-                  desc: school?.after_school_cares || "Not specified",
+                  key: "admission",
+                  icon: "ri-book-open-line",
+                  title: "Admission Requirements",
+                  desc: school?.admission_requirements || "Not specified",
                 },
                 {
+                  key: "tuition",
+                  icon: "ri-money-dollar-circle-line",
+                  title: "Tuition Notes",
+                  desc: school?.tuition_notes || "Not specified",
+                },
+                {
+                  key: "programs",
+                  icon: "ri-stack-line",
+                  title: "Programs",
+                  desc: school?.extra_programs_elective || "Not specified",
+                },
+                {
+                  key: "transportation",
                   icon: "ri-bus-line",
                   title: "Transportation",
                   desc: school?.school_bus_note || "Not specified",
                 },
                 {
+                  key: "scholarships",
                   icon: "ri-graduation-cap-line",
                   title: "Scholarships",
                   desc: school?.scholarships_discounts || "Not specified",
                 },
                 {
-                  icon: "ri-shield-line",
-                  title: "Special Education",
-                  desc: school?.special_education_support || "Not specified",
+                  key: "curriculum",
+                  icon: "ri-book-2-line",
+                  title: "Curriculum",
+                  desc: school?.curriculum_type || "Not specified",
                 },
                 {
+                  key: "language",
+                  icon: "ri-global-line",
+                  title: "Language",
+                  desc: school?.language_used || "Not specified",
+                },
+                {
+                  key: "accreditations",
                   icon: "ri-award-line",
                   title: "Accreditations",
                   desc: school?.accreditations_affiliations || "Not specified",
                 },
-                {
-                  icon: "ri-book-open-line",
-                  title: "Admission Requirements",
-                  desc: school?.admission_requirements || "Not specified",
-                },
               ].map((info) => (
-                <div key={info.title} className="flex gap-4 mt-4">
-                  <i className={`${info.icon} text-[#774BE5] text-lg`}></i>
-                  <div>
-                    <p className="md:text-xl text-base text-[#0E1C29] font-semibold">
-                      {info.title}
-                    </p>
-                    <p className="text-[#0E1C29] font-normal text-sm">
-                      {info.desc}
-                    </p>
-                  </div>
+                <div key={info.key} className="mt-4 border-b border-gray-100 last:border-b-0 pb-4 last:pb-0">
+                  <button
+                    onClick={() =>
+                      setExpandedItems((prev) => ({
+                        ...prev,
+                        [info.key]: !prev[info.key],
+                      }))
+                    }
+                    className="flex items-center justify-between w-full gap-4 hover:opacity-80 transition-opacity"
+                  >
+                    <div className="flex items-center gap-4 flex-1">
+                      <i className={`${info.icon} text-[#774BE5] text-lg shrink-0`}></i>
+                      <p className="md:text-xl text-base text-[#0E1C29] font-semibold text-left">
+                        {info.title}
+                      </p>
+                    </div>
+                    <i
+                      className={`ri-arrow-down-s-line text-[#0E1C29] text-lg transition-transform duration-200 shrink-0 ${
+                        expandedItems[info.key] ? "rotate-180" : ""
+                      }`}
+                    ></i>
+                  </button>
+                  {expandedItems[info.key] && (
+                    <div className="mt-3 ml-9">
+                      <p className="text-[#0E1C29] font-normal text-sm">
+                        {info.desc}
+                      </p>
+                    </div>
+                  )}
                 </div>
               ))}
             </div>
