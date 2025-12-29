@@ -192,11 +192,9 @@ const SchoolDetails = () => {
               />
             </div>
             <div className="flex flex-col gap-2">
-              <div className="flex items-center gap-2">
-                <h4 className="text-[#0E1C29] md:text-4xl text-base md:font-medium font-semibold">
-                  {school?.school_name || "School Name"}
-                </h4>
-                <div className="relative group">
+              <h4 className="text-[#0E1C29] md:text-4xl text-base md:font-medium font-semibold">
+                <span>{school?.school_name || "School Name"}</span>
+                <span className="relative group inline-block ml-1 -mt-3 align-middle">
                   <i className="ri-verified-badge-fill text-[#774BE5] text-xl md:text-2xl cursor-pointer"></i>
                   <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-1.5 bg-[#774BE5] text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-10">
                     Verified by Aralya
@@ -204,12 +202,18 @@ const SchoolDetails = () => {
                       <div className="border-4 border-transparent border-t-[#774BE5]"></div>
                     </div>
                   </div>
+                </span>
+              </h4>
+              <div className="flex items-center my-1 gap-2 flex-wrap">
+                <div className="flex items-center gap-2">
+                  <i className="ri-map-pin-line text-[#374151] text-lg"></i>
+                  <p className="text-base font-medium text-[#374151]">
+                    {school?.city || "City"}
+                  </p>
                 </div>
-              </div>
-              <div className="flex items-center my-1">
-                <i className="ri-map-pin-line text-[#374151] text-lg"></i>
-                <p className="text-base font-medium text-[#374151]">
-                  {school?.city || "City"}
+                <i className="ri-checkbox-blank-circle-fill text-black text-[6px]"></i>
+                <p className="text-sm font-medium text-[#374151]">
+                  Updated: {formatLastUpdated(school?.updated_at)}
                 </p>
               </div>
               {school?.website && (
@@ -225,17 +229,10 @@ const SchoolDetails = () => {
                   </a>
                 </div>
               )}
-              <div className="flex items-center my-1">
-                <p className="text-sm font-medium text-[#374151]">
-                  Last Updated: {formatLastUpdated(school?.updated_at)}
-                </p>
-              </div>
-              <div className="bg-[#774BE5] rounded-lg px-4 py-2 w-fit">
-                <p className="text-white font-semibold text-sm">
-                  {school?.min_tuition || "N/A"} -{" "}
-                  {school?.max_tuition || "N/A"}
-                </p>
-              </div>
+              <p className="text-[#0E1C29] font-bold text-base">
+                {school?.min_tuition || "N/A"} -{" "}
+                {school?.max_tuition || "N/A"} / year
+              </p>
             </div>
           </div>
 
