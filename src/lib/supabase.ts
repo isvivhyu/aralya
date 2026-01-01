@@ -35,6 +35,7 @@ export interface School {
   created_at?: string;
   updated_at?: string;
   location?: string;
+  description?: string;
 }
 
 export interface City {
