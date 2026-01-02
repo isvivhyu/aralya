@@ -237,36 +237,7 @@ const SchoolDetails = () => {
                 <p className="text-sm font-medium text-[#374151]">
                   {school.description}
                 </p>
-              )} 
-              <h6 className="text-[#0E1C29] text-sm font-semibold">
-              Help us keep this information accurate
-            </h6>
-
-            <Link
-                      href="https://web.facebook.com/people/Aralya/61578164295126"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="bg-[#774BE5] rounded-lg px-4 py-2 w-fit mt-2 flex items-center gap-2 hover:bg-[#6B3FD6] transition-colors"
-                    >
-                      <span className="text-white text-center font-semibold text-sm">
-                        Message Aralya on Facebook
-                      </span>
-                      <i className="ri-arrow-right-line text-white text-sm"></i>
-                    </Link>
-
-              {/* Help Keep Information Accurate Section */}
-              <div className="border-t border-gray-200 pt-4 mt-4">
-                <div className="flex gap-4 w-full">
-                  <div className="shrink-0">
-                    <i className="ri-lightbulb-line text-[#774BE5] text-2xl"></i>
-                  </div>
-                  <div className="flex flex-col gap-2 flex-1">
-                    <p className="text-sm text-[#374151]">
-                      If you notice outdated or incorrect details, message us on Facebook and we'll review it promptly.
-                    </p>
-                  </div>
-                </div>
-              </div>
+              )}
             </div>
           </div>
 
@@ -511,6 +482,34 @@ const SchoolDetails = () => {
                 <i className="ri-map-pin-line text-white text-base"></i>
                 Open in Google Maps
               </a>
+            </div>
+          </div>
+
+          {/* Help Keep Information Accurate Section */}
+          <div className="w-full mt-10 rounded-3xl bg-white p-6 flex flex-col gap-4">
+            <div className="flex gap-4">
+              <div className="shrink-0">
+                <i className="ri-lightbulb-line text-[#774BE5] text-2xl"></i>
+              </div>
+              <div className="flex flex-col gap-2 flex-1">
+                <h4 className="text-[#0E1C29] md:text-xl text-base font-semibold">
+                  Help us keep this information accurate
+                </h4>
+                <p className="text-sm text-[#374151]">
+                  If you notice outdated or incorrect details, message us on Facebook and we'll review it promptly.
+                </p>
+                <Link
+                  href="https://web.facebook.com/people/Aralya/61578164295126"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="bg-[#774BE5] rounded-lg px-4 py-2 w-fit mt-2 flex items-center gap-2 hover:bg-[#6B3FD6] transition-colors"
+                >
+                  <span className="text-white text-center font-semibold text-sm">
+                    Message Aralya on Facebook
+                  </span>
+                  <i className="ri-arrow-right-line text-white text-sm"></i>
+                </Link>
+              </div>
             </div>
           </div>
         </div>
