@@ -182,13 +182,13 @@ const SchoolDetails = () => {
 
           {/* Header */}
           <div className="rounded-[16px] bg-white p-4 flex md:flex-row flex-col gap-4 md:items-center w-full">
-            <div className="w-full md:w-80 md:h-48 bg-gray-200 border border-gray-200 rounded-[10px] overflow-hidden">
+            <div className="w-full md:w-80 md:h-48 bg-gray-200 border border-gray-200 rounded-[10px] overflow-hidden flex items-center justify-center">
               <Image
                 src={school?.logo_banner || "/images/Logo.png"}
                 alt={school?.school_name || "School Logo"}
                 width={400}
                 height={200}
-                className="w-full h-full object-contain"
+                className="max-w-full max-h-full object-contain"
               />
             </div>
             <div className="flex flex-col gap-2">

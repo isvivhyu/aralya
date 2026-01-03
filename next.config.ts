@@ -4,7 +4,14 @@ const nextConfig: NextConfig = {
   // Remove output: 'export' to allow dynamic routes
   trailingSlash: true,
   images: {
-    unoptimized: false,
+    unoptimized: true,
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'res.cloudinary.com',
+        pathname: '/**',
+      },
+    ],
   },
 };
 

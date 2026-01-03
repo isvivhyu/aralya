@@ -68,6 +68,7 @@ const Navbar = ({ textColor = "white" }: NavbarProps) => {
                 alt="logo"
                 width={100}
                 height={100}
+                style={{ height: 'auto' }}
               />
             )}
           </Link>
