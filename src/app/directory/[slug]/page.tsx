@@ -16,6 +16,86 @@ const SchoolDetails = () => {
   const [school, setSchool] = useState<School | null>(null);
   const [loading, setLoading] = useState(true);
   const [expandedItems, setExpandedItems] = useState<Record<string, boolean>>({});
+  const [showShareModal, setShowShareModal] = useState(false);
+  const [linkCopied, setLinkCopied] = useState(false);
+
+  // Get current page URL for sharing
+  const getShareUrl = () => {
+    if (typeof window !== "undefined") {
+      return window.location.href;
+    }
+    return "";
+  };
+
+  // Copy link to clipboard
+  const handleCopyLink = async () => {
+    try {
+      const url = getShareUrl();
+      await navigator.clipboard.writeText(url);
+      setLinkCopied(true);
+      setTimeout(() => setLinkCopied(false), 2000);
+    } catch (error) {
+      console.error("Failed to copy link:", error);
+    }
+  };
+
+  // Share functions
+  const shareToFacebook = () => {
+    const url = encodeURIComponent(getShareUrl());
+    // Facebook will automatically scrape Open Graph tags from the page
+    window.open(`https://www.facebook.com/sharer/sharer.php?u=${url}`, "_blank");
+  };
+
+  const shareToTwitter = () => {
+    const url = encodeURIComponent(getShareUrl());
+    const text = encodeURIComponent(`Check out ${school?.school_name || "this school"} on Aralya!`);
+    window.open(`https://twitter.com/intent/tweet?url=${url}&text=${text}`, "_blank");
+  };
+
+  const shareToLinkedIn = () => {
+    const url = encodeURIComponent(getShareUrl());
+    const title = encodeURIComponent(`${school?.school_name || "School"} | Aralya - Compare Preschools`);
+    const summary = encodeURIComponent(
+      `Check out ${school?.school_name || "this school"} on Aralya. ${school?.city ? `Located in ${school.city}.` : ""} ${school?.curriculum_type ? `Curriculum: ${school.curriculum_type}.` : ""} ${school?.min_tuition && school?.max_tuition ? `Tuition: ${school.min_tuition} - ${school.max_tuition} / year.` : ""}`
+    );
+    window.open(`https://www.linkedin.com/sharing/share-offsite/?url=${url}&title=${title}&summary=${summary}`, "_blank");
+  };
+
+  const shareToWhatsApp = () => {
+    const url = encodeURIComponent(getShareUrl());
+    const text = encodeURIComponent(`Check out ${school?.school_name || "this school"} on Aralya: ${getShareUrl()}`);
+    window.open(`https://wa.me/?text=${text}`, "_blank");
+  };
+
+  const shareToMessenger = () => {
+    const url = getShareUrl();
+    const text = `Check out ${school?.school_name || "this school"} on Aralya! ${url}`;
+    // Use Web Share API which works on mobile and allows sharing to Messenger
+    if (navigator.share) {
+      navigator.share({
+        title: `${school?.school_name || "School"} | Aralya`,
+        text: text,
+        url: url,
+      }).catch((error) => {
+        // User cancelled or error occurred
+        console.log("Share cancelled or failed:", error);
+      });
+    } else {
+      // Fallback: Copy link and show message, or open messenger.com
+      navigator.clipboard.writeText(url).then(() => {
+        alert("Link copied! You can now paste it in Messenger.");
+      }).catch(() => {
+        // If clipboard fails, open messenger.com
+        window.open("https://www.messenger.com", "_blank");
+      });
+    }
+  };
+
+  const shareViaEmail = () => {
+    const subject = encodeURIComponent(`Check out ${school?.school_name || "this school"} on Aralya`);
+    const body = encodeURIComponent(`I found this school on Aralya and thought you might be interested:\n\n${getShareUrl()}`);
+    window.location.href = `mailto:?subject=${subject}&body=${body}`;
+  };
 
   // Format date to "Month Year" format
   const formatLastUpdated = (dateString?: string): string => {
@@ -192,7 +272,8 @@ const SchoolDetails = () => {
               />
             </div>
             <div className="flex flex-col gap-2">
-              <h4 className="text-[#0E1C29] md:text-4xl text-base md:font-medium font-semibold">
+             <div className="flex items-center justify-between">
+             <h4 className="text-[#0E1C29] md:text-4xl text-base md:font-medium font-semibold">
                 <span>{school?.school_name || "School Name"}</span>
                 <span className="relative group inline-block ml-1 -mt-3 align-middle">
                   <i className="ri-verified-badge-fill text-[#774BE5] text-xl md:text-2xl cursor-pointer"></i>
@@ -204,6 +285,17 @@ const SchoolDetails = () => {
                   </div>
                 </span>
               </h4>
+
+              <div 
+                className="flex items-center gap-2 cursor-pointer border border-black rounded-lg px-2 py-1 hover:bg-gray-50 transition-colors"
+                onClick={() => setShowShareModal(true)}
+              >
+                  <i className="ri-upload-line text-black text-lg"></i>
+                  <p className="text-base font-medium text-black underline">
+                    Share
+                  </p>
+              </div>
+             </div>
               <div className="flex items-center my-1 gap-2 flex-wrap">
                 <div className="flex items-center gap-2">
                   <i className="ri-map-pin-line text-[#374151] text-lg"></i>
@@ -514,6 +606,141 @@ const SchoolDetails = () => {
           </div>
         </div>
       </section>
+
+      {/* Share Modal */}
+      {showShareModal && (
+        <div 
+          className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
+          onClick={() => setShowShareModal(false)}
+        >
+          <div 
+            className="bg-white rounded-2xl max-w-xl w-full p-6 shadow-xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Header */}
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-2xl font-semibold text-[#0E1C29]">
+                Share this school
+              </h3>
+              <button
+                onClick={() => setShowShareModal(false)}
+                className="text-gray-500 hover:text-gray-700 transition-colors"
+              >
+                <i className="ri-close-line text-2xl"></i>
+              </button>
+            </div>
+
+            {/* School Image and Details */}
+            <div className="mb-6">
+              <div className="w-full h-48 bg-gray-200 border border-gray-200 rounded-lg overflow-hidden flex items-center justify-center mb-4">
+                <Image
+                  src={school?.logo_banner || "/images/Logo.png"}
+                  alt={school?.school_name || "School Logo"}
+                  width={400}
+                  height={200}
+                  className="max-w-full max-h-full object-contain"
+                />
+              </div>
+              <h4 className="text-xl font-semibold text-[#0E1C29] mb-2">
+                {school?.school_name || "School Name"}
+              </h4>
+              <div className="flex flex-col gap-1 text-sm text-[#374151]">
+                <div className="flex items-center gap-2">
+                  <i className="ri-map-pin-line"></i>
+                  <span>{school?.city || "City"}</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <i className="ri-money-dollar-circle-line"></i>
+                  <span>
+                    {school?.min_tuition || "N/A"} - {school?.max_tuition || "N/A"} / year
+                  </span>
+                </div>
+                {school?.curriculum_type && (
+                  <div className="flex items-center gap-2">
+                    <i className="ri-book-open-line"></i>
+                    <span>{school.curriculum_type}</span>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Share Actions */}
+            <div className="space-y-3">
+              {/* Copy Link Button */}
+              <button
+                onClick={handleCopyLink}
+                className="w-full bg-[#774BE5] hover:bg-[#6B3FD6] text-white rounded-lg px-4 py-3 flex items-center justify-center gap-2 font-semibold transition-colors"
+              >
+                {linkCopied ? (
+                  <>
+                    <i className="ri-check-line text-lg"></i>
+                    <span>Link Copied!</span>
+                  </>
+                ) : (
+                  <>
+                    <i className="ri-link text-lg"></i>
+                    <span>Copy Link</span>
+                  </>
+                )}
+              </button>
+
+              {/* Social Media Share Buttons */}
+              <div className="grid grid-cols-2 gap-3">
+                <button
+                  onClick={shareToFacebook}
+                  className="flex items-center justify-center gap-2 border border-gray-300 rounded-lg px-4 py-3 hover:bg-gray-50 transition-colors"
+                >
+                  <i className="ri-facebook-fill text-[#1877F2] text-xl"></i>
+                  <span className="font-medium text-[#0E1C29]">Facebook</span>
+                </button>
+
+                <button
+                  onClick={shareToTwitter}
+                  className="flex items-center justify-center gap-2 border border-gray-300 rounded-lg px-4 py-3 hover:bg-gray-50 transition-colors"
+                >
+                  <i className="ri-twitter-x-fill text-black text-xl"></i>
+                  <span className="font-medium text-[#0E1C29]">Twitter</span>
+                </button>
+
+                <button
+                  onClick={shareToLinkedIn}
+                  className="flex items-center justify-center gap-2 border border-gray-300 rounded-lg px-4 py-3 hover:bg-gray-50 transition-colors"
+                >
+                  <i className="ri-linkedin-fill text-[#0A66C2] text-xl"></i>
+                  <span className="font-medium text-[#0E1C29]">LinkedIn</span>
+                </button>
+
+                <button
+                  onClick={shareToWhatsApp}
+                  className="flex items-center justify-center gap-2 border border-gray-300 rounded-lg px-4 py-3 hover:bg-gray-50 transition-colors"
+                >
+                  <i className="ri-whatsapp-fill text-[#25D366] text-xl"></i>
+                  <span className="font-medium text-[#0E1C29]">WhatsApp</span>
+                </button>
+              </div>
+
+              {/* Messaging Apps */}
+              <div className="grid grid-cols-2 gap-3">
+                <button
+                  onClick={shareToMessenger}
+                  className="flex items-center justify-center gap-2 border border-gray-300 rounded-lg px-4 py-3 hover:bg-gray-50 transition-colors"
+                >
+                  <i className="ri-messenger-fill text-[#0084FF] text-xl"></i>
+                  <span className="font-medium text-[#0E1C29]">Messenger</span>
+                </button>
+
+                <button
+                  onClick={shareViaEmail}
+                  className="flex items-center justify-center gap-2 border border-gray-300 rounded-lg px-4 py-3 hover:bg-gray-50 transition-colors"
+                >
+                  <i className="ri-mail-line text-[#774BE5] text-xl"></i>
+                  <span className="font-medium text-[#0E1C29]">Email</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       <Footer />
     </>
