@@ -18,6 +18,7 @@ const SchoolDetails = () => {
   const [expandedItems, setExpandedItems] = useState<Record<string, boolean>>({});
   const [showShareModal, setShowShareModal] = useState(false);
   const [linkCopied, setLinkCopied] = useState(false);
+  const [isDesktop, setIsDesktop] = useState(false);
 
   // Get current page URL for sharing
   const getShareUrl = () => {
@@ -39,62 +40,57 @@ const SchoolDetails = () => {
     }
   };
 
-  // Share functions
+  // Native share for mobile
+  const handleNativeShare = async () => {
+    const url = getShareUrl();
+    const text = `Check out ${school?.school_name || "this school"} on Aralya! ${school?.city ? `Located in ${school.city}.` : ""} ${url}`;
+    const title = `${school?.school_name || "School"} | Aralya`;
+
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: title,
+          text: text,
+          url: url,
+        });
+      } catch (error) {
+        // User cancelled or error occurred - silently fail
+        if (error instanceof Error && error.name !== "AbortError") {
+          console.log("Share failed:", error);
+        }
+      }
+    } else {
+      // Fallback: copy link if native share not available
+      handleCopyLink();
+    }
+  };
+
+  // Share functions for desktop (direct platform URLs)
   const shareToFacebook = () => {
     const url = encodeURIComponent(getShareUrl());
-    // Facebook will automatically scrape Open Graph tags from the page
     window.open(`https://www.facebook.com/sharer/sharer.php?u=${url}`, "_blank");
-  };
-
-  const shareToTwitter = () => {
-    const url = encodeURIComponent(getShareUrl());
-    const text = encodeURIComponent(`Check out ${school?.school_name || "this school"} on Aralya!`);
-    window.open(`https://twitter.com/intent/tweet?url=${url}&text=${text}`, "_blank");
-  };
-
-  const shareToLinkedIn = () => {
-    const url = encodeURIComponent(getShareUrl());
-    const title = encodeURIComponent(`${school?.school_name || "School"} | Aralya - Compare Preschools`);
-    const summary = encodeURIComponent(
-      `Check out ${school?.school_name || "this school"} on Aralya. ${school?.city ? `Located in ${school.city}.` : ""} ${school?.curriculum_type ? `Curriculum: ${school.curriculum_type}.` : ""} ${school?.min_tuition && school?.max_tuition ? `Tuition: ${school.min_tuition} - ${school.max_tuition} / year.` : ""}`
-    );
-    window.open(`https://www.linkedin.com/sharing/share-offsite/?url=${url}&title=${title}&summary=${summary}`, "_blank");
-  };
-
-  const shareToWhatsApp = () => {
-    const url = encodeURIComponent(getShareUrl());
-    const text = encodeURIComponent(`Check out ${school?.school_name || "this school"} on Aralya: ${getShareUrl()}`);
-    window.open(`https://wa.me/?text=${text}`, "_blank");
   };
 
   const shareToMessenger = () => {
     const url = getShareUrl();
-    const text = `Check out ${school?.school_name || "this school"} on Aralya! ${url}`;
-    // Use Web Share API which works on mobile and allows sharing to Messenger
-    if (navigator.share) {
-      navigator.share({
-        title: `${school?.school_name || "School"} | Aralya`,
-        text: text,
-        url: url,
-      }).catch((error) => {
-        // User cancelled or error occurred
-        console.log("Share cancelled or failed:", error);
-      });
-    } else {
-      // Fallback: Copy link and show message, or open messenger.com
-      navigator.clipboard.writeText(url).then(() => {
-        alert("Link copied! You can now paste it in Messenger.");
-      }).catch(() => {
-        // If clipboard fails, open messenger.com
-        window.open("https://www.messenger.com", "_blank");
-      });
-    }
+    navigator.clipboard.writeText(url).then(() => {
+      alert("Link copied! You can now paste it in Messenger.");
+    }).catch(() => {
+      window.open("https://www.messenger.com", "_blank");
+    });
   };
 
-  const shareViaEmail = () => {
-    const subject = encodeURIComponent(`Check out ${school?.school_name || "this school"} on Aralya`);
-    const body = encodeURIComponent(`I found this school on Aralya and thought you might be interested:\n\n${getShareUrl()}`);
-    window.location.href = `mailto:?subject=${subject}&body=${body}`;
+  const shareToViber = () => {
+    const url = encodeURIComponent(getShareUrl());
+    const text = encodeURIComponent(`Check out ${school?.school_name || "this school"} on Aralya! ${getShareUrl()}`);
+    window.open(`viber://forward?text=${text}`, "_blank");
+    setTimeout(() => {
+      if (!document.hasFocus()) {
+        navigator.clipboard.writeText(getShareUrl()).then(() => {
+          alert("Link copied! You can now paste it in Viber.");
+        });
+      }
+    }, 500);
   };
 
   // Format date to "Month Year" format
@@ -122,6 +118,17 @@ const SchoolDetails = () => {
       });
     }
   };
+
+  // Detect desktop vs mobile
+  useEffect(() => {
+    const checkDesktop = () => {
+      setIsDesktop(window.innerWidth >= 768); // md breakpoint
+    };
+    
+    checkDesktop();
+    window.addEventListener("resize", checkDesktop);
+    return () => window.removeEventListener("resize", checkDesktop);
+  }, []);
 
   // Load school data from API
   useEffect(() => {
@@ -288,7 +295,15 @@ const SchoolDetails = () => {
 
               <div 
                 className="flex items-center gap-2 cursor-pointer border border-black rounded-lg px-2 py-1 hover:bg-gray-50 transition-colors"
-                onClick={() => setShowShareModal(true)}
+                onClick={() => {
+                  // On mobile, directly trigger native share
+                  if (!isDesktop) {
+                    handleNativeShare();
+                  } else {
+                    // On desktop, show modal
+                    setShowShareModal(true);
+                  }
+                }}
               >
                   <i className="ri-upload-line text-black text-lg"></i>
                   <p className="text-base font-medium text-black underline">
@@ -632,7 +647,8 @@ const SchoolDetails = () => {
 
             {/* School Image and Details */}
             <div className="mb-6">
-              <div className="w-full h-48 bg-gray-200 border border-gray-200 rounded-lg overflow-hidden flex items-center justify-center mb-4">
+              <div className="w-full h-48  overflow-hidden flex items-center justify-center gap-4 mb-4">
+                <div className="w-1/2 bg-gray-200 border border-gray-200 rounded-lg">
                 <Image
                   src={school?.logo_banner || "/images/Logo.png"}
                   alt={school?.school_name || "School Logo"}
@@ -640,8 +656,10 @@ const SchoolDetails = () => {
                   height={200}
                   className="max-w-full max-h-full object-contain"
                 />
-              </div>
-              <h4 className="text-xl font-semibold text-[#0E1C29] mb-2">
+                </div>
+
+                <div className="flex flex-col gap-2 w-1/2">
+                <h4 className="text-xl font-semibold text-[#0E1C29] mb-2">
                 {school?.school_name || "School Name"}
               </h4>
               <div className="flex flex-col gap-1 text-sm text-[#374151]">
@@ -662,81 +680,91 @@ const SchoolDetails = () => {
                   </div>
                 )}
               </div>
+                  </div>
+              </div>
             </div>
 
             {/* Share Actions */}
             <div className="space-y-3">
-              {/* Copy Link Button */}
-              <button
-                onClick={handleCopyLink}
-                className="w-full bg-[#774BE5] hover:bg-[#6B3FD6] text-white rounded-lg px-4 py-3 flex items-center justify-center gap-2 font-semibold transition-colors"
-              >
-                {linkCopied ? (
-                  <>
-                    <i className="ri-check-line text-lg"></i>
-                    <span>Link Copied!</span>
-                  </>
-                ) : (
-                  <>
-                    <i className="ri-link text-lg"></i>
-                    <span>Copy Link</span>
-                  </>
-                )}
-              </button>
+              {isDesktop ? (
+                /* Desktop: Show Copy Link, Messenger, Viber, Facebook in 2x2 grid */
+                <div className="grid grid-cols-2 gap-3">
+                  {/* 1. Copy Link */}
+                  <button
+                    onClick={handleCopyLink}
+                    className="bg-[#774BE5] hover:bg-[#6B3FD6] text-white rounded-lg px-4 py-3 flex items-center justify-center gap-2 font-semibold transition-colors"
+                  >
+                    {linkCopied ? (
+                      <>
+                        <i className="ri-check-line text-lg"></i>
+                        <span>Link Copied!</span>
+                      </>
+                    ) : (
+                      <>
+                        <i className="ri-link text-lg"></i>
+                        <span>Copy Link</span>
+                      </>
+                    )}
+                  </button>
 
-              {/* Social Media Share Buttons */}
-              <div className="grid grid-cols-2 gap-3">
-                <button
-                  onClick={shareToFacebook}
-                  className="flex items-center justify-center gap-2 border border-gray-300 rounded-lg px-4 py-3 hover:bg-gray-50 transition-colors"
-                >
-                  <i className="ri-facebook-fill text-[#1877F2] text-xl"></i>
-                  <span className="font-medium text-[#0E1C29]">Facebook</span>
-                </button>
+                  {/* 2. Messenger */}
+                  <button
+                    onClick={shareToMessenger}
+                    className="flex items-center justify-center gap-2 border border-gray-300 rounded-lg px-4 py-3 hover:bg-gray-50 transition-colors"
+                  >
+                    <i className="ri-messenger-fill text-[#0084FF] text-xl"></i>
+                    <span className="font-medium text-[#0E1C29]">Messenger</span>
+                  </button>
 
-                <button
-                  onClick={shareToTwitter}
-                  className="flex items-center justify-center gap-2 border border-gray-300 rounded-lg px-4 py-3 hover:bg-gray-50 transition-colors"
-                >
-                  <i className="ri-twitter-x-fill text-black text-xl"></i>
-                  <span className="font-medium text-[#0E1C29]">Twitter</span>
-                </button>
+                  {/* 3. Viber */}
+                  <button
+                    onClick={shareToViber}
+                    className="flex items-center justify-center gap-2 border border-gray-300 rounded-lg px-4 py-3 hover:bg-gray-50 transition-colors"
+                  >
+                    <i className="ri-message-3-fill text-[#665CAC] text-xl"></i>
+                    <span className="font-medium text-[#0E1C29]">Viber</span>
+                  </button>
 
-                <button
-                  onClick={shareToLinkedIn}
-                  className="flex items-center justify-center gap-2 border border-gray-300 rounded-lg px-4 py-3 hover:bg-gray-50 transition-colors"
-                >
-                  <i className="ri-linkedin-fill text-[#0A66C2] text-xl"></i>
-                  <span className="font-medium text-[#0E1C29]">LinkedIn</span>
-                </button>
+                  {/* 4. Facebook */}
+                  <button
+                    onClick={shareToFacebook}
+                    className="flex items-center justify-center gap-2 border border-gray-300 rounded-lg px-4 py-3 hover:bg-gray-50 transition-colors"
+                  >
+                    <i className="ri-facebook-fill text-[#1877F2] text-xl"></i>
+                    <span className="font-medium text-[#0E1C29]">Facebook</span>
+                  </button>
+                </div>
+              ) : (
+                /* Mobile: Use native share */
+                <>
+                  {/* Native Share Button */}
+                  <button
+                    onClick={handleNativeShare}
+                    className="w-full bg-[#774BE5] hover:bg-[#6B3FD6] text-white rounded-lg px-4 py-3 flex items-center justify-center gap-2 font-semibold transition-colors"
+                  >
+                    <i className="ri-share-line text-lg"></i>
+                    <span>Share</span>
+                  </button>
 
-                <button
-                  onClick={shareToWhatsApp}
-                  className="flex items-center justify-center gap-2 border border-gray-300 rounded-lg px-4 py-3 hover:bg-gray-50 transition-colors"
-                >
-                  <i className="ri-whatsapp-fill text-[#25D366] text-xl"></i>
-                  <span className="font-medium text-[#0E1C29]">WhatsApp</span>
-                </button>
-              </div>
-
-              {/* Messaging Apps */}
-              <div className="grid grid-cols-2 gap-3">
-                <button
-                  onClick={shareToMessenger}
-                  className="flex items-center justify-center gap-2 border border-gray-300 rounded-lg px-4 py-3 hover:bg-gray-50 transition-colors"
-                >
-                  <i className="ri-messenger-fill text-[#0084FF] text-xl"></i>
-                  <span className="font-medium text-[#0E1C29]">Messenger</span>
-                </button>
-
-                <button
-                  onClick={shareViaEmail}
-                  className="flex items-center justify-center gap-2 border border-gray-300 rounded-lg px-4 py-3 hover:bg-gray-50 transition-colors"
-                >
-                  <i className="ri-mail-line text-[#774BE5] text-xl"></i>
-                  <span className="font-medium text-[#0E1C29]">Email</span>
-                </button>
-              </div>
+                  {/* Copy Link as secondary option */}
+                  <button
+                    onClick={handleCopyLink}
+                    className="w-full flex items-center justify-center gap-2 border border-gray-300 rounded-lg px-4 py-3 hover:bg-gray-50 transition-colors"
+                  >
+                    {linkCopied ? (
+                      <>
+                        <i className="ri-check-line text-lg"></i>
+                        <span className="font-medium text-[#0E1C29]">Link Copied!</span>
+                      </>
+                    ) : (
+                      <>
+                        <i className="ri-link text-lg"></i>
+                        <span className="font-medium text-[#0E1C29]">Copy Link</span>
+                      </>
+                    )}
+                  </button>
+                </>
+              )}
             </div>
           </div>
         </div>
