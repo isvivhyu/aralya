@@ -32,7 +32,12 @@ export const metadata: Metadata = {
     "compare preschools Metro Manila",
   ],
   icons: {
-    icon: "/images/favicon.ico",
+    icon: [
+      { url: `${baseUrl}/favicon.ico`, sizes: "any" },
+      { url: `${baseUrl}/favicon.ico`, type: "image/x-icon" },
+    ],
+    apple: `${baseUrl}/favicon.ico`,
+    shortcut: `${baseUrl}/favicon.ico`,
   },
   alternates: {
     canonical: `${baseUrl}/`,
@@ -45,7 +50,7 @@ export const metadata: Metadata = {
     siteName: "Aralya",
     images: [
       {
-        url: "/images/Logo.png",
+        url: `${baseUrl}/images/Logo.png`,
         width: 1200,
         height: 630,
         alt: "Aralya - Compare Preschools in Metro Manila",
@@ -59,7 +64,7 @@ export const metadata: Metadata = {
     title: "Aralya | Compare Preschools in Metro Manila",
     description:
       "Aralya helps Filipino parents compare preschools across Metro Manila — updated tuition, curriculum, schedules & contact info in one easy place.",
-    images: ["/images/Logo.png"],
+    images: [`${baseUrl}/images/Logo.png`],
   },
   robots: {
     index: true,

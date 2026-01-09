@@ -32,21 +32,45 @@ export async function generateMetadata({
 
       if (school) {
         const pageUrl = `${baseUrl}/directory/${slug}/`;
-        const description = school.description || 
-          `View details, tuition, curriculum, and contact information for ${school.school_name} on Aralya. ${school.city ? `Located in ${school.city}.` : ""} ${school.min_tuition && school.max_tuition ? `Tuition: ${school.min_tuition} - ${school.max_tuition} / year.` : ""}`;
+        
+        // Clean, concise description for sharing
+        const buildDescription = () => {
+          const parts: string[] = [];
+          
+          if (school.city) {
+            parts.push(school.city);
+          }
+          
+          if (school.curriculum_type) {
+            parts.push(school.curriculum_type);
+          }
+          
+          if (school.min_tuition && school.max_tuition) {
+            parts.push(`₱${school.min_tuition} - ₱${school.max_tuition}/year`);
+          }
+          
+          return parts.length > 0 
+            ? `${school.school_name} • ${parts.join(" • ")}`
+            : school.school_name;
+        };
+        
+        const ogDescription = buildDescription();
+        const metaDescription = school.description || 
+          `View ${school.school_name} on Aralya. ${school.city ? `Located in ${school.city}.` : ""} Compare tuition, curriculum, and contact information.`;
+        
         const imageUrl = school.logo_banner 
           ? (school.logo_banner.startsWith('http') ? school.logo_banner : `${baseUrl}${school.logo_banner}`)
           : `${baseUrl}/images/Logo.png`;
 
         return {
           title: `${school.school_name} | Aralya - Compare Preschools in Metro Manila`,
-          description,
+          description: metaDescription,
           alternates: {
             canonical: pageUrl,
           },
           openGraph: {
-            title: `${school.school_name} | Aralya`,
-            description,
+            title: school.school_name,
+            description: ogDescription,
             url: pageUrl,
             siteName: "Aralya",
             images: [
@@ -62,8 +86,8 @@ export async function generateMetadata({
           },
           twitter: {
             card: "summary_large_image",
-            title: `${school.school_name} | Aralya`,
-            description,
+            title: school.school_name,
+            description: ogDescription,
             images: [imageUrl],
           },
         };
@@ -84,8 +108,8 @@ export async function generateMetadata({
       canonical: pageUrl,
     },
     openGraph: {
-      title: "School Details | Aralya",
-      description: "View school details, tuition, curriculum, and contact information on Aralya.",
+      title: "School Details",
+      description: "Compare preschools in Metro Manila on Aralya",
       url: pageUrl,
       siteName: "Aralya",
       images: [
@@ -101,8 +125,8 @@ export async function generateMetadata({
     },
     twitter: {
       card: "summary_large_image",
-      title: "School Details | Aralya",
-      description: "View school details, tuition, curriculum, and contact information on Aralya.",
+      title: "School Details",
+      description: "Compare preschools in Metro Manila on Aralya",
       images: [fallbackImage],
     },
   };
