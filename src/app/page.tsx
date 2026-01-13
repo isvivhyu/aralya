@@ -160,11 +160,11 @@ export default function Home() {
 
       <section className="w-full md:px-10 px-5 pt-25 bg-white">
         <h2 className="text-[#0E1C29] md:text-[56px] text-4xl font-normal text-center">
-          About Aralya
+          Why parents use Aralya
         </h2>
         <div className="w-full md:w-[800px] mx-auto">
           <p className="mt-4 text-[#0E1C29] text-sm text-center font-normal">
-            Aralya helps Filipino parents find preschools fast. Compare schools by city, tuition, curriculum, and schedule, then contact the school in one tap-Call, Text, FB Message, or Email. No sign-up. Free for parents. We verify details with schools and refresh weekly so you can decide with confidence.
+            Carefully curated preschool information to help parents choose with confidence.
           </p>
         </div>
         <div className="mt-11 mb-25 flex items-center justify-center w-full">
@@ -173,7 +173,7 @@ export default function Home() {
               href="/directory"
               className="bg-black hover:bg-[#774BE5] transition-all duration-500 ease-in-out rounded-[10px] text-white flex items-center gap-2 px-6 py-3"
             >
-              <p className="text-base font-medium">View all schools</p>
+              <p className="text-base font-medium">Browse preschools</p>
               <i className="ri-arrow-right-fill text-lg"></i>
             </Link>
           </div>
@@ -182,30 +182,31 @@ export default function Home() {
 
       <div>
         <HowItWorksSection
-          title="How Aralya Works"
-          description="Find the right preschool in 3 quick steps"
+          title="Getting started with Aralya"
           steps={[
             {
-              iconSrc: "/images/map.svg",
-              iconAlt: "map",
-              stepNumber: 1,
-              title: "Choose your city",
-              description: "Start with BGC, QC, Makati, Pasig and more.",
+              iconClass: "ri-school-line",
+              text: (
+                <>
+                  <strong>Start</strong> with available preschools
+                </>
+              ),
             },
             {
-              iconSrc: "/images/filter.svg",
-              iconAlt: "filter",
-              stepNumber: 2,
-              title: "Filter by preferences",
-              description:
-                "Set your budget, curriculum, and schedule preferences.",
+              iconClass: "ri-filter-line",
+              text: (
+                <>
+                  <strong>Narrow down</strong> what matters to you
+                </>
+              ),
             },
             {
-              iconSrc: "/images/about.jpg",
-              iconAlt: "compare",
-              stepNumber: 3,
-              title: "Compare and contact",
-              description: "Review schools and contact them directly.",
+              iconClass: "ri-file-text-line",
+              text: (
+                <>
+                  <strong>Review</strong> details and reach out when ready
+                </>
+              ),
             },
           ]}
         />
