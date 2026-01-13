@@ -1,6 +1,8 @@
+import React from "react";
+
 interface StepItem {
   iconClass: string;
-  text: string | JSX.Element;
+  text: string | React.ReactNode;
 }
 
 interface HowItWorksSectionProps {
