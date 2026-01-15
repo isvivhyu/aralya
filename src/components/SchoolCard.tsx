@@ -9,6 +9,7 @@ interface SchoolCardProps {
   tags: string[];
   priceRange: string;
   schoolSlug?: string;
+  priority?: boolean;
 }
 
 const SchoolCard = ({
@@ -19,19 +20,24 @@ const SchoolCard = ({
   tags,
   priceRange,
   schoolSlug,
+  priority = false,
 }: SchoolCardProps) => {
   return (
     <div className="bg-[#eeeff1] rounded-[16px] p-4 h-full flex flex-col">
-      <div className="w-full h-48 rounded-[10px] overflow-hidden mb-3 flex items-center justify-center bg-white">
+      <div className="w-full h-48 rounded-[10px] overflow-hidden mb-3 flex items-center justify-center bg-white p-2">
         <Image
           src={imageSrc}
           alt={imageAlt}
-          width={200}
-          height={200}
-          className="max-w-full max-h-full rounded-[10px] object-contain"
+          width={400}
+          height={400}
+          className="w-full h-full object-contain"
+          loading={priority ? "eager" : "lazy"}
+          priority={priority}
+          quality={90}
+          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 33vw, 25vw"
         />
       </div>
-      <h4 className="text-black text-base font-medium">
+      <h4 className="text-black text-base font-bold">
         <span>{schoolName}</span>
         <span className="relative group inline-block ml-1 -mt-1 align-middle">
           <i className="ri-verified-badge-fill text-[#774BE5] text-xl cursor-pointer"></i>

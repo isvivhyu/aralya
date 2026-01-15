@@ -46,11 +46,6 @@ const SchoolDirectoryContent = () => {
   const [hasMore, setHasMore] = useState(true);
   const [filteredSchools, setFilteredSchools] = useState<School[]>([]);
   const [localSearchQuery, setLocalSearchQuery] = useState(searchQuery);
-  const [searchResults, setSearchResults] = useState<
-    { city: string; schoolCount: number }[]
-  >([]);
-  const [schoolSearchResults, setSchoolSearchResults] = useState<School[]>([]);
-  const [showResults, setShowResults] = useState(false);
   const [activeFilter, setActiveFilter] = useState("all");
   const [budgetFilter, setBudgetFilter] = useState(budgetQuery);
   const [cityFilter, setCityFilter] = useState(cityQuery);
@@ -62,10 +57,41 @@ const SchoolDirectoryContent = () => {
   >([]);
   const [isSearching, setIsSearching] = useState(false);
   const [isFiltering, setIsFiltering] = useState(false);
+  const [activeCategory, setActiveCategory] = useState<
+    "all" | "city" | "budget" | "curriculum"
+  >("all");
   const observerRef = useRef<HTMLDivElement>(null);
-  const searchRef = useRef<HTMLFormElement>(null);
 
   const schoolsPerPage = 12; // Load 12 schools at a time
+
+  // Get placeholder text based on active category
+  const getPlaceholder = () => {
+    switch (activeCategory) {
+      case "city":
+        return "Enter a city (e.g., Pasig, Makati, Taguig…)";
+      case "budget":
+        return "Enter your budget (e.g., ₱50,000 – ₱100,000)";
+      case "curriculum":
+        return "Search by curriculum (e.g., Montessori, Progressive…)";
+      default:
+        return "Search by school name, city, or curriculum…";
+    }
+  };
+
+  const categories = [
+    { id: "all" as const, label: "All Schools", icon: "ri-grid-line" },
+    { id: "city" as const, label: "By City", icon: "ri-map-pin-line" },
+    {
+      id: "budget" as const,
+      label: "By Budget",
+      icon: "ri-money-dollar-circle-line",
+    },
+    {
+      id: "curriculum" as const,
+      label: "By Curriculum",
+      icon: "ri-book-open-line",
+    },
+  ];
 
   // Helper function to create URL-friendly slugs
   const createSlug = (schoolName: string) => {
@@ -75,18 +101,6 @@ const SchoolDirectoryContent = () => {
       .replace(/\s+/g, "-") // Replace spaces with hyphens
       .replace(/-+/g, "-") // Replace multiple hyphens with single
       .trim();
-  };
-
-  // Filter cities locally (no API calls)
-  const filterCities = (query: string) => {
-    if (!query.trim()) {
-      return availableCities;
-    }
-
-    const queryLower = query.toLowerCase().trim();
-    return availableCities.filter((cityData) =>
-      cityData.city.toLowerCase().includes(queryLower),
-    );
   };
 
   // Helper function to check if a string is a number (budget amount)
@@ -132,71 +146,9 @@ const SchoolDirectoryContent = () => {
     });
   };
 
-  // Handle local search input changes - search schools and cities
-  const handleSearchChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const query = e.target.value;
-    setLocalSearchQuery(query);
-    setShowResults(true);
-
-    if (query.trim().length === 0) {
-      // Show all cities when query is empty
-      setSearchResults(availableCities);
-      setSchoolSearchResults([]);
-      setIsSearching(false);
-      return;
-    }
-
-    // Filter already-loaded cities (only if not a numeric query)
-    if (!isNumericQuery(query)) {
-      const filtered = filterCities(query);
-      setSearchResults(filtered);
-    } else {
-      // Don't show city results for numeric queries
-      setSearchResults([]);
-    }
-
-    // Search for schools matching the query
-    setIsSearching(true);
-    try {
-      let schools: School[];
-
-      // Check if the query is a numeric budget amount
-      if (isNumericQuery(query)) {
-        // If it's a number, get all schools and filter by budget
-        const allSchools = await SchoolService.getAllSchools();
-        const budgetAmount = parseBudgetAmount(query);
-        schools = filterByBudgetAmount(allSchools, budgetAmount);
-      } else {
-        // If it's text, search across school name, curriculum, and city
-        schools = await SchoolService.searchSchools(query);
-      }
-
-      setSchoolSearchResults(schools.slice(0, 5)); // Limit to 5 for dropdown
-    } catch (error) {
-      console.error("Error searching schools:", error);
-      setSchoolSearchResults([]);
-    } finally {
-      setIsSearching(false);
-    }
-  };
-
-  // Show all cities when input gains focus - no API call needed
-  const handleSearchFocus = () => {
-    setShowResults(true);
-    // Show all cities from already-loaded data
-    setSearchResults(availableCities);
-    setSchoolSearchResults([]);
-  };
-
-  // Handle clicking on a city search result
-  const handleCityClick = (city: string) => {
-    window.location.href = `/directory?city=${encodeURIComponent(city)}`;
-  };
-
-  // Handle clicking on a school search result
-  const handleSchoolClick = (school: School) => {
-    const slug = createSlug(school.school_name);
-    window.location.href = `/directory/${slug}`;
+  // Handle search input changes
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setLocalSearchQuery(e.target.value);
   };
 
   // Helper function to update URL with current filters
@@ -227,7 +179,12 @@ const SchoolDirectoryContent = () => {
     setIsSearching(true);
     try {
       if (localSearchQuery.trim()) {
-        window.location.href = `/directory?search=${encodeURIComponent(localSearchQuery.trim())}${budgetFilter ? `&budget=${budgetFilter}` : ""}${cityFilter ? `&city=${encodeURIComponent(cityFilter)}` : ""}${curriculumFilter ? `&curriculum=${curriculumFilter}` : ""}`;
+        const params = new URLSearchParams();
+        params.set("search", localSearchQuery.trim());
+        if (budgetFilter) params.set("budget", budgetFilter);
+        if (cityFilter) params.set("city", cityFilter);
+        if (curriculumFilter) params.set("curriculum", curriculumFilter);
+        window.location.href = `/directory?${params.toString()}`;
       } else {
         const params = new URLSearchParams();
         if (budgetFilter) params.set("budget", budgetFilter);
@@ -309,13 +266,6 @@ const SchoolDirectoryContent = () => {
   // Handle click outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (
-        searchRef.current &&
-        !searchRef.current.contains(event.target as Node)
-      ) {
-        setShowResults(false);
-      }
-
       if (isMobile) {
         // On mobile, only close search results, never close filter panels
         console.log("Mobile detected - not closing filter panels");
@@ -534,137 +484,59 @@ const SchoolDirectoryContent = () => {
             We&apos;re still adding more schools each week.
           </p>
           <form
-            className="bg-white w-full md:rounded-3xl rounded-full mt-6 relative"
-            ref={searchRef}
+            className="bg-white w-full p-5 rounded-3xl mt-6 relative"
             onSubmit={handleSearchSubmit}
           >
-            <div className="flex flex-col md:flex-row gap-2.5 rounded-2xl">
-              <div className="w-full p-4 md:rounded-[10px] rounded-full overflow-hidden flex items-center gap-5 relative">
+            {/* Category Tabs Section */}
+            <div className="w-full relative z-[999]">
+              <div className="flex items-center justify-start md:justify-center gap-2 md:gap-3 overflow-x-auto scrollbar-hide md:flex-wrap flex-nowrap">
+                {categories.map((category) => (
+                  <button
+                    key={category.id}
+                    type="button"
+                    onClick={() => setActiveCategory(category.id)}
+                    className={`px-4 md:px-6 py-2.5 md:py-3 text-sm font-semibold flex items-center gap-2 text-black relative shrink-0 ${
+                      activeCategory === category.id
+                        ? "border-b-2 border-black"
+                        : "border-b-2 border-transparent"
+                    } transition-all duration-300 ease-in-out`}
+                  >
+                    <i className={`${category.icon} text-base`}></i>
+                    <span>{category.label}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+            <div className="flex flex-col md:flex-row md:mt-6 mt-3 gap-2.5 rounded-2xl">
+              <div className="bg-[#f5f5f5] w-full md:w-[810px] p-3 md:p-4 md:rounded-[10px] rounded-full overflow-hidden flex items-center gap-3 md:gap-5 relative">
                 <i className="ri-search-line text-[#0E1C29]/40 text-2xl"></i>
                 <input
                   type="text"
                   value={localSearchQuery}
                   onChange={handleSearchChange}
-                  onFocus={handleSearchFocus}
-                  placeholder="Search by school name, curriculum, or city…"
+                  placeholder={getPlaceholder()}
                   className="bg-transparent w-full text-base text-[#0E1C29] placeholder-[#999999] focus:outline-none"
                   style={{ fontSize: "16px" }}
                 />
-                {isSearching && (
-                  <div className="flex-shrink-0">
-                    <LoadingSpinner size="sm" />
-                  </div>
-                )}
-                {localSearchQuery && !isSearching && (
+                {localSearchQuery && (
                   <button
                     type="button"
-                    onClick={() => {
-                      setLocalSearchQuery("");
-                      setSearchResults([]);
-                      setSchoolSearchResults([]);
-                      setShowResults(false);
-                    }}
+                    onClick={() => setLocalSearchQuery("")}
                     className="text-[#0E1C29]/40 hover:text-[#0E1C29]/60 transition-colors"
                   >
                     <i className="ri-close-line text-xl"></i>
                   </button>
                 )}
               </div>
+              <ButtonWithLoading
+                type="submit"
+                isLoading={isSearching}
+                className="bg-[#774BE5] md:w-fit w-full text-white p-4 rounded-[10px] text-sm font-semibold flex items-center justify-center gap-1 hover:bg-[#6B3FD6] transition-colors disabled:hover:bg-[#774BE5]"
+              >
+                <i className="ri-search-line text-white text-lg mt-0.5"></i>
+                Search
+              </ButtonWithLoading>
             </div>
-
-            {/* Search Results Dropdown */}
-            {showResults &&
-              (searchResults.length > 0 ||
-                schoolSearchResults.length > 0 ||
-                localSearchQuery.trim().length > 0 ||
-                isSearching) && (
-                <div className="absolute top-full left-5 right-5 mt-2 bg-white rounded-2xl border border-gray-200 shadow-xl max-h-80 overflow-auto z-[10001]">
-                  <div className="p-4">
-                    {isSearching && localSearchQuery.trim().length > 0 && (
-                      <div className="flex items-center justify-center gap-2 py-4 text-gray-500">
-                        <LoadingSpinner size="sm" />
-                        <span className="text-sm">Searching...</span>
-                      </div>
-                    )}
-                    {/* Schools Section */}
-                    {!isSearching && schoolSearchResults.length > 0 && (
-                      <>
-                        <h5 className="text-sm font-semibold text-gray-600 mb-3">
-                          Schools ({schoolSearchResults.length})
-                        </h5>
-                        {schoolSearchResults.map((school, index) => (
-                          <div
-                            key={`${school.school_name}-${index}`}
-                            onClick={() => handleSchoolClick(school)}
-                            className="flex items-center gap-3 p-3 hover:bg-gray-50 rounded-lg cursor-pointer transition-colors mb-2"
-                          >
-                            <div className="w-12 h-12 rounded-lg bg-[#774BE5]/10 flex items-center justify-center flex-shrink-0">
-                              <i className="ri-school-line text-[#774BE5] text-xl"></i>
-                            </div>
-                            <div className="flex-1 min-w-0">
-                              <h6 className="font-semibold text-[#0E1C29] text-sm truncate">
-                                {school.school_name}
-                              </h6>
-                              <p className="text-xs text-gray-500 mt-0.5 truncate">
-                                {school.city}
-                                {school.curriculum_tags &&
-                                  ` • ${school.curriculum_tags.split(", ")[0]}`}
-                              </p>
-                            </div>
-                            <i className="ri-arrow-right-s-line text-gray-400"></i>
-                          </div>
-                        ))}
-                        {searchResults.length > 0 && (
-                          <div className="border-t border-gray-200 my-3"></div>
-                        )}
-                      </>
-                    )}
-
-                    {/* Cities Section */}
-                    {searchResults.length > 0 && (
-                      <>
-                        <h5 className="text-sm font-semibold text-gray-600 mb-3">
-                          Cities ({searchResults.length})
-                        </h5>
-                        {searchResults.map((cityData, index) => (
-                          <div
-                            key={`${cityData.city}-${index}`}
-                            onClick={() => handleCityClick(cityData.city)}
-                            className="flex items-center gap-3 p-3 hover:bg-gray-50 rounded-lg cursor-pointer transition-colors"
-                          >
-                            <div className="w-12 h-12 rounded-lg bg-[#774BE5]/10 flex items-center justify-center flex-shrink-0">
-                              <i className="ri-map-pin-line text-[#774BE5] text-xl"></i>
-                            </div>
-                            <div className="flex-1 min-w-0">
-                              <h6 className="font-semibold text-[#0E1C29] text-sm truncate">
-                                {cityData.city}
-                              </h6>
-                              <p className="text-xs text-gray-500 mt-0.5">
-                                {cityData.schoolCount}{" "}
-                                {cityData.schoolCount === 1
-                                  ? "school"
-                                  : "schools"}{" "}
-                                available
-                              </p>
-                            </div>
-                            <i className="ri-arrow-right-s-line text-gray-400"></i>
-                          </div>
-                        ))}
-                      </>
-                    )}
-
-                    {/* No Results */}
-                    {searchResults.length === 0 &&
-                      schoolSearchResults.length === 0 &&
-                      localSearchQuery.trim().length > 0 && (
-                        <div className="text-sm text-gray-500 p-2">
-                          This school is not in our database yet. We are adding
-                          more schools weekly
-                        </div>
-                      )}
-                  </div>
-                </div>
-              )}
           </form>
 
           {/* Filter Section - Right below search bar */}
@@ -1264,9 +1136,6 @@ const SchoolDirectoryContent = () => {
           <h6 className="font-medium text-black text-sm">
             We&apos;re still adding more preschools across Metro Manila.
           </h6>
-          <p className="text-black text-xs font-normal text-right mt-1">
-            New Schools are added every week.
-          </p>
         </div>
 
         {/* Mobile Info Text */}
@@ -1274,9 +1143,6 @@ const SchoolDirectoryContent = () => {
           <h6 className="font-medium text-black text-sm">
             We&apos;re still adding more preschools across Metro Manila.
           </h6>
-          <p className="text-black text-xs font-normal mt-1">
-            New Schools are added every week.
-          </p>
         </div>
 
         {/* Results Summary */}
@@ -1359,6 +1225,7 @@ const SchoolDirectoryContent = () => {
                   tags={school.curriculum_tags.split(", ")}
                   priceRange={`${school.min_tuition} - ${school.max_tuition}`}
                   schoolSlug={createSlug(school.school_name)}
+                  priority={index < 6}
                 />
               </div>
             ))}
