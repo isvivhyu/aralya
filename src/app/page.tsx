@@ -4,23 +4,155 @@ import Navbar from "@/components/Navbar";
 import HowItWorksSection from "@/components/HowItWorksSection";
 import Link from "next/link";
 import Footer from "@/components/Footer";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import AOS from "aos";
 import "aos/dist/aos.css";
 import { ButtonWithLoading } from "@/components/LoadingSpinner";
+import { SchoolService } from "@/lib/schoolService";
 
 export default function Home() {
   const [searchQuery, setSearchQuery] = useState("");
   const [activeCategory, setActiveCategory] = useState<
     "all" | "city" | "budget" | "curriculum"
   >("all");
+  const [cityFilter, setCityFilter] = useState("");
+  const [budgetFilter, setBudgetFilter] = useState("");
+  const [curriculumFilter, setCurriculumFilter] = useState("");
+  const [availableCities, setAvailableCities] = useState<
+    { city: string; schoolCount: number }[]
+  >([]);
+  const [availableCurriculums, setAvailableCurriculums] = useState<string[]>([]);
+  const [showDropdown, setShowDropdown] = useState(false);
+  const [inputFocused, setInputFocused] = useState(false);
   const [isSearching, setIsSearching] = useState(false);
   const router = useRouter();
+  const searchInputRef = useRef<HTMLInputElement>(null);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  // Budget range options
+  const budgetOptions = [
+    { key: "under-100k", label: "Under ₱100k", value: "under-100k" },
+    { key: "100k-200k", label: "₱100k - ₱200k", value: "100k-200k" },
+    { key: "200k-300k", label: "₱200k - ₱300k", value: "200k-300k" },
+    { key: "300k-500k", label: "₱300k - ₱500k", value: "300k-500k" },
+    { key: "over-500k", label: "Over ₱500k", value: "over-500k" },
+  ];
+
+  // Load available cities and curriculums
+  useEffect(() => {
+    const loadData = async () => {
+      try {
+        const cities = await SchoolService.searchCities("");
+        setAvailableCities(cities);
+      } catch (error) {
+        console.error("Error loading cities:", error);
+        setAvailableCities([]);
+      }
+
+      try {
+        const curriculums = await SchoolService.getUniqueCurriculumTags();
+        setAvailableCurriculums(curriculums);
+      } catch (error) {
+        console.error("Error loading curriculum options:", error);
+        setAvailableCurriculums([]);
+      }
+    };
+
+    loadData();
+  }, []);
+
+  // Show dropdown when input is focused and a category is selected
+  useEffect(() => {
+    if (inputFocused && activeCategory !== "all") {
+      setShowDropdown(true);
+    } else {
+      setShowDropdown(false);
+    }
+  }, [inputFocused, activeCategory]);
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target as Node) &&
+        searchInputRef.current &&
+        !searchInputRef.current.contains(event.target as Node)
+      ) {
+        setShowDropdown(false);
+        setInputFocused(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
 
   // Handle search input changes
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchQuery(e.target.value);
+    const value = e.target.value;
+    setSearchQuery(value);
+
+    // Show dropdown when typing in category-specific mode
+    if (activeCategory === "city" || activeCategory === "curriculum") {
+      setShowDropdown(true);
+      // Clear the filter when user clears the input or types something different
+      if (activeCategory === "city") {
+        if (!value || value !== cityFilter) {
+          // Only clear if the value doesn't match the current filter
+          if (value !== cityFilter) setCityFilter("");
+        }
+      } else if (activeCategory === "curriculum") {
+        if (!value || value !== curriculumFilter) {
+          // Only clear if the value doesn't match the current filter
+          if (value !== curriculumFilter) setCurriculumFilter("");
+        }
+      }
+    }
+  };
+
+  // Filter options based on search query and selected filter
+  const filteredCities = availableCities.filter((city) => {
+    // If a city filter is already selected, only show that city
+    if (cityFilter) {
+      return city.city === cityFilter;
+    }
+    // Otherwise, filter by search query
+    return city.city.toLowerCase().includes(searchQuery.toLowerCase());
+  });
+
+  const filteredCurriculums = availableCurriculums.filter((curriculum) => {
+    // If a curriculum filter is already selected, only show that curriculum
+    if (curriculumFilter) {
+      return curriculum === curriculumFilter;
+    }
+    // Otherwise, filter by search query
+    return curriculum.toLowerCase().includes(searchQuery.toLowerCase());
+  });
+
+  // Filter budget options based on selected filter
+  const filteredBudgetOptions = budgetFilter
+    ? budgetOptions.filter((option) => option.value === budgetFilter)
+    : budgetOptions;
+
+  // Handle option selection from dropdown
+  const handleOptionSelect = (value: string) => {
+    if (activeCategory === "city") {
+      setCityFilter(value);
+      setSearchQuery(value);
+    } else if (activeCategory === "budget") {
+      setBudgetFilter(value);
+      const selectedBudget = budgetOptions.find((b) => b.value === value);
+      setSearchQuery(selectedBudget?.label || "");
+    } else if (activeCategory === "curriculum") {
+      setCurriculumFilter(value);
+      setSearchQuery(value);
+    }
+    setShowDropdown(false);
+    setInputFocused(false);
   };
 
   // Handle search functionality
@@ -28,15 +160,27 @@ export default function Home() {
     e.preventDefault();
     setIsSearching(true);
     try {
-      if (searchQuery.trim()) {
-        // Redirect to directory with search query
-        router.push(
-          `/directory?search=${encodeURIComponent(searchQuery.trim())}`,
-        );
-      } else {
-        // If no search query, go to directory
-        router.push("/directory");
+      const params = new URLSearchParams();
+      
+      // Add search query if not empty
+      if (searchQuery.trim() && activeCategory === "all") {
+        params.set("search", searchQuery.trim());
       }
+      
+      // Add filters if they exist
+      if (cityFilter) {
+        params.set("city", cityFilter);
+      }
+      if (budgetFilter) {
+        params.set("budget", budgetFilter);
+      }
+      if (curriculumFilter) {
+        params.set("curriculum", curriculumFilter);
+      }
+
+      const queryString = params.toString();
+      const url = `/directory${queryString ? `?${queryString}` : ""}`;
+      router.push(url);
     } catch (error) {
       console.error("Error during search:", error);
     } finally {
@@ -49,11 +193,11 @@ export default function Home() {
   const getPlaceholder = () => {
     switch (activeCategory) {
       case "city":
-        return "Enter a city (e.g., Pasig, Makati, Taguig…)";
+        return "Select or search for a city";
       case "budget":
-        return "Enter your budget (e.g., ₱50,000 – ₱100,000)";
+        return "Select your budget range";
       case "curriculum":
-        return "Search by curriculum (e.g., Montessori, Progressive…)";
+        return "Select or search for a curriculum";
       default:
         return "Search by school name, city, or curriculum…";
     }
@@ -110,7 +254,30 @@ export default function Home() {
                   <button
                     key={category.id}
                     type="button"
-                    onClick={() => setActiveCategory(category.id)}
+                    onClick={() => {
+                      setActiveCategory(category.id);
+                      setSearchQuery("");
+                      // Clear the filter for the category being switched to
+                      if (category.id === "city") {
+                        setCityFilter("");
+                      } else if (category.id === "budget") {
+                        setBudgetFilter("");
+                      } else if (category.id === "curriculum") {
+                        setCurriculumFilter("");
+                      } else if (category.id === "all") {
+                        // Clear all filters when switching to "All Schools"
+                        setCityFilter("");
+                        setBudgetFilter("");
+                        setCurriculumFilter("");
+                      }
+                      // Show dropdown immediately for budget, hide for others
+                      if (category.id === "budget") {
+                        setShowDropdown(true);
+                      } else {
+                        setShowDropdown(false);
+                      }
+                      setInputFocused(false);
+                    }}
                     className={`px-4 md:px-6 py-2.5 md:py-3 text-sm font-semibold flex items-center gap-2 text-black relative shrink-0 ${
                       activeCategory === category.id
                         ? "border-b-2 border-black"
@@ -124,24 +291,159 @@ export default function Home() {
               </div>
             </div>
             <div className="flex flex-col md:flex-row md:mt-6 mt-3 gap-2.5 rounded-2xl">
-              <div className="bg-[#f5f5f5] w-full md:w-[810px] p-3 md:p-4 md:rounded-[10px] rounded-full overflow-hidden flex items-center gap-3 md:gap-5 relative">
+              <div
+                className="bg-[#f5f5f5] w-full md:w-[810px] p-3 md:p-4 md:rounded-[10px] rounded-full overflow-visible flex items-center gap-3 md:gap-5 relative"
+                onClick={() => {
+                  if (activeCategory === "budget") {
+                    setShowDropdown(true);
+                  }
+                }}
+              >
                 <i className="ri-search-line text-[#0E1C29]/40 text-2xl"></i>
                 <input
+                  ref={searchInputRef}
                   type="text"
-                  value={searchQuery}
+                  value={
+                    activeCategory === "city"
+                      ? cityFilter || searchQuery
+                      : activeCategory === "budget"
+                        ? budgetOptions.find((b) => b.value === budgetFilter)
+                            ?.label || ""
+                        : activeCategory === "curriculum"
+                          ? curriculumFilter || searchQuery
+                          : searchQuery
+                  }
+                  readOnly={activeCategory === "budget"}
                   onChange={handleSearchChange}
+                  onFocus={() => {
+                    if (activeCategory === "budget") {
+                      setShowDropdown(true);
+                    } else {
+                      setInputFocused(true);
+                      if (activeCategory !== "all") {
+                        setShowDropdown(true);
+                      }
+                    }
+                  }}
+                  onBlur={() => {
+                    // Delay to allow dropdown click to register
+                    setTimeout(() => setInputFocused(false), 200);
+                  }}
                   placeholder={getPlaceholder()}
-                  className="bg-transparent w-full text-base text-[#0E1C29] placeholder-[#999999] focus:outline-none"
+                  className="bg-transparent w-full text-base text-[#0E1C29] placeholder-[#999999] focus:outline-none cursor-pointer"
                   style={{ fontSize: "16px" }}
+                  onClick={() => {
+                    if (activeCategory === "budget") {
+                      setShowDropdown(true);
+                    }
+                  }}
                 />
-                {searchQuery && (
+                {(searchQuery ||
+                  (activeCategory === "city" && cityFilter) ||
+                  (activeCategory === "budget" && budgetFilter) ||
+                  (activeCategory === "curriculum" && curriculumFilter)) && (
                   <button
                     type="button"
-                    onClick={() => setSearchQuery("")}
+                    onClick={() => {
+                      setSearchQuery("");
+                      if (activeCategory === "city") setCityFilter("");
+                      if (activeCategory === "budget") setBudgetFilter("");
+                      if (activeCategory === "curriculum")
+                        setCurriculumFilter("");
+                    }}
                     className="text-[#0E1C29]/40 hover:text-[#0E1C29]/60 transition-colors"
                   >
                     <i className="ri-close-line text-xl"></i>
                   </button>
+                )}
+                {/* Dropdown Menu */}
+                {showDropdown && activeCategory !== "all" && (
+                  <div
+                    ref={dropdownRef}
+                    className="absolute top-full left-0 right-0 mt-2 bg-white rounded-xl shadow-lg border border-gray-200 max-h-96 overflow-y-auto z-50"
+                  >
+                    {activeCategory === "city" && (
+                      <div className="py-2">
+                        {filteredCities.length > 0 ? (
+                          filteredCities.map((cityOption) => (
+                            <button
+                              key={cityOption.city}
+                              type="button"
+                              onClick={() => handleOptionSelect(cityOption.city)}
+                              className="w-full px-4 py-3 text-left hover:bg-[#f5f5f5] transition-colors flex items-center justify-between"
+                            >
+                              <span className="text-[#0E1C29] font-medium">
+                                {cityOption.city}
+                              </span>
+                              <span className="text-sm text-gray-500">
+                                {cityOption.schoolCount} school
+                                {cityOption.schoolCount !== 1 ? "s" : ""}
+                              </span>
+                            </button>
+                          ))
+                        ) : filteredCities.length === 0 &&
+                            availableCities.length > 0 ? (
+                          <div className="px-4 py-3 text-gray-500 text-center">
+                            No cities found matching &quot;{searchQuery}&quot;
+                          </div>
+                        ) : (
+                          <div className="px-4 py-3 text-gray-500 text-center">
+                            Loading cities...
+                          </div>
+                        )}
+                      </div>
+                    )}
+                    {activeCategory === "budget" && (
+                      <div className="py-2">
+                        {filteredBudgetOptions.map((budgetOption) => (
+                          <button
+                            key={budgetOption.key}
+                            type="button"
+                            onClick={() => handleOptionSelect(budgetOption.value)}
+                            className={`w-full px-4 py-3 text-left hover:bg-[#f5f5f5] transition-colors ${
+                              budgetFilter === budgetOption.value
+                                ? "bg-[#774BE5]/10 text-[#774BE5]"
+                                : "text-[#0E1C29]"
+                            }`}
+                          >
+                            <span className="font-medium">
+                              {budgetOption.label}
+                            </span>
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                    {activeCategory === "curriculum" && (
+                      <div className="py-2">
+                        {filteredCurriculums.length > 0 ? (
+                          filteredCurriculums.map((curriculum) => (
+                            <button
+                              key={curriculum}
+                              type="button"
+                              onClick={() => handleOptionSelect(curriculum)}
+                              className={`w-full px-4 py-3 text-left hover:bg-[#f5f5f5] transition-colors ${
+                                curriculumFilter === curriculum
+                                  ? "bg-[#774BE5]/10 text-[#774BE5]"
+                                  : "text-[#0E1C29]"
+                              }`}
+                            >
+                              <span className="font-medium">{curriculum}</span>
+                            </button>
+                          ))
+                        ) : filteredCurriculums.length === 0 &&
+                            availableCurriculums.length > 0 ? (
+                          <div className="px-4 py-3 text-gray-500 text-center">
+                            No curriculum options found matching &quot;
+                            {searchQuery}&quot;
+                          </div>
+                        ) : (
+                          <div className="px-4 py-3 text-gray-500 text-center">
+                            Loading curriculum options...
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
                 )}
               </div>
               <ButtonWithLoading
