@@ -22,7 +22,7 @@ export default function Home() {
   const [availableCities, setAvailableCities] = useState<
     { city: string; schoolCount: number }[]
   >([]);
-  const [availableCurriculums, setAvailableCurriculums] = useState<string[]>([]);
+  const [availableCurriculums, setAvailableCurriculums] = useState<{ label: string; count: number }[]>([]);
   const [showDropdown, setShowDropdown] = useState(false);
   const [inputFocused, setInputFocused] = useState(false);
   const [isSearching, setIsSearching] = useState(false);
@@ -31,30 +31,101 @@ export default function Home() {
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   // Budget range options
-  const budgetOptions = [
-    { key: "under-100k", label: "Under ₱100k", value: "under-100k" },
-    { key: "100k-200k", label: "₱100k - ₱200k", value: "100k-200k" },
-    { key: "200k-300k", label: "₱200k - ₱300k", value: "200k-300k" },
-    { key: "300k-500k", label: "₱300k - ₱500k", value: "300k-500k" },
-    { key: "over-500k", label: "Over ₱500k", value: "over-500k" },
-  ];
+  const [budgetOptions, setBudgetOptions] = useState([
+    { key: "under-100k", label: "Under ₱100k", value: "under-100k", count: 0 },
+    { key: "100k-200k", label: "₱100k - ₱200k", value: "100k-200k", count: 0 },
+    { key: "200k-300k", label: "₱200k - ₱300k", value: "200k-300k", count: 0 },
+    { key: "300k-500k", label: "₱300k - ₱500k", value: "300k-500k", count: 0 },
+    { key: "over-500k", label: "Over ₱500k", value: "over-500k", count: 0 },
+  ]);
 
   // Load available cities and curriculums
   useEffect(() => {
     const loadData = async () => {
       try {
+        // Fetch all schools to calculate counts
+        const schools = await SchoolService.getAllSchools();
+        
+        // 1. Process Cities
         const cities = await SchoolService.searchCities("");
         setAvailableCities(cities);
-      } catch (error) {
-        console.error("Error loading cities:", error);
-        setAvailableCities([]);
-      }
 
-      try {
-        const curriculums = await SchoolService.getUniqueCurriculumTags();
-        setAvailableCurriculums(curriculums);
+        // 2. Process Curriculums
+        const curriculumCounts: Record<string, number> = {};
+        schools.forEach((school) => {
+          if (school.curriculum_tags) {
+            const tags = school.curriculum_tags.split(",").map(t => t.trim());
+            tags.forEach(tag => {
+              if (tag) {
+                curriculumCounts[tag] = (curriculumCounts[tag] || 0) + 1;
+              }
+            });
+          }
+        });
+        
+        const curriculumsWithCounts = Object.entries(curriculumCounts)
+          .map(([label, count]) => ({ label, count }))
+          .sort((a, b) => a.label.localeCompare(b.label));
+        
+        setAvailableCurriculums(curriculumsWithCounts);
+
+        // 3. Process Budgets
+        const budgetCounts = {
+          "under-100k": 0,
+          "100k-200k": 0,
+          "200k-300k": 0,
+          "300k-500k": 0,
+          "over-500k": 0,
+        };
+
+        const budgetRanges = {
+          "under-100k": { min: 0, max: 100000 },
+          "100k-200k": { min: 100000, max: 200000 },
+          "200k-300k": { min: 200000, max: 300000 },
+          "300k-500k": { min: 300000, max: 500000 },
+          "over-500k": { min: 500000, max: Infinity },
+        };
+
+        schools.forEach((school) => {
+          try {
+             // Skip schools with non-numeric tuition values
+             if (
+              !school.min_tuition || 
+              !school.max_tuition ||
+              isNaN(parseFloat(school.min_tuition.replace(/[^\d.]/g, ""))) ||
+              isNaN(parseFloat(school.max_tuition.replace(/[^\d.]/g, "")))
+            ) {
+              return;
+            }
+
+            const minPrice = parseFloat(school.min_tuition.replace(/[^\d.]/g, ""));
+            const maxPrice = parseFloat(school.max_tuition.replace(/[^\d.]/g, ""));
+
+            // Check which ranges this school falls into
+            Object.entries(budgetRanges).forEach(([key, range]) => {
+              if (
+                 (minPrice >= range.min && minPrice <= range.max) ||
+                 (maxPrice >= range.min && maxPrice <= range.max)
+              ) {
+                if (key in budgetCounts) {
+                  budgetCounts[key as keyof typeof budgetCounts]++;
+                }
+              }
+            });
+          } catch (e) {
+            // ignore parsing errors
+          }
+        });
+
+        // Update budget options with counts
+        setBudgetOptions(prev => prev.map(opt => ({
+          ...opt,
+          count: budgetCounts[opt.value as keyof typeof budgetCounts] || 0
+        })));
+
       } catch (error) {
-        console.error("Error loading curriculum options:", error);
+        console.error("Error loading data:", error);
+        setAvailableCities([]);
         setAvailableCurriculums([]);
       }
     };
@@ -124,13 +195,13 @@ export default function Home() {
     return city.city.toLowerCase().includes(searchQuery.toLowerCase());
   });
 
-  const filteredCurriculums = availableCurriculums.filter((curriculum) => {
+  const filteredCurriculums = availableCurriculums.filter((item) => {
     // If a curriculum filter is already selected, only show that curriculum
     if (curriculumFilter) {
-      return curriculum === curriculumFilter;
+      return item.label === curriculumFilter;
     }
     // Otherwise, filter by search query
-    return curriculum.toLowerCase().includes(searchQuery.toLowerCase());
+    return item.label.toLowerCase().includes(searchQuery.toLowerCase());
   });
 
   // Filter budget options based on selected filter
@@ -249,7 +320,7 @@ export default function Home() {
           >
             {/* Category Tabs Section */}
             <div className="w-full relative z-[999]">
-              <div className="flex items-center justify-start md:justify-center gap-2 md:gap-3 overflow-x-auto scrollbar-hide md:flex-wrap flex-nowrap">
+              <div className="grid grid-cols-2 md:flex md:items-center md:justify-center gap-2 md:gap-3 md:flex-wrap">
                 {categories.map((category) => (
                   <button
                     key={category.id}
@@ -278,7 +349,7 @@ export default function Home() {
                       }
                       setInputFocused(false);
                     }}
-                    className={`px-4 md:px-6 py-2.5 md:py-3 text-sm font-semibold flex items-center gap-2 text-black relative shrink-0 ${
+                    className={`px-4 md:px-6 py-2.5 md:py-3 text-sm font-semibold flex items-center justify-center gap-2 text-black relative ${
                       activeCategory === category.id
                         ? "border-b-2 border-black"
                         : "border-b-2 border-transparent"
@@ -400,7 +471,7 @@ export default function Home() {
                             key={budgetOption.key}
                             type="button"
                             onClick={() => handleOptionSelect(budgetOption.value)}
-                            className={`w-full px-4 py-3 text-left hover:bg-[#f5f5f5] transition-colors ${
+                            className={`w-full px-4 py-3 text-left hover:bg-[#f5f5f5] transition-colors flex items-center justify-between ${
                               budgetFilter === budgetOption.value
                                 ? "bg-[#774BE5]/10 text-[#774BE5]"
                                 : "text-[#0E1C29]"
@@ -408,6 +479,10 @@ export default function Home() {
                           >
                             <span className="font-medium">
                               {budgetOption.label}
+                            </span>
+                            <span className="text-sm text-gray-500">
+                                {budgetOption.count} school
+                                {budgetOption.count !== 1 ? "s" : ""}
                             </span>
                           </button>
                         ))}
@@ -418,16 +493,20 @@ export default function Home() {
                         {filteredCurriculums.length > 0 ? (
                           filteredCurriculums.map((curriculum) => (
                             <button
-                              key={curriculum}
+                              key={curriculum.label}
                               type="button"
-                              onClick={() => handleOptionSelect(curriculum)}
-                              className={`w-full px-4 py-3 text-left hover:bg-[#f5f5f5] transition-colors ${
-                                curriculumFilter === curriculum
+                              onClick={() => handleOptionSelect(curriculum.label)}
+                              className={`w-full px-4 py-3 text-left hover:bg-[#f5f5f5] transition-colors flex items-center justify-between ${
+                                curriculumFilter === curriculum.label
                                   ? "bg-[#774BE5]/10 text-[#774BE5]"
                                   : "text-[#0E1C29]"
                               }`}
                             >
-                              <span className="font-medium">{curriculum}</span>
+                              <span className="font-medium">{curriculum.label}</span>
+                              <span className="text-sm text-gray-500">
+                                {curriculum.count} school
+                                {curriculum.count !== 1 ? "s" : ""}
+                              </span>
                             </button>
                           ))
                         ) : filteredCurriculums.length === 0 &&
@@ -490,7 +569,7 @@ export default function Home() {
               iconClass: "ri-school-line",
               text: (
                 <>
-                  <strong>Start</strong> with available preschools
+                  Start with available preschools
                 </>
               ),
             },
@@ -498,7 +577,7 @@ export default function Home() {
               iconClass: "ri-filter-line",
               text: (
                 <>
-                  <strong>Narrow down</strong> what matters to you
+                  Narrow down what matters to you
                 </>
               ),
             },
@@ -506,7 +585,7 @@ export default function Home() {
               iconClass: "ri-file-text-line",
               text: (
                 <>
-                  <strong>Review</strong> details and reach out when ready
+                  Review details and reach out when ready
                 </>
               ),
             },
