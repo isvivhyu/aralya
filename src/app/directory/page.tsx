@@ -649,16 +649,15 @@ const SchoolDirectoryContent = () => {
                 ))}
               </div>
             </div>
-            <div className="flex flex-col md:flex-row md:mt-6 mt-3 gap-2.5 rounded-2xl">
+            <div className="flex flex-col md:flex-row md:mt-6 mt-3 gap-2.5 rounded-2xl relative z-[1001]">
               <div 
-                className="bg-[#f5f5f5] w-full md:w-[810px] p-3 md:p-4 md:rounded-[10px] rounded-full overflow-visible flex items-center gap-3 md:gap-5 relative"
+                className="bg-[#f5f5f5] w-full p-2 rounded-full overflow-visible flex items-center justify-between gap-3 relative shadow-sm"
                 onClick={() => {
                   if (activeCategory === "budget") {
                     setShowDropdown(true);
                   }
                 }}
               >
-                <i className="ri-search-line text-[#0E1C29]/40 text-2xl"></i>
                 <input
                   ref={searchInputRef}
                   type="text"
@@ -689,7 +688,7 @@ const SchoolDirectoryContent = () => {
                     setTimeout(() => setInputFocused(false), 200);
                   }}
                   placeholder={getPlaceholder()}
-                  className="bg-transparent w-full text-base text-[#0E1C29] placeholder-[#999999] focus:outline-none cursor-pointer"
+                  className="bg-transparent w-full text-base text-[#0E1C29] placeholder-[#999999] focus:outline-none cursor-pointer pl-6"
                   style={{ fontSize: "16px" }}
                   onClick={() => {
                     if (activeCategory === "budget") {
@@ -697,24 +696,37 @@ const SchoolDirectoryContent = () => {
                     }
                   }}
                 />
-                {(localSearchQuery ||
-                  (activeCategory === "city" && cityFilter) ||
-                  (activeCategory === "budget" && budgetFilter) ||
-                  (activeCategory === "curriculum" && curriculumFilter)) && (
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setLocalSearchQuery("");
-                      if (activeCategory === "city") setCityFilter("");
-                      if (activeCategory === "budget") setBudgetFilter("");
-                      if (activeCategory === "curriculum")
-                        setCurriculumFilter("");
-                    }}
-                    className="text-[#0E1C29]/40 hover:text-[#0E1C29]/60 transition-colors"
+                
+                <div className="flex items-center gap-2">
+                  {(localSearchQuery ||
+                    (activeCategory === "city" && cityFilter) ||
+                    (activeCategory === "budget" && budgetFilter) ||
+                    (activeCategory === "curriculum" && curriculumFilter)) && (
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setLocalSearchQuery("");
+                        if (activeCategory === "city") setCityFilter("");
+                        if (activeCategory === "budget") setBudgetFilter("");
+                        if (activeCategory === "curriculum")
+                          setCurriculumFilter("");
+                      }}
+                      className="text-[#0E1C29]/40 hover:text-[#0E1C29]/60 transition-colors mr-2"
+                    >
+                      <i className="ri-close-line text-xl"></i>
+                    </button>
+                  )}
+
+                  <ButtonWithLoading
+                    type="submit"
+                    isLoading={isSearching}
+                    className="bg-[#774BE5] text-white px-8 py-3 rounded-full text-sm font-semibold flex items-center justify-center gap-1 hover:bg-[#6B3FD6] transition-colors disabled:hover:bg-[#774BE5]"
                   >
-                    <i className="ri-close-line text-xl"></i>
-                  </button>
-                )}
+                    Search
+                  </ButtonWithLoading>
+                </div>
+
                 {/* Dropdown Menu */}
                 {showDropdown && activeCategory !== "all" && (
                   <div
@@ -813,14 +825,6 @@ const SchoolDirectoryContent = () => {
                   </div>
                 )}
               </div>
-              <ButtonWithLoading
-                type="submit"
-                isLoading={isSearching}
-                className="bg-[#774BE5] md:w-fit w-full text-white p-4 rounded-[10px] text-sm font-semibold flex items-center justify-center gap-1 hover:bg-[#6B3FD6] transition-colors disabled:hover:bg-[#774BE5]"
-              >
-                <i className="ri-search-line text-white text-lg mt-0.5"></i>
-                Search
-              </ButtonWithLoading>
             </div>
           </form>
         </div>

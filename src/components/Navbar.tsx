@@ -59,15 +59,15 @@ const Navbar = ({ textColor = "white" }: NavbarProps) => {
               <Image
                 src="/images/logo-white.png"
                 alt="logo"
-                width={100}
-                height={100}
+                width={150}
+                height={150}
               />
             ) : (
               <Image
                 src="/images/Logo.png"
                 alt="logo"
-                width={150}
-                height={150}
+                width={200}
+                height={200}
                 style={{ height: 'auto' }}
               />
             )}
@@ -76,13 +76,13 @@ const Navbar = ({ textColor = "white" }: NavbarProps) => {
             <Image
               src="/images/logo-white.png"
               alt="logo"
-              width={100}
-              height={100}
+              width={200}
+              height={200}
             />
           </Link>
 
           <ul
-            className={`hidden md:flex items-center justify-center gap-20 font-semibold text-sm transition-all duration-500 ease-in-out flex-1`}
+            className={`hidden md:flex items-center justify-center gap-20 font-bold text-base transition-all duration-500 ease-in-out flex-1`}
           >
             <li
               className={`transition-colors duration-500 ease-in-out delay-100 ${
@@ -145,7 +145,7 @@ const Navbar = ({ textColor = "white" }: NavbarProps) => {
           }`}
         >
           <div className="px-5 my-12">
-            <ul className="flex flex-col gap-10 font-semibold text-lg w-full">
+            <ul className="flex flex-col gap-10 font-bold text-lg w-full">
               <li className="text-white hover:text-[#0E1C29] transition-colors duration-500 ease-in-out delay-100">
                 <Link href="/" onClick={() => setIsMenuOpen(false)}>
                   Home

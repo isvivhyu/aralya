@@ -124,7 +124,7 @@ const SchoolDetails = () => {
     const checkDesktop = () => {
       setIsDesktop(window.innerWidth >= 768); // md breakpoint
     };
-    
+
     checkDesktop();
     window.addEventListener("resize", checkDesktop);
     return () => window.removeEventListener("resize", checkDesktop);
@@ -236,7 +236,7 @@ const SchoolDetails = () => {
             </p>
             <Link
               href="/directory"
-              className="bg-[#774BE5] text-white px-6 py-3 rounded-lg font-semibold"
+              className="bg-[#774BE5] text-white px-6 py-3 rounded-full font-semibold"
             >
               Back to Directory
             </Link>
@@ -279,38 +279,38 @@ const SchoolDetails = () => {
               />
             </div>
             <div className="flex flex-col gap-2">
-             <div className="flex items-center justify-between">
-             <h4 className="text-[#0E1C29] md:text-4xl text-base md:font-medium font-semibold">
-                <span>{school?.school_name || "School Name"}</span>
-                <span className="relative group inline-block ml-1 -mt-3 align-middle">
-                  <i className="ri-verified-badge-fill text-[#774BE5] text-xl md:text-2xl cursor-pointer"></i>
-                  <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-1.5 bg-[#774BE5] text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-10">
-                    Verified by Aralya
-                    <div className="absolute top-full left-1/2 transform -translate-x-1/2 -mt-1">
-                      <div className="border-4 border-transparent border-t-[#774BE5]"></div>
+              <div className="flex items-center justify-between">
+                <h4 className="text-[#0E1C29] md:text-4xl text-base md:font-medium font-semibold">
+                  <span>{school?.school_name || "School Name"}</span>
+                  <span className="relative group inline-block ml-1 -mt-3 align-middle">
+                    <i className="ri-verified-badge-fill text-[#774BE5] text-xl md:text-2xl cursor-pointer"></i>
+                    <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-1.5 bg-[#774BE5] text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-10">
+                      Verified by Aralya
+                      <div className="absolute top-full left-1/2 transform -translate-x-1/2 -mt-1">
+                        <div className="border-4 border-transparent border-t-[#774BE5]"></div>
+                      </div>
                     </div>
-                  </div>
-                </span>
-              </h4>
+                  </span>
+                </h4>
 
-              <div 
-                className="flex items-center gap-2 cursor-pointer border border-black rounded-lg px-2 py-1 hover:bg-gray-50 transition-colors"
-                onClick={() => {
-                  // On mobile, directly trigger native share
-                  if (!isDesktop) {
-                    handleNativeShare();
-                  } else {
-                    // On desktop, show modal
-                    setShowShareModal(true);
-                  }
-                }}
-              >
+                <div
+                  className="flex items-center gap-2 cursor-pointer border border-black rounded-lg px-2 py-1 hover:bg-gray-50 transition-colors"
+                  onClick={() => {
+                    // On mobile, directly trigger native share
+                    if (!isDesktop) {
+                      handleNativeShare();
+                    } else {
+                      // On desktop, show modal
+                      setShowShareModal(true);
+                    }
+                  }}
+                >
                   <i className="ri-upload-line text-black text-lg"></i>
                   <p className="text-base font-medium text-black underline">
                     Share
                   </p>
+                </div>
               </div>
-             </div>
               <div className="flex items-center my-1 gap-2 flex-wrap">
                 <div className="flex items-center gap-2">
                   <i className="ri-map-pin-line text-[#374151] text-lg"></i>
@@ -358,7 +358,7 @@ const SchoolDetails = () => {
               <div className="grid md:grid-cols-4 grid-cols-2 w-full gap-4">
                 <Link
                   href={`tel:${(school?.contact_number || "").split(",")[0]?.trim() || ""}`}
-                  className="bg-[#774BE5] rounded-lg px-4 py-2"
+                  className="bg-[#774BE5] rounded-full px-4 py-2"
                 >
                   <p className="text-white text-center font-semibold text-sm">
                     Call
@@ -366,7 +366,7 @@ const SchoolDetails = () => {
                 </Link>
                 <Link
                   href={`sms:${(school?.contact_number || "").split(",")[0]?.trim() || ""}`}
-                  className="bg-[#774BE5] rounded-lg px-4 py-2"
+                  className="bg-[#774BE5] rounded-full px-4 py-2"
                 >
                   <p className="text-white text-center font-semibold text-sm">
                     Text
@@ -376,7 +376,7 @@ const SchoolDetails = () => {
                   href={school?.facebook || "#"}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="bg-[#774BE5] rounded-lg px-4 py-2"
+                  className="bg-[#774BE5] rounded-full px-4 py-2"
                 >
                   <p className="text-white text-center font-semibold text-sm">
                     Facebook
@@ -384,7 +384,7 @@ const SchoolDetails = () => {
                 </Link>
                 <Link
                   href={`mailto:${school?.email || ""}`}
-                  className="bg-[#774BE5] rounded-lg px-4 py-2"
+                  className="bg-[#774BE5] rounded-full px-4 py-2"
                 >
                   <p className="text-white text-center font-semibold text-sm">
                     Email
@@ -527,9 +527,8 @@ const SchoolDetails = () => {
                       </p>
                     </div>
                     <i
-                      className={`ri-arrow-down-s-line text-[#0E1C29] text-lg transition-transform duration-200 shrink-0 ${
-                        expandedItems[info.key] ? "rotate-180" : ""
-                      }`}
+                      className={`ri-arrow-down-s-line text-[#0E1C29] text-lg transition-transform duration-200 shrink-0 ${expandedItems[info.key] ? "rotate-180" : ""
+                        }`}
                     ></i>
                   </button>
                   {expandedItems[info.key] && (
@@ -584,7 +583,7 @@ const SchoolDetails = () => {
                 )}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="bg-[#774BE5] rounded-lg px-4 py-2 inline-flex items-center gap-2 text-white font-semibold text-sm"
+                className="bg-[#774BE5] rounded-full px-4 py-2 inline-flex items-center gap-2 text-white font-semibold text-sm"
               >
                 <i className="ri-map-pin-line text-white text-base"></i>
                 Open in Google Maps
@@ -609,7 +608,7 @@ const SchoolDetails = () => {
                   href="https://web.facebook.com/people/Aralya/61578164295126"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="bg-[#774BE5] rounded-lg px-4 py-2 w-fit mt-2 flex items-center gap-2 hover:bg-[#6B3FD6] transition-colors"
+                  className="bg-[#774BE5] rounded-full px-4 py-2 w-fit mt-2 flex items-center gap-2 hover:bg-[#6B3FD6] transition-colors"
                 >
                   <span className="text-white text-center font-semibold text-sm">
                     Message Aralya on Facebook
@@ -624,11 +623,11 @@ const SchoolDetails = () => {
 
       {/* Share Modal */}
       {showShareModal && (
-        <div 
+        <div
           className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
           onClick={() => setShowShareModal(false)}
         >
-          <div 
+          <div
             className="bg-white rounded-2xl max-w-xl w-full p-6 shadow-xl"
             onClick={(e) => e.stopPropagation()}
           >
@@ -649,38 +648,38 @@ const SchoolDetails = () => {
             <div className="mb-6">
               <div className="w-full h-48  overflow-hidden flex items-center justify-center gap-4 mb-4">
                 <div className="w-1/2 bg-gray-200 border border-gray-200 rounded-lg">
-                <Image
-                  src={school?.logo_banner || "/images/Logo.png"}
-                  alt={school?.school_name || "School Logo"}
-                  width={400}
-                  height={200}
-                  className="max-w-full max-h-full object-contain"
-                />
+                  <Image
+                    src={school?.logo_banner || "/images/Logo.png"}
+                    alt={school?.school_name || "School Logo"}
+                    width={400}
+                    height={200}
+                    className="max-w-full max-h-full object-contain"
+                  />
                 </div>
 
                 <div className="flex flex-col gap-2 w-1/2">
-                <h4 className="text-xl font-semibold text-[#0E1C29] mb-2">
-                {school?.school_name || "School Name"}
-              </h4>
-              <div className="flex flex-col gap-1 text-sm text-[#374151]">
-                <div className="flex items-center gap-2">
-                  <i className="ri-map-pin-line"></i>
-                  <span>{school?.city || "City"}</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <i className="ri-money-dollar-circle-line"></i>
-                  <span>
-                    {school?.min_tuition || "N/A"} - {school?.max_tuition || "N/A"} / year
-                  </span>
-                </div>
-                {school?.curriculum_type && (
-                  <div className="flex items-center gap-2">
-                    <i className="ri-book-open-line"></i>
-                    <span>{school.curriculum_type}</span>
+                  <h4 className="text-xl font-semibold text-[#0E1C29] mb-2">
+                    {school?.school_name || "School Name"}
+                  </h4>
+                  <div className="flex flex-col gap-1 text-sm text-[#374151]">
+                    <div className="flex items-center gap-2">
+                      <i className="ri-map-pin-line"></i>
+                      <span>{school?.city || "City"}</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <i className="ri-money-dollar-circle-line"></i>
+                      <span>
+                        {school?.min_tuition || "N/A"} - {school?.max_tuition || "N/A"} / year
+                      </span>
+                    </div>
+                    {school?.curriculum_type && (
+                      <div className="flex items-center gap-2">
+                        <i className="ri-book-open-line"></i>
+                        <span>{school.curriculum_type}</span>
+                      </div>
+                    )}
                   </div>
-                )}
-              </div>
-                  </div>
+                </div>
               </div>
             </div>
 
@@ -692,7 +691,7 @@ const SchoolDetails = () => {
                   {/* 1. Copy Link */}
                   <button
                     onClick={handleCopyLink}
-                    className="bg-[#774BE5] hover:bg-[#6B3FD6] text-white rounded-lg px-4 py-3 flex items-center justify-center gap-2 font-semibold transition-colors"
+                    className="bg-[#774BE5] hover:bg-[#6B3FD6] text-white rounded-full px-4 py-3 flex items-center justify-center gap-2 font-semibold transition-colors"
                   >
                     {linkCopied ? (
                       <>
@@ -740,7 +739,7 @@ const SchoolDetails = () => {
                   {/* Native Share Button */}
                   <button
                     onClick={handleNativeShare}
-                    className="w-full bg-[#774BE5] hover:bg-[#6B3FD6] text-white rounded-lg px-4 py-3 flex items-center justify-center gap-2 font-semibold transition-colors"
+                    className="w-full bg-[#774BE5] hover:bg-[#6B3FD6] text-white rounded-full px-4 py-3 flex items-center justify-center gap-2 font-semibold transition-colors"
                   >
                     <i className="ri-share-line text-lg"></i>
                     <span>Share</span>

@@ -71,7 +71,7 @@ const SchoolCard = ({
         </p>
         <Link
           href={schoolSlug ? `/directory/${schoolSlug}` : "/directory"}
-          className="bg-[#774BE5] w-fit text-white p-4 rounded-[10px] text-sm font-semibold flex items-center h-11.5"
+          className="bg-[#774BE5] w-fit text-white p-4 rounded-full text-sm font-semibold flex items-center h-11.5"
         >
           View Info
         </Link>

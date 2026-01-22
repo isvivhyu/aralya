@@ -45,7 +45,7 @@ export default function Home() {
       try {
         // Fetch all schools to calculate counts
         const schools = await SchoolService.getAllSchools();
-        
+
         // 1. Process Cities
         const cities = await SchoolService.searchCities("");
         setAvailableCities(cities);
@@ -62,11 +62,11 @@ export default function Home() {
             });
           }
         });
-        
+
         const curriculumsWithCounts = Object.entries(curriculumCounts)
           .map(([label, count]) => ({ label, count }))
           .sort((a, b) => a.label.localeCompare(b.label));
-        
+
         setAvailableCurriculums(curriculumsWithCounts);
 
         // 3. Process Budgets
@@ -88,9 +88,9 @@ export default function Home() {
 
         schools.forEach((school) => {
           try {
-             // Skip schools with non-numeric tuition values
-             if (
-              !school.min_tuition || 
+            // Skip schools with non-numeric tuition values
+            if (
+              !school.min_tuition ||
               !school.max_tuition ||
               isNaN(parseFloat(school.min_tuition.replace(/[^\d.]/g, ""))) ||
               isNaN(parseFloat(school.max_tuition.replace(/[^\d.]/g, "")))
@@ -104,8 +104,8 @@ export default function Home() {
             // Check which ranges this school falls into
             Object.entries(budgetRanges).forEach(([key, range]) => {
               if (
-                 (minPrice >= range.min && minPrice <= range.max) ||
-                 (maxPrice >= range.min && maxPrice <= range.max)
+                (minPrice >= range.min && minPrice <= range.max) ||
+                (maxPrice >= range.min && maxPrice <= range.max)
               ) {
                 if (key in budgetCounts) {
                   budgetCounts[key as keyof typeof budgetCounts]++;
@@ -232,12 +232,12 @@ export default function Home() {
     setIsSearching(true);
     try {
       const params = new URLSearchParams();
-      
+
       // Add search query if not empty
       if (searchQuery.trim() && activeCategory === "all") {
         params.set("search", searchQuery.trim());
       }
-      
+
       // Add filters if they exist
       if (cityFilter) {
         params.set("city", cityFilter);
@@ -349,11 +349,10 @@ export default function Home() {
                       }
                       setInputFocused(false);
                     }}
-                    className={`px-4 md:px-6 py-2.5 md:py-3 text-sm font-semibold flex items-center justify-center gap-2 text-black relative ${
-                      activeCategory === category.id
-                        ? "border-b-2 border-black"
-                        : "border-b-2 border-transparent"
-                    } transition-all duration-300 ease-in-out`}
+                    className={`px-4 md:px-6 py-2.5 md:py-3 text-sm font-semibold flex items-center justify-center gap-2 text-black relative ${activeCategory === category.id
+                      ? "border-b-2 border-black"
+                      : "border-b-2 border-transparent"
+                      } transition-all duration-300 ease-in-out`}
                   >
                     <i className={`${category.icon} text-base`}></i>
                     <span>{category.label}</span>
@@ -361,16 +360,15 @@ export default function Home() {
                 ))}
               </div>
             </div>
-            <div className="flex flex-col md:flex-row md:mt-6 mt-3 gap-2.5 rounded-2xl">
+            <div className="flex flex-col md:flex-row md:mt-6 mt-3 gap-2.5 rounded-2xl relative z-[1001]">
               <div
-                className="bg-[#f5f5f5] w-full md:w-[810px] p-3 md:p-4 md:rounded-[10px] rounded-full overflow-visible flex items-center gap-3 md:gap-5 relative"
+                className="bg-[#f5f5f5] w-full p-2 rounded-full overflow-visible flex items-center justify-between gap-3 relative shadow-sm"
                 onClick={() => {
                   if (activeCategory === "budget") {
                     setShowDropdown(true);
                   }
                 }}
               >
-                <i className="ri-search-line text-[#0E1C29]/40 text-2xl"></i>
                 <input
                   ref={searchInputRef}
                   type="text"
@@ -379,7 +377,7 @@ export default function Home() {
                       ? cityFilter || searchQuery
                       : activeCategory === "budget"
                         ? budgetOptions.find((b) => b.value === budgetFilter)
-                            ?.label || ""
+                          ?.label || ""
                         : activeCategory === "curriculum"
                           ? curriculumFilter || searchQuery
                           : searchQuery
@@ -401,7 +399,7 @@ export default function Home() {
                     setTimeout(() => setInputFocused(false), 200);
                   }}
                   placeholder={getPlaceholder()}
-                  className="bg-transparent w-full text-base text-[#0E1C29] placeholder-[#999999] focus:outline-none cursor-pointer"
+                  className="bg-transparent w-full text-base text-[#0E1C29] placeholder-[#999999] focus:outline-none cursor-pointer pl-6"
                   style={{ fontSize: "16px" }}
                   onClick={() => {
                     if (activeCategory === "budget") {
@@ -409,24 +407,37 @@ export default function Home() {
                     }
                   }}
                 />
-                {(searchQuery ||
-                  (activeCategory === "city" && cityFilter) ||
-                  (activeCategory === "budget" && budgetFilter) ||
-                  (activeCategory === "curriculum" && curriculumFilter)) && (
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setSearchQuery("");
-                      if (activeCategory === "city") setCityFilter("");
-                      if (activeCategory === "budget") setBudgetFilter("");
-                      if (activeCategory === "curriculum")
-                        setCurriculumFilter("");
-                    }}
-                    className="text-[#0E1C29]/40 hover:text-[#0E1C29]/60 transition-colors"
+
+                <div className="flex items-center gap-2">
+                  {(searchQuery ||
+                    (activeCategory === "city" && cityFilter) ||
+                    (activeCategory === "budget" && budgetFilter) ||
+                    (activeCategory === "curriculum" && curriculumFilter)) && (
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setSearchQuery("");
+                          if (activeCategory === "city") setCityFilter("");
+                          if (activeCategory === "budget") setBudgetFilter("");
+                          if (activeCategory === "curriculum")
+                            setCurriculumFilter("");
+                        }}
+                        className="text-[#0E1C29]/40 hover:text-[#0E1C29]/60 transition-colors mr-2"
+                      >
+                        <i className="ri-close-line text-xl"></i>
+                      </button>
+                    )}
+
+                  <ButtonWithLoading
+                    type="submit"
+                    isLoading={isSearching}
+                    className="bg-[#774BE5] text-white px-8 py-3 rounded-full text-sm font-semibold flex items-center justify-center gap-1 hover:bg-[#6B3FD6] transition-colors disabled:hover:bg-[#774BE5]"
                   >
-                    <i className="ri-close-line text-xl"></i>
-                  </button>
-                )}
+                    Search
+                  </ButtonWithLoading>
+                </div>
+
                 {/* Dropdown Menu */}
                 {showDropdown && activeCategory !== "all" && (
                   <div
@@ -453,7 +464,7 @@ export default function Home() {
                             </button>
                           ))
                         ) : filteredCities.length === 0 &&
-                            availableCities.length > 0 ? (
+                          availableCities.length > 0 ? (
                           <div className="px-4 py-3 text-gray-500 text-center">
                             No cities found matching &quot;{searchQuery}&quot;
                           </div>
@@ -471,18 +482,17 @@ export default function Home() {
                             key={budgetOption.key}
                             type="button"
                             onClick={() => handleOptionSelect(budgetOption.value)}
-                            className={`w-full px-4 py-3 text-left hover:bg-[#f5f5f5] transition-colors flex items-center justify-between ${
-                              budgetFilter === budgetOption.value
-                                ? "bg-[#774BE5]/10 text-[#774BE5]"
-                                : "text-[#0E1C29]"
-                            }`}
+                            className={`w-full px-4 py-3 text-left hover:bg-[#f5f5f5] transition-colors flex items-center justify-between ${budgetFilter === budgetOption.value
+                              ? "bg-[#774BE5]/10 text-[#774BE5]"
+                              : "text-[#0E1C29]"
+                              }`}
                           >
                             <span className="font-medium">
                               {budgetOption.label}
                             </span>
                             <span className="text-sm text-gray-500">
-                                {budgetOption.count} school
-                                {budgetOption.count !== 1 ? "s" : ""}
+                              {budgetOption.count} school
+                              {budgetOption.count !== 1 ? "s" : ""}
                             </span>
                           </button>
                         ))}
@@ -496,11 +506,10 @@ export default function Home() {
                               key={curriculum.label}
                               type="button"
                               onClick={() => handleOptionSelect(curriculum.label)}
-                              className={`w-full px-4 py-3 text-left hover:bg-[#f5f5f5] transition-colors flex items-center justify-between ${
-                                curriculumFilter === curriculum.label
-                                  ? "bg-[#774BE5]/10 text-[#774BE5]"
-                                  : "text-[#0E1C29]"
-                              }`}
+                              className={`w-full px-4 py-3 text-left hover:bg-[#f5f5f5] transition-colors flex items-center justify-between ${curriculumFilter === curriculum.label
+                                ? "bg-[#774BE5]/10 text-[#774BE5]"
+                                : "text-[#0E1C29]"
+                                }`}
                             >
                               <span className="font-medium">{curriculum.label}</span>
                               <span className="text-sm text-gray-500">
@@ -510,7 +519,7 @@ export default function Home() {
                             </button>
                           ))
                         ) : filteredCurriculums.length === 0 &&
-                            availableCurriculums.length > 0 ? (
+                          availableCurriculums.length > 0 ? (
                           <div className="px-4 py-3 text-gray-500 text-center">
                             No curriculum options found matching &quot;
                             {searchQuery}&quot;
@@ -525,14 +534,6 @@ export default function Home() {
                   </div>
                 )}
               </div>
-              <ButtonWithLoading
-                type="submit"
-                isLoading={isSearching}
-                className="bg-[#774BE5] md:w-fit w-full text-white p-4 rounded-[10px] text-sm font-semibold flex items-center justify-center gap-1 hover:bg-[#6B3FD6] transition-colors disabled:hover:bg-[#774BE5]"
-              >
-                <i className="ri-search-line text-white text-lg mt-0.5"></i>
-                Search
-              </ButtonWithLoading>
             </div>
           </form>
         </div>
@@ -552,7 +553,7 @@ export default function Home() {
           <div className="w-fit">
             <Link
               href="/directory"
-              className="bg-black hover:bg-[#774BE5] transition-all duration-500 ease-in-out rounded-[10px] text-white flex items-center gap-2 px-6 py-3"
+              className="bg-[#774BE5] hover:bg-[#6B3FD6] transition-all duration-500 ease-in-out rounded-full text-white flex items-center gap-2 px-6 py-3"
             >
               <p className="text-base font-medium">Browse preschools</p>
               <i className="ri-arrow-right-fill text-lg"></i>
@@ -569,7 +570,7 @@ export default function Home() {
               iconClass: "ri-school-line",
               text: (
                 <>
-                  Start with available preschools
+                  <strong>Start</strong> with available preschools
                 </>
               ),
             },
@@ -577,7 +578,7 @@ export default function Home() {
               iconClass: "ri-filter-line",
               text: (
                 <>
-                  Narrow down what matters to you
+                  <strong>Narrow</strong> down what matters to you
                 </>
               ),
             },
@@ -585,7 +586,7 @@ export default function Home() {
               iconClass: "ri-file-text-line",
               text: (
                 <>
-                  Review details and reach out when ready
+                  <strong>Review</strong> details and reach out when ready
                 </>
               ),
             },

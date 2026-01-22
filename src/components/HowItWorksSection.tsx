@@ -30,10 +30,10 @@ const HowItWorksSection = ({
         {steps.map((step, index) => (
           <div
             key={index}
-            className="bg-white w-full p-4 rounded-[20px] h-48 flex flex-col items-center"
+            className="w-full p-4 h-48 flex flex-col items-center"
           >
-            <div className="bg-[#EFE8FF] w-10 h-10 rounded-full flex items-center justify-center mb-2.5 mt-5.5">
-              <i className={`${step.iconClass} text-[#774BE5] text-xl`}></i>
+            <div className="flex items-center justify-center mb-2.5 mt-5.5">
+              <i className={`${step.iconClass} text-black text-4xl`}></i>
             </div>
             <p className="text-base text-center text-[#0D0D0D] font-normal px-2">
               {step.text}
