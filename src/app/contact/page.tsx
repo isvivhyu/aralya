@@ -17,24 +17,20 @@ const Contact = () => {
           </h3>
 
           <div className="w-full flex flex-col items-center bg-white mt-8 p-8 rounded-2xl">
-            <div className="flex w-fit p-1 justify-center mb-4 bg-[#F6FBFF] shadow rounded">
-              <i className="ri-customer-service-line text-[#0E1C29] text-3xl"></i>
-            </div>
             <h6 className="text-3xl font-medium text-[#0E1C29] text-center">
-              Help us keep school details accurate
+              Help keep school details accurate
             </h6>
             <p className="text-sm mt-3 text-[#0E1C29] text-center">
-              Message us on Facebook for site questions, to report a correction,
-              or to suggest a school
+              Message us on Facebook to report corrections or suggest a school.
             </p>
 
             <div className="w-full flex justify-center mt-8">
               <Link
                 href="https://web.facebook.com/people/Aralya/61578164295126"
                 target="_blank"
-                className="bg-[#774BE5] min-w-20 text-white p-4 rounded-[10px] text-sm font-semibold flex items-center justify-center gap-1"
+                className="bg-[#774BE5] min-w-20 text-white p-4 rounded-full text-sm font-semibold flex items-center justify-center gap-1"
               >
-                Message Aralya on Facebook
+                Message on Facebook
               </Link>
             </div>
           </div>

@@ -520,8 +520,7 @@ const SchoolDetails = () => {
                     }
                     className="flex items-center justify-between w-full gap-4 hover:opacity-80 transition-opacity"
                   >
-                    <div className="flex items-center gap-4 flex-1">
-                      <i className={`${info.icon} text-[#774BE5] text-lg shrink-0`}></i>
+                    <div className="flex items-center flex-1">
                       <p className="md:text-xl text-base text-[#0E1C29] font-semibold text-left">
                         {info.title}
                       </p>
@@ -532,7 +531,7 @@ const SchoolDetails = () => {
                     ></i>
                   </button>
                   {expandedItems[info.key] && (
-                    <div className="mt-3 ml-9">
+                    <div className="mt-3">
                       <p className="text-[#0E1C29] font-normal text-sm">
                         {info.desc}
                       </p>
@@ -544,7 +543,7 @@ const SchoolDetails = () => {
           </div>
 
           {/* Location (opens Google Maps) */}
-          <div className="w-full mt-10 rounded-3xl bg-white p-6 flex flex-col  gap-2">
+          <div className="w-full mt-10 rounded-3xl bg-white p-6 flex flex-col gap-4">
             <div className="flex gap-2 items-center -ml-1 mb-2">
               <i className="ri-map-pin-line text-[#0E1C29] md:text-2xl text-xl mt-0.5 ml-1"></i>
               <p className="md:text-2xl text-lg text-[#0E1C29] font-semibold">
@@ -552,25 +551,11 @@ const SchoolDetails = () => {
               </p>
             </div>
             <p className="text-[#0E1C29] font-normal text-sm">
-              <a
-                href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
-                  school?.location && school.location.trim() !== ""
-                    ? `${school.location}, Philippines`
-                    : school?.city && school.city.trim() !== ""
-                      ? `${school.city}, Philippines`
-                      : "Philippines",
-                )}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-[#774BE5] hover:underline"
-              >
-                {school?.location && school.location.trim() !== ""
-                  ? school.location
-                  : school?.city && school.city.trim() !== ""
-                    ? school.city
-                    : "Philippines"}{" "}
-                ↗
-              </a>
+              {school?.location && school.location.trim() !== ""
+                ? school.location
+                : school?.city && school.city.trim() !== ""
+                  ? school.city
+                  : "Philippines"}
             </p>
             <div className="mt-4 flex justify-center md:justify-start">
               <a
@@ -583,39 +568,35 @@ const SchoolDetails = () => {
                 )}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="bg-[#774BE5] rounded-full px-4 py-2 inline-flex items-center gap-2 text-white font-semibold text-sm"
+                className="bg-[#774BE5] rounded-full px-4 py-2 inline-flex items-center text-white font-semibold text-sm"
               >
-                <i className="ri-map-pin-line text-white text-base"></i>
-                Open in Google Maps
+                Google Maps
               </a>
             </div>
           </div>
 
           {/* Help Keep Information Accurate Section */}
           <div className="w-full mt-10 rounded-3xl bg-white p-6 flex flex-col gap-4">
-            <div className="flex gap-4">
-              <div className="shrink-0">
-                <i className="ri-lightbulb-line text-[#774BE5] text-2xl"></i>
-              </div>
-              <div className="flex flex-col gap-2 flex-1">
-                <h4 className="text-[#0E1C29] md:text-xl text-base font-semibold">
-                  Help us keep this information accurate
-                </h4>
-                <p className="text-sm text-[#374151]">
-                  If you notice outdated or incorrect details, message us on Facebook and we'll review it promptly.
-                </p>
-                <Link
-                  href="https://web.facebook.com/people/Aralya/61578164295126"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="bg-[#774BE5] rounded-full px-4 py-2 w-fit mt-2 flex items-center gap-2 hover:bg-[#6B3FD6] transition-colors"
-                >
-                  <span className="text-white text-center font-semibold text-sm">
-                    Message Aralya on Facebook
-                  </span>
-                  <i className="ri-arrow-right-line text-white text-sm"></i>
-                </Link>
-              </div>
+            <div className="flex gap-2 items-center -ml-1 mb-2">
+              <i className="ri-lightbulb-line text-[#0E1C29] md:text-2xl text-xl mt-0.5 ml-1"></i>
+              <h4 className="md:text-2xl text-lg text-[#0E1C29] font-semibold">
+                Help us keep this information accurate
+              </h4>
+            </div>
+            <div className="flex flex-col gap-2">
+              <p className="text-sm text-[#374151]">
+                If you notice outdated or incorrect details, message us on Facebook and we'll review it promptly.
+              </p>
+              <Link
+                href="https://web.facebook.com/people/Aralya/61578164295126"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="bg-[#774BE5] rounded-full px-4 py-2 w-fit mt-2 flex items-center hover:bg-[#6B3FD6] transition-colors"
+              >
+                <span className="text-white text-center font-semibold text-sm">
+                  Message on Facebook
+                </span>
+              </Link>
             </div>
           </div>
         </div>
