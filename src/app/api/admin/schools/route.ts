@@ -49,7 +49,7 @@ export async function GET(request: NextRequest) {
     const { data, error } = await supabaseServer
       .from("schools")
       .select("*")
-      .order("school_name");
+      .order("school");
 
     if (error) {
       return NextResponse.json(

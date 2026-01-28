@@ -47,7 +47,7 @@ export async function GET(request: NextRequest) {
     // Apply filters
     if (query) {
       queryBuilder = queryBuilder.or(
-        `school_name.ilike.%${query}%, city.ilike.%${query}%, curriculum_tags.ilike.%${query}%`,
+        `school.ilike.%${query}%, city.ilike.%${query}%, curriculum_tags.ilike.%${query}%`,
       );
     }
 
@@ -65,7 +65,7 @@ export async function GET(request: NextRequest) {
       queryBuilder = queryBuilder.limit(3);
     }
 
-    queryBuilder = queryBuilder.order("school_name");
+    queryBuilder = queryBuilder.order("school");
 
     const { data, error } = await queryBuilder;
 

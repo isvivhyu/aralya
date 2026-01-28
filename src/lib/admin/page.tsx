@@ -93,11 +93,11 @@ export default function AdminPage() {
                     </label>
                     <input
                       type="text"
-                      value={newSchool.school_name || ""}
+                      value={newSchool.school || ""}
                       onChange={(e) =>
                         setNewSchool({
                           ...newSchool,
-                          school_name: e.target.value,
+                          school: e.target.value,
                         })
                       }
                       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#774BE5]"
@@ -200,14 +200,14 @@ export default function AdminPage() {
                             <Image
                               className="h-10 w-10 rounded-full object-contain"
                               src={school.logo_banner}
-                              alt={school.school_name}
+                              alt={school.school}
                               width={40}
                               height={40}
                             />
                           </div>
                           <div className="ml-4">
                             <div className="text-sm font-medium text-gray-900">
-                              {school.school_name}
+                              {school.school}
                             </div>
                           </div>
                         </div>

@@ -54,7 +54,7 @@ export async function GET(
     const { data: schools, error } = await supabaseServer
       .from("schools")
       .select("*")
-      .order("school_name");
+      .order("school");
 
     if (error) {
       return NextResponse.json(
@@ -64,7 +64,7 @@ export async function GET(
     }
 
     const school = schools?.find((s) => {
-      const schoolSlug = createSlug(s.school_name);
+      const schoolSlug = createSlug(s.school);
       return schoolSlug === slug;
     });
 

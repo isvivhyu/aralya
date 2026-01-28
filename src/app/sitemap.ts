@@ -25,7 +25,7 @@ const getCachedSchools = cache(async (): Promise<School[]> => {
     const { data, error } = await supabaseServer
       .from("schools")
       .select("*")
-      .order("school_name");
+      .order("school");
 
     if (error) {
       console.error("Error fetching schools for sitemap:", error);
@@ -117,10 +117,10 @@ const getCachedCities = cache(
           const latestUpdate =
             schools && schools.length > 0
               ? schools
-                  .map((s) => s.updated_at)
-                  .filter((date): date is string => !!date)
-                  .sort()
-                  .reverse()[0]
+                .map((s) => s.updated_at)
+                .filter((date): date is string => !!date)
+                .sort()
+                .reverse()[0]
               : undefined;
 
           return {
@@ -183,7 +183,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const schools = await getCachedSchools();
   const schoolPages: MetadataRoute.Sitemap = schools.map((school) => ({
     url: ensureTrailingSlash(
-      `${baseUrl}/directory/${createSlug(school.school_name)}`,
+      `${baseUrl}/directory/${createSlug(school.school)}`,
     ),
     lastModified: school.updated_at ? new Date(school.updated_at) : new Date(),
     changeFrequency: "weekly" as const,

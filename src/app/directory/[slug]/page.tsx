@@ -15,7 +15,6 @@ const SchoolDetails = () => {
 
   const [school, setSchool] = useState<School | null>(null);
   const [loading, setLoading] = useState(true);
-  const [expandedItems, setExpandedItems] = useState<Record<string, boolean>>({});
   const [showShareModal, setShowShareModal] = useState(false);
   const [linkCopied, setLinkCopied] = useState(false);
   const [isDesktop, setIsDesktop] = useState(false);
@@ -43,8 +42,8 @@ const SchoolDetails = () => {
   // Native share for mobile
   const handleNativeShare = async () => {
     const url = getShareUrl();
-    const text = `Check out ${school?.school_name || "this school"} on Aralya! ${school?.city ? `Located in ${school.city}.` : ""} ${url}`;
-    const title = `${school?.school_name || "School"} | Aralya`;
+    const text = `Check out ${school?.school || "this school"} on Aralya! ${school?.city ? `Located in ${school.city}.` : ""} ${url}`;
+    const title = `${school?.school || "School"} | Aralya`;
 
     if (navigator.share) {
       try {
@@ -82,7 +81,7 @@ const SchoolDetails = () => {
 
   const shareToViber = () => {
     const url = encodeURIComponent(getShareUrl());
-    const text = encodeURIComponent(`Check out ${school?.school_name || "this school"} on Aralya! ${getShareUrl()}`);
+    const text = encodeURIComponent(`Check out ${school?.school || "this school"} on Aralya! ${getShareUrl()}`);
     window.open(`viber://forward?text=${text}`, "_blank");
     setTimeout(() => {
       if (!document.hasFocus()) {
@@ -181,37 +180,21 @@ const SchoolDetails = () => {
             </div>
           </div>
 
-          {/* Overview + Info Skeleton */}
-          <div className="flex md:flex-row flex-col items-start w-full gap-8 mt-11">
-            {/* Overview Skeleton */}
+          {/* Overview Skeleton */}
+          <div className="w-full mt-11">
             <div className="rounded-2xl p-8 w-full bg-white">
               <div className="flex gap-2 items-center -ml-1 mb-4">
                 <SkeletonLoader className="h-6 w-6 rounded" />
                 <SkeletonLoader className="h-6 w-24" />
               </div>
-              {Array.from({ length: 6 }).map((_, index) => (
-                <div key={index} className="flex flex-col gap-2 mt-4">
-                  <SkeletonLoader className="h-5 w-32" />
-                  <SkeletonLoader className="h-4 w-full" />
-                </div>
-              ))}
-            </div>
-
-            {/* School Info Skeleton */}
-            <div className="rounded-2xl p-8 w-full bg-white">
-              <div className="flex gap-2 items-center -ml-1 mb-4">
-                <SkeletonLoader className="h-6 w-6 rounded" />
-                <SkeletonLoader className="h-6 w-40" />
-              </div>
-              {Array.from({ length: 6 }).map((_, index) => (
-                <div key={index} className="flex gap-4 mt-4">
-                  <SkeletonLoader className="h-5 w-5 rounded" />
-                  <div className="flex-1">
-                    <SkeletonLoader className="h-5 w-32 mb-2" />
+              <div className="grid md:grid-cols-2 grid-cols-1 gap-x-12 gap-y-6 mt-8">
+                {Array.from({ length: 6 }).map((_, index) => (
+                  <div key={index} className="flex flex-col gap-2">
+                    <SkeletonLoader className="h-5 w-32" />
                     <SkeletonLoader className="h-4 w-full" />
                   </div>
-                </div>
-              ))}
+                ))}
+              </div>
             </div>
           </div>
         </div>
@@ -272,7 +255,7 @@ const SchoolDetails = () => {
             <div className="w-full md:w-80 md:h-48 bg-gray-200 border border-gray-200 rounded-[10px] overflow-hidden flex items-center justify-center">
               <Image
                 src={school?.logo_banner || "/images/Logo.png"}
-                alt={school?.school_name || "School Logo"}
+                alt={school?.school || "School Logo"}
                 width={400}
                 height={200}
                 className="max-w-full max-h-full object-contain"
@@ -281,7 +264,7 @@ const SchoolDetails = () => {
             <div className="flex flex-col gap-2">
               <div className="flex items-center justify-between">
                 <h4 className="text-[#0E1C29] md:text-4xl text-base md:font-medium font-semibold">
-                  <span>{school?.school_name || "School Name"}</span>
+                  <span>{school?.school || "School Name"}</span>
                   <span className="relative group inline-block ml-1 -mt-3 align-middle">
                     <i className="ri-verified-badge-fill text-[#774BE5] text-xl md:text-2xl cursor-pointer"></i>
                     <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-1.5 bg-[#774BE5] text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-10">
@@ -340,9 +323,9 @@ const SchoolDetails = () => {
                 {school?.min_tuition || "N/A"} -{" "}
                 {school?.max_tuition || "N/A"} / year
               </p>
-              {school?.description && (
+              {school?.summary && (
                 <p className="text-sm font-medium text-[#374151]">
-                  {school.description}
+                  {school.summary}
                 </p>
               )}
             </div>
@@ -357,7 +340,7 @@ const SchoolDetails = () => {
 
               <div className="grid md:grid-cols-4 grid-cols-2 w-full gap-4">
                 <Link
-                  href={`tel:${(school?.contact_number || "").split(",")[0]?.trim() || ""}`}
+                  href={`tel:${(school?.number || "").split(",")[0]?.trim() || ""}`}
                   className="bg-[#774BE5] rounded-full px-4 py-2"
                 >
                   <p className="text-white text-center font-semibold text-sm">
@@ -365,7 +348,7 @@ const SchoolDetails = () => {
                   </p>
                 </Link>
                 <Link
-                  href={`sms:${(school?.contact_number || "").split(",")[0]?.trim() || ""}`}
+                  href={`sms:${(school?.number || "").split(",")[0]?.trim() || ""}`}
                   className="bg-[#774BE5] rounded-full px-4 py-2"
                 >
                   <p className="text-white text-center font-semibold text-sm">
@@ -394,9 +377,8 @@ const SchoolDetails = () => {
             </div>
           </div>
 
-          {/* Overview + Info */}
-          <div className="flex md:flex-row flex-col items-start w-full gap-8 mt-11">
-            {/* Overview */}
+          {/* Overview Section */}
+          <div className="w-full mt-11">
             <div className="rounded-2xl p-8 w-full bg-white">
               <div className="flex gap-2 items-center -ml-1">
                 <i className="ri-book-open-line text-[#0E1C29] md:text-2xl text-xl mt-0.5 ml-1"></i>
@@ -405,140 +387,61 @@ const SchoolDetails = () => {
                 </p>
               </div>
 
-              <div className="flex flex-col gap-2 mt-4">
-                <p className="md:text-xl text-base text-[#0E1C29] font-semibold">
-                  Curriculum
-                </p>
-                <p className="text-[#0E1C29] font-normal text-sm">
-                  {school?.curriculum_type || "Not specified"}
-                </p>
-              </div>
-
-              <div className="flex flex-col gap-2 mt-4">
-                <p className="md:text-xl text-base text-[#0E1C29] font-semibold">
-                  Grade Levels
-                </p>
-                <p className="text-[#0E1C29] font-normal text-sm">
-                  {school?.preschool_levels_offered || "Not specified"}
-                </p>
-              </div>
-
-              <div className="flex flex-col gap-2 mt-4">
-                <p className="md:text-xl text-base text-[#0E1C29] font-semibold">
-                  Class Size
-                </p>
-                <p className="text-[#0E1C29] font-normal text-sm">
-                  {school?.class_size_notes || "Not specified"}
-                </p>
-              </div>
-
-              <div className="flex flex-col gap-2 mt-4">
-                <p className="md:text-xl text-base text-[#0E1C29] font-semibold">
-                  After-school Care
-                </p>
-                <p className="text-[#0E1C29] font-normal text-sm">
-                  {school?.after_school_cares || "Not specified"}
-                </p>
-              </div>
-
-              <div className="flex flex-col gap-2 mt-4">
-                <p className="md:text-xl text-base text-[#0E1C29] font-semibold">
-                  Special Education Support
-                </p>
-                <p className="text-[#0E1C29] font-normal text-sm">
-                  {school?.special_education_support || "Not specified"}
-                </p>
-              </div>
-            </div>
-
-            {/* School Info */}
-            <div className="rounded-2xl p-8 w-full bg-white">
-              <div className="flex gap-2 items-center -ml-1">
-                <i className="ri-shield-line text-[#0E1C29] md:text-2xl text-xl mt-0.5 ml-1"></i>
-                <p className="md:text-2xl text-lg text-[#0E1C29] font-semibold">
-                  School Information
-                </p>
-              </div>
-
-              {[
-                {
-                  key: "admission",
-                  icon: "ri-book-open-line",
-                  title: "Admission Requirements",
-                  desc: school?.admission_requirements || "Not specified",
-                },
-                {
-                  key: "tuition",
-                  icon: "ri-money-dollar-circle-line",
-                  title: "Tuition Notes",
-                  desc: school?.tuition_notes || "Not specified",
-                },
-                {
-                  key: "programs",
-                  icon: "ri-stack-line",
-                  title: "Programs",
-                  desc: school?.extra_programs_elective || "Not specified",
-                },
-                {
-                  key: "transportation",
-                  icon: "ri-bus-line",
-                  title: "Transportation",
-                  desc: school?.school_bus_note || "Not specified",
-                },
-                {
-                  key: "scholarships",
-                  icon: "ri-graduation-cap-line",
-                  title: "Scholarships",
-                  desc: school?.scholarships_discounts || "Not specified",
-                },
-                {
-                  key: "curriculum",
-                  icon: "ri-book-2-line",
-                  title: "Curriculum",
-                  desc: school?.curriculum_type || "Not specified",
-                },
-                {
-                  key: "language",
-                  icon: "ri-global-line",
-                  title: "Language",
-                  desc: school?.language_used || "Not specified",
-                },
-                {
-                  key: "accreditations",
-                  icon: "ri-award-line",
-                  title: "Accreditations",
-                  desc: school?.accreditations_affiliations || "Not specified",
-                },
-              ].map((info) => (
-                <div key={info.key} className="mt-4 border-b border-gray-100 last:border-b-0 pb-4 last:pb-0">
-                  <button
-                    onClick={() =>
-                      setExpandedItems((prev) => ({
-                        ...prev,
-                        [info.key]: !prev[info.key],
-                      }))
-                    }
-                    className="flex items-center justify-between w-full gap-4 hover:opacity-80 transition-opacity"
-                  >
-                    <div className="flex items-center flex-1">
-                      <p className="md:text-xl text-base text-[#0E1C29] font-semibold text-left">
-                        {info.title}
-                      </p>
-                    </div>
-                    <i
-                      className={`ri-arrow-down-s-line text-[#0E1C29] text-lg transition-transform duration-200 shrink-0 ${expandedItems[info.key] ? "rotate-180" : ""
-                        }`}
-                    ></i>
-                  </button>
-                  {expandedItems[info.key] && (
-                    <div className="mt-3">
-                      <p className="text-[#0E1C29] font-normal text-sm">
-                        {info.desc}
-                      </p>
-                    </div>
-                  )}
+              <div className="grid md:grid-cols-2 grid-cols-1 gap-x-12 gap-y-6 mt-8">
+                <div className="flex flex-col gap-2">
+                  <p className="md:text-xl text-base text-[#0E1C29] font-semibold">
+                    Curriculum
+                  </p>
+                  <p className="text-[#0E1C29] font-normal text-sm">
+                    {school?.curriculum || "Not specified"}
+                  </p>
                 </div>
-              ))}
+
+                <div className="flex flex-col gap-2">
+                  <p className="md:text-xl text-base text-[#0E1C29] font-semibold">
+                    Schedule
+                  </p>
+                  <p className="text-[#0E1C29] font-normal text-sm">
+                    {school?.schedule || "Not specified"}
+                  </p>
+                </div>
+
+                <div className="flex flex-col gap-2">
+                  <p className="md:text-xl text-base text-[#0E1C29] font-semibold">
+                    Class Size
+                  </p>
+                  <p className="text-[#0E1C29] font-normal text-sm">
+                    {school?.class_size || "Not specified"}
+                  </p>
+                </div>
+
+                <div className="flex flex-col gap-2">
+                  <p className="md:text-xl text-base text-[#0E1C29] font-semibold">
+                    Programs
+                  </p>
+                  <p className="text-[#0E1C29] font-normal text-sm">
+                    {school?.programs || "Not specified"}
+                  </p>
+                </div>
+
+                <div className="flex flex-col gap-2">
+                  <p className="md:text-xl text-base text-[#0E1C29] font-semibold">
+                    After-school Care
+                  </p>
+                  <p className="text-[#0E1C29] font-normal text-sm">
+                    {school?.care || "Not specified"}
+                  </p>
+                </div>
+
+                <div className="flex flex-col gap-2">
+                  <p className="md:text-xl text-base text-[#0E1C29] font-semibold">
+                    Special Education Support
+                  </p>
+                  <p className="text-[#0E1C29] font-normal text-sm">
+                    {school?.support || "Not specified"}
+                  </p>
+                </div>
+              </div>
             </div>
           </div>
 
@@ -631,7 +534,7 @@ const SchoolDetails = () => {
                 <div className="w-1/2 bg-gray-200 border border-gray-200 rounded-lg">
                   <Image
                     src={school?.logo_banner || "/images/Logo.png"}
-                    alt={school?.school_name || "School Logo"}
+                    alt={school?.school || "School Logo"}
                     width={400}
                     height={200}
                     className="max-w-full max-h-full object-contain"
@@ -640,7 +543,7 @@ const SchoolDetails = () => {
 
                 <div className="flex flex-col gap-2 w-1/2">
                   <h4 className="text-xl font-semibold text-[#0E1C29] mb-2">
-                    {school?.school_name || "School Name"}
+                    {school?.school || "School Name"}
                   </h4>
                   <div className="flex flex-col gap-1 text-sm text-[#374151]">
                     <div className="flex items-center gap-2">
@@ -653,10 +556,10 @@ const SchoolDetails = () => {
                         {school?.min_tuition || "N/A"} - {school?.max_tuition || "N/A"} / year
                       </span>
                     </div>
-                    {school?.curriculum_type && (
+                    {school?.curriculum && (
                       <div className="flex items-center gap-2">
                         <i className="ri-book-open-line"></i>
-                        <span>{school.curriculum_type}</span>
+                        <span>{school.curriculum}</span>
                       </div>
                     )}
                   </div>

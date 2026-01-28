@@ -209,7 +209,7 @@ const SchoolDirectoryContent = () => {
     // Otherwise, filter by search query
     return city.city.toLowerCase().includes(localSearchQuery.toLowerCase());
   });
-  
+
   const filteredCurriculums = availableCurriculums.filter((item) => {
     // If a curriculum filter is already selected, only show that curriculum
     if (curriculumFilter) {
@@ -218,7 +218,7 @@ const SchoolDirectoryContent = () => {
     // Otherwise, filter by search query
     return item.label.toLowerCase().includes(localSearchQuery.toLowerCase());
   });
-  
+
   // Filter budget options based on selected filter
   const filteredBudgetOptions = budgetFilter
     ? budgetOptions.filter((option) => option.value === budgetFilter)
@@ -268,7 +268,7 @@ const SchoolDirectoryContent = () => {
       try {
         // Fetch all schools to calculate counts
         const schools = await SchoolService.getAllSchools();
-        
+
         // 1. Process Cities
         const cities = await SchoolService.searchCities("");
         setAvailableCities(cities);
@@ -285,11 +285,11 @@ const SchoolDirectoryContent = () => {
             });
           }
         });
-        
+
         const curriculumsWithCounts = Object.entries(curriculumCounts)
           .map(([label, count]) => ({ label, count }))
           .sort((a, b) => a.label.localeCompare(b.label));
-        
+
         setAvailableCurriculums(curriculumsWithCounts);
 
         // 3. Process Budgets
@@ -311,9 +311,9 @@ const SchoolDirectoryContent = () => {
 
         schools.forEach((school) => {
           try {
-             // Skip schools with non-numeric tuition values
-             if (
-              !school.min_tuition || 
+            // Skip schools with non-numeric tuition values
+            if (
+              !school.min_tuition ||
               !school.max_tuition ||
               isNaN(parseFloat(school.min_tuition.replace(/[^\d.]/g, ""))) ||
               isNaN(parseFloat(school.max_tuition.replace(/[^\d.]/g, "")))
@@ -327,8 +327,8 @@ const SchoolDirectoryContent = () => {
             // Check which ranges this school falls into
             Object.entries(budgetRanges).forEach(([key, range]) => {
               if (
-                 (minPrice >= range.min && minPrice <= range.max) ||
-                 (maxPrice >= range.min && maxPrice <= range.max)
+                (minPrice >= range.min && minPrice <= range.max) ||
+                (maxPrice >= range.min && maxPrice <= range.max)
               ) {
                 if (key in budgetCounts) {
                   budgetCounts[key as keyof typeof budgetCounts]++;
@@ -637,11 +637,10 @@ const SchoolDirectoryContent = () => {
                       }
                       setInputFocused(false);
                     }}
-                    className={`px-4 md:px-6 py-2.5 md:py-3 text-sm font-semibold flex items-center justify-center gap-2 text-black relative ${
-                      activeCategory === category.id
+                    className={`px-4 md:px-6 py-2.5 md:py-3 text-sm font-semibold flex items-center justify-center gap-2 text-black relative ${activeCategory === category.id
                         ? "border-b-2 border-black"
                         : "border-b-2 border-transparent"
-                    } transition-all duration-300 ease-in-out`}
+                      } transition-all duration-300 ease-in-out`}
                   >
                     <i className={`${category.icon} text-base`}></i>
                     <span>{category.label}</span>
@@ -650,7 +649,7 @@ const SchoolDirectoryContent = () => {
               </div>
             </div>
             <div className="flex flex-col md:flex-row md:mt-6 mt-3 gap-2.5 rounded-2xl relative z-[1001]">
-              <div 
+              <div
                 className="bg-[#f5f5f5] w-full p-2 rounded-full overflow-visible flex items-center justify-between gap-3 relative shadow-sm"
                 onClick={() => {
                   if (activeCategory === "budget") {
@@ -666,7 +665,7 @@ const SchoolDirectoryContent = () => {
                       ? cityFilter || localSearchQuery
                       : activeCategory === "budget"
                         ? budgetOptions.find((b) => b.value === budgetFilter)
-                            ?.label || ""
+                          ?.label || ""
                         : activeCategory === "curriculum"
                           ? curriculumFilter || localSearchQuery
                           : localSearchQuery
@@ -696,27 +695,27 @@ const SchoolDirectoryContent = () => {
                     }
                   }}
                 />
-                
+
                 <div className="flex items-center gap-2">
                   {(localSearchQuery ||
                     (activeCategory === "city" && cityFilter) ||
                     (activeCategory === "budget" && budgetFilter) ||
                     (activeCategory === "curriculum" && curriculumFilter)) && (
-                    <button
-                      type="button"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setLocalSearchQuery("");
-                        if (activeCategory === "city") setCityFilter("");
-                        if (activeCategory === "budget") setBudgetFilter("");
-                        if (activeCategory === "curriculum")
-                          setCurriculumFilter("");
-                      }}
-                      className="text-[#0E1C29]/40 hover:text-[#0E1C29]/60 transition-colors mr-2"
-                    >
-                      <i className="ri-close-line text-xl"></i>
-                    </button>
-                  )}
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setLocalSearchQuery("");
+                          if (activeCategory === "city") setCityFilter("");
+                          if (activeCategory === "budget") setBudgetFilter("");
+                          if (activeCategory === "curriculum")
+                            setCurriculumFilter("");
+                        }}
+                        className="text-[#0E1C29]/40 hover:text-[#0E1C29]/60 transition-colors mr-2"
+                      >
+                        <i className="ri-close-line text-xl"></i>
+                      </button>
+                    )}
 
                   <ButtonWithLoading
                     type="submit"
@@ -753,7 +752,7 @@ const SchoolDirectoryContent = () => {
                             </button>
                           ))
                         ) : filteredCities.length === 0 &&
-                            availableCities.length > 0 ? (
+                          availableCities.length > 0 ? (
                           <div className="px-4 py-3 text-gray-500 text-center">
                             No cities found matching &quot;{localSearchQuery}&quot;
                           </div>
@@ -764,25 +763,24 @@ const SchoolDirectoryContent = () => {
                         )}
                       </div>
                     )}
-                  {activeCategory === "budget" && (
+                    {activeCategory === "budget" && (
                       <div className="py-2">
                         {filteredBudgetOptions.map((budgetOption) => (
                           <button
                             key={budgetOption.key}
                             type="button"
                             onClick={() => handleOptionSelect(budgetOption.value)}
-                            className={`w-full px-4 py-3 text-left hover:bg-[#f5f5f5] transition-colors flex items-center justify-between ${
-                              budgetFilter === budgetOption.value
+                            className={`w-full px-4 py-3 text-left hover:bg-[#f5f5f5] transition-colors flex items-center justify-between ${budgetFilter === budgetOption.value
                                 ? "bg-[#774BE5]/10 text-[#774BE5]"
                                 : "text-[#0E1C29]"
-                            }`}
+                              }`}
                           >
                             <span className="font-medium">
                               {budgetOption.label}
                             </span>
                             <span className="text-sm text-gray-500">
-                                {budgetOption.count} school
-                                {budgetOption.count !== 1 ? "s" : ""}
+                              {budgetOption.count} school
+                              {budgetOption.count !== 1 ? "s" : ""}
                             </span>
                           </button>
                         ))}
@@ -796,11 +794,10 @@ const SchoolDirectoryContent = () => {
                               key={curriculum.label}
                               type="button"
                               onClick={() => handleOptionSelect(curriculum.label)}
-                              className={`w-full px-4 py-3 text-left hover:bg-[#f5f5f5] transition-colors flex items-center justify-between ${
-                                curriculumFilter === curriculum.label
+                              className={`w-full px-4 py-3 text-left hover:bg-[#f5f5f5] transition-colors flex items-center justify-between ${curriculumFilter === curriculum.label
                                   ? "bg-[#774BE5]/10 text-[#774BE5]"
                                   : "text-[#0E1C29]"
-                              }`}
+                                }`}
                             >
                               <span className="font-medium">{curriculum.label}</span>
                               <span className="text-sm text-gray-500">
@@ -810,7 +807,7 @@ const SchoolDirectoryContent = () => {
                             </button>
                           ))
                         ) : filteredCurriculums.length === 0 &&
-                            availableCurriculums.length > 0 ? (
+                          availableCurriculums.length > 0 ? (
                           <div className="px-4 py-3 text-gray-500 text-center">
                             No curriculum options found matching &quot;
                             {localSearchQuery}&quot;
@@ -940,17 +937,16 @@ const SchoolDirectoryContent = () => {
                 <>
                   <h3 className="text-lg font-semibold text-[#0E1C29]">
                     {filteredSchools.length > 0
-                      ? `${filteredSchools.length} School${
-                          filteredSchools.length !== 1 ? "s" : ""
-                        } Found`
+                      ? `${filteredSchools.length} School${filteredSchools.length !== 1 ? "s" : ""
+                      } Found`
                       : "This school is not in our database yet. We are adding more schools weekly."}
                   </h3>
                   {(budgetFilter ||
                     cityFilter ||
                     curriculumFilter ||
                     filteredSchools.length > 0) && (
-                    <div className="w-2 h-2 bg-[#774BE5] rounded-full animate-pulse"></div>
-                  )}
+                      <div className="w-2 h-2 bg-[#774BE5] rounded-full animate-pulse"></div>
+                    )}
                 </>
               )}
             </div>
@@ -997,15 +993,15 @@ const SchoolDirectoryContent = () => {
         ) : (
           <div className="w-full grid md:grid-cols-3 grid-cols-1 gap-5 z-0">
             {displayedSchools.map((school, index) => (
-              <div key={`${school.school_name}-${index}`}>
+              <div key={`${school.school}-${index}`}>
                 <SchoolCard
                   imageSrc={school.logo_banner}
-                  imageAlt={school.school_name}
-                  schoolName={school.school_name}
+                  imageAlt={school.school}
+                  schoolName={school.school}
                   location={school.city}
-                  tags={school.curriculum_tags.split(", ")}
+                  tags={school.curriculum_tags.split(", ").map(t => t.trim())}
                   priceRange={`${school.min_tuition} - ${school.max_tuition}`}
-                  schoolSlug={createSlug(school.school_name)}
+                  schoolSlug={createSlug(school.school)}
                   priority={index < 6}
                 />
               </div>

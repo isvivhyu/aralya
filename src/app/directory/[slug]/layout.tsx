@@ -24,52 +24,52 @@ export async function generateMetadata({
     // Fetch school data to get the actual school name for title
     const { data: schools, error } = await supabaseServer
       .from("schools")
-      .select("school_name, city, min_tuition, max_tuition, curriculum_type, logo_banner, description")
-      .order("school_name");
+      .select("school, city, min_tuition, max_tuition, curriculum, logo_banner, summary")
+      .order("school");
 
     if (!error && schools) {
-      const school = schools.find((s) => createSlug(s.school_name) === slug);
+      const school = schools.find((s) => createSlug(s.school) === slug);
 
       if (school) {
         const pageUrl = `${baseUrl}/directory/${slug}/`;
-        
+
         // Clean, concise description for sharing
         const buildDescription = () => {
           const parts: string[] = [];
-          
+
           if (school.city) {
             parts.push(school.city);
           }
-          
-          if (school.curriculum_type) {
-            parts.push(school.curriculum_type);
+
+          if (school.curriculum) {
+            parts.push(school.curriculum);
           }
-          
+
           if (school.min_tuition && school.max_tuition) {
             parts.push(`₱${school.min_tuition} - ₱${school.max_tuition}/year`);
           }
-          
-          return parts.length > 0 
-            ? `${school.school_name} • ${parts.join(" • ")}`
-            : school.school_name;
+
+          return parts.length > 0
+            ? `${school.school} • ${parts.join(" • ")}`
+            : school.school;
         };
-        
+
         const ogDescription = buildDescription();
-        const metaDescription = school.description || 
-          `View ${school.school_name} on Aralya. ${school.city ? `Located in ${school.city}.` : ""} Compare tuition, curriculum, and contact information.`;
-        
-        const imageUrl = school.logo_banner 
+        const metaDescription = school.summary ||
+          `View ${school.school} on Aralya. ${school.city ? `Located in ${school.city}.` : ""} Compare tuition, curriculum, and contact information.`;
+
+        const imageUrl = school.logo_banner
           ? (school.logo_banner.startsWith('http') ? school.logo_banner : `${baseUrl}${school.logo_banner}`)
           : `${baseUrl}/images/Logo.png`;
 
         return {
-          title: `${school.school_name} | Aralya - Compare Preschools in Metro Manila`,
+          title: `${school.school} | Aralya - Compare Preschools in Metro Manila`,
           description: metaDescription,
           alternates: {
             canonical: pageUrl,
           },
           openGraph: {
-            title: school.school_name,
+            title: school.school,
             description: ogDescription,
             url: pageUrl,
             siteName: "Aralya",
@@ -78,7 +78,7 @@ export async function generateMetadata({
                 url: imageUrl,
                 width: 1200,
                 height: 630,
-                alt: school.school_name,
+                alt: school.school,
               },
             ],
             locale: "en_US",
@@ -86,7 +86,7 @@ export async function generateMetadata({
           },
           twitter: {
             card: "summary_large_image",
-            title: school.school_name,
+            title: school.school,
             description: ogDescription,
             images: [imageUrl],
           },
