@@ -238,15 +238,19 @@ const SchoolDetails = () => {
         </div>
 
         {/* Main Content */}
-        <div className="pt-13 flex flex-col items-center md:w-[930px] w-full px-0 mt-28">
-          {/* Back to Directory Button */}
-          <div className="w-full mb-4">
+        <div className="pt-13 flex flex-col items-center md:w-[930px] w-full px-0 mt-14">
+          {/* Back to Browse Button */}
+          <div className="w-full mb-4 relative flex items-center min-h-10">
             <Link
               href="/directory"
-              className="inline-flex items-center gap-2 text-[#774BE5] hover:text-[#6B3FD6] transition-colors font-medium"
+              className="w-full flex items-center relative"
             >
-              <i className="ri-arrow-left-line text-lg"></i>
-              Back to Directory
+              <div className="w-10 h-10 rounded-full bg-[#774BE5] text-white flex items-center justify-center hover:bg-[#6B3FD6] transition-colors shrink-0">
+                <i className="ri-arrow-left-line text-lg"></i>
+              </div>
+              <span className="absolute left-1/2 -translate-x-1/2 text-[#774BE5] font-semibold">
+                Back to Browse
+              </span>
             </Link>
           </div>
 
@@ -263,9 +267,9 @@ const SchoolDetails = () => {
             </div>
             <div className="flex flex-col gap-2">
               <div className="flex items-center justify-between">
-                <h4 className="text-[#0E1C29] md:text-4xl text-base md:font-medium font-semibold">
+                <h4 className="text-[#0E1C29] md:text-4xl text-lg md:font-medium font-semibold">
                   <span>{school?.school || "School Name"}</span>
-                  <span className="relative group inline-block ml-1 -mt-3 align-middle">
+                  <span className="relative group inline-block ml-1 -mt-1 align-middle">
                     <i className="ri-verified-badge-fill text-[#774BE5] text-xl md:text-2xl cursor-pointer"></i>
                     <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-1.5 bg-[#774BE5] text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-10">
                       Verified by Aralya
@@ -319,7 +323,7 @@ const SchoolDetails = () => {
                   </a>
                 </div>
               )}
-              <p className="text-[#0E1C29] font-bold text-base">
+              <p className="text-[#0E1C29] font-bold text-lg">
                 {school?.min_tuition || "N/A"} -{" "}
                 {school?.max_tuition || "N/A"} / year
               </p>
@@ -460,7 +464,7 @@ const SchoolDetails = () => {
                   ? school.city
                   : "Philippines"}
             </p>
-            <div className="mt-4 flex justify-center md:justify-start">
+            <div className="mt-4 flex md:justify-start">
               <a
                 href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
                   school?.location && school.location.trim() !== ""

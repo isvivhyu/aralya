@@ -65,9 +65,14 @@ const SchoolCard = ({
       </div>
       <div className="flex items-center justify-between mt-auto pt-5">
         <p className="text-[#0E1C29] font-bold text-base">
-          {priceRange.split(" ").length > 3
-            ? priceRange.split(" ").slice(0, 3).join(" ") + "..."
-            : priceRange}
+          {(() => {
+            const hasPerYear = priceRange.endsWith(" / year");
+            const base = hasPerYear ? priceRange.slice(0, -7) : priceRange;
+            const words = base.split(" ");
+            const display =
+              words.length > 3 ? words.slice(0, 3).join(" ") + "..." : base;
+            return hasPerYear ? display + " / year" : display;
+          })()}
         </p>
         <Link
           href={schoolSlug ? `/directory/${schoolSlug}` : "/directory"}
