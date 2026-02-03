@@ -594,7 +594,7 @@ const SchoolDirectoryContent = () => {
         style={{ backgroundImage: "url('/images/Hero.jpg')" }}
       >
         <div className="w-full h-full absolute top-0 left-0 bg-black/20 z-0"></div>
-        <div className="w-full flex items-center justify-center md:px-10 pt-5 md:pt-0 relative z-[1000]">
+        <div className="w-full flex items-center justify-center md:px-10 pt-5 md:pt-0">
           <Navbar />
         </div>
         <div className="pt-13 flex flex-col items-center md:w-[930px] w-full px-0 md:px-0 mt-20 relative">
@@ -638,8 +638,8 @@ const SchoolDirectoryContent = () => {
                       setInputFocused(false);
                     }}
                     className={`px-4 md:px-6 py-2.5 md:py-3 text-sm font-semibold flex items-center justify-center gap-2 text-black relative ${activeCategory === category.id
-                        ? "border-b-2 border-black"
-                        : "border-b-2 border-transparent"
+                      ? "border-b-2 border-black"
+                      : "border-b-2 border-transparent"
                       } transition-all duration-300 ease-in-out`}
                   >
                     <i className={`${category.icon} text-base`}></i>
@@ -771,8 +771,8 @@ const SchoolDirectoryContent = () => {
                             type="button"
                             onClick={() => handleOptionSelect(budgetOption.value)}
                             className={`w-full px-4 py-3 text-left hover:bg-[#f5f5f5] transition-colors flex items-center justify-between ${budgetFilter === budgetOption.value
-                                ? "bg-[#774BE5]/10 text-[#774BE5]"
-                                : "text-[#0E1C29]"
+                              ? "bg-[#774BE5]/10 text-[#774BE5]"
+                              : "text-[#0E1C29]"
                               }`}
                           >
                             <span className="font-medium">
@@ -795,8 +795,8 @@ const SchoolDirectoryContent = () => {
                               type="button"
                               onClick={() => handleOptionSelect(curriculum.label)}
                               className={`w-full px-4 py-3 text-left hover:bg-[#f5f5f5] transition-colors flex items-center justify-between ${curriculumFilter === curriculum.label
-                                  ? "bg-[#774BE5]/10 text-[#774BE5]"
-                                  : "text-[#0E1C29]"
+                                ? "bg-[#774BE5]/10 text-[#774BE5]"
+                                : "text-[#0E1C29]"
                                 }`}
                             >
                               <span className="font-medium">{curriculum.label}</span>
