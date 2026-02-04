@@ -1000,7 +1000,7 @@ const SchoolDirectoryContent = () => {
                   schoolName={school.school}
                   location={school.city}
                   tags={school.curriculum_tags.split(", ").map(t => t.trim())}
-                  priceRange={`${school.min_tuition} - ${school.max_tuition} / year`}
+                  priceRange={`${school.min_tuition} - ${school.max_tuition}${(school.min_tuition?.toLowerCase().includes("/month") || school.max_tuition?.toLowerCase().includes("/month")) ? "" : " / year"}`}
                   schoolSlug={createSlug(school.school)}
                   priority={index < 6}
                 />

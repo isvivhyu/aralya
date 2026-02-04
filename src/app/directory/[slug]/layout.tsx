@@ -46,7 +46,8 @@ export async function generateMetadata({
           }
 
           if (school.min_tuition && school.max_tuition) {
-            parts.push(`₱${school.min_tuition} - ₱${school.max_tuition}/year`);
+            const isPerMonth = school.min_tuition.toLowerCase().includes("/month") || school.max_tuition.toLowerCase().includes("/month");
+            parts.push(`₱${school.min_tuition} - ₱${school.max_tuition}${isPerMonth ? "" : "/year"}`);
           }
 
           return parts.length > 0

@@ -325,7 +325,8 @@ const SchoolDetails = () => {
               )}
               <p className="text-[#0E1C29] font-bold text-lg">
                 {school?.min_tuition || "N/A"} -{" "}
-                {school?.max_tuition || "N/A"} / year
+                {school?.max_tuition || "N/A"}
+                {(school?.min_tuition?.toLowerCase().includes("/month") || school?.max_tuition?.toLowerCase().includes("/month")) ? "" : " / year"}
               </p>
               {school?.summary && (
                 <p className="text-sm font-medium text-[#374151]">
@@ -557,7 +558,8 @@ const SchoolDetails = () => {
                     <div className="flex items-center gap-2">
                       <i className="ri-money-dollar-circle-line"></i>
                       <span>
-                        {school?.min_tuition || "N/A"} - {school?.max_tuition || "N/A"} / year
+                        {school?.min_tuition || "N/A"} - {school?.max_tuition || "N/A"}
+                        {(school?.min_tuition?.toLowerCase().includes("/month") || school?.max_tuition?.toLowerCase().includes("/month")) ? "" : " / year"}
                       </span>
                     </div>
                     {school?.curriculum && (
