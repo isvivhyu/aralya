@@ -257,7 +257,7 @@ const SchoolDetails = () => {
 
           {/* Header */}
           <div className="rounded-[16px] bg-white p-4 flex md:flex-row flex-col gap-4 md:items-center w-full">
-            <div className="w-full md:w-80 md:h-48 bg-gray-200 border border-gray-200 rounded-[10px] overflow-hidden flex items-center justify-center">
+            <div className="w-full md:w-80 md:h-48 bg-gray-200 border border-gray-200 rounded-[10px] bg-white overflow-hidden flex items-center justify-center">
               <Image
                 src={optimizeImageUrl(school?.logo_banner) || "/images/Logo.png"}
                 alt={school?.school || "School Logo"}
@@ -537,7 +537,7 @@ const SchoolDetails = () => {
             {/* School Image and Details */}
             <div className="mb-6">
               <div className="w-full h-48  overflow-hidden flex items-center justify-center gap-4 mb-4">
-                <div className="w-1/2 bg-gray-200 border border-gray-200 rounded-lg">
+                <div className="w-1/2 bg-gray-200 border border-gray-200 bg-white rounded-lg">
                   <Image
                     src={optimizeImageUrl(school?.logo_banner) || "/images/Logo.png"}
                     alt={school?.school || "School Logo"}
