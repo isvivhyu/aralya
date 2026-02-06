@@ -8,6 +8,7 @@ import { School } from "@/lib/supabase";
 import { useParams } from "next/navigation";
 import { SkeletonLoader } from "@/components/SkeletonLoader";
 import Footer from "@/components/Footer";
+import { optimizeImageUrl } from "@/lib/cloudinary";
 
 const SchoolDetails = () => {
   const params = useParams();
@@ -258,7 +259,7 @@ const SchoolDetails = () => {
           <div className="rounded-[16px] bg-white p-4 flex md:flex-row flex-col gap-4 md:items-center w-full">
             <div className="w-full md:w-80 md:h-48 bg-gray-200 border border-gray-200 rounded-[10px] overflow-hidden flex items-center justify-center">
               <Image
-                src={school?.logo_banner || "/images/Logo.png"}
+                src={optimizeImageUrl(school?.logo_banner) || "/images/Logo.png"}
                 alt={school?.school || "School Logo"}
                 width={400}
                 height={200}
@@ -538,7 +539,7 @@ const SchoolDetails = () => {
               <div className="w-full h-48  overflow-hidden flex items-center justify-center gap-4 mb-4">
                 <div className="w-1/2 bg-gray-200 border border-gray-200 rounded-lg">
                   <Image
-                    src={school?.logo_banner || "/images/Logo.png"}
+                    src={optimizeImageUrl(school?.logo_banner) || "/images/Logo.png"}
                     alt={school?.school || "School Logo"}
                     width={400}
                     height={200}

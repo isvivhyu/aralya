@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import Image from "next/image";
 import { SchoolService } from "@/lib/schoolService";
 import { School } from "@/lib/supabase";
+import { optimizeImageUrl } from "@/lib/cloudinary";
 
 export default function AdminPage() {
   const [schools, setSchools] = useState<School[]>([]);
@@ -199,7 +200,7 @@ export default function AdminPage() {
                           <div className="flex-shrink-0 h-10 w-10">
                             <Image
                               className="h-10 w-10 rounded-full object-contain"
-                              src={school.logo_banner}
+                              src={optimizeImageUrl(school.logo_banner, 100)}
                               alt={school.school}
                               width={40}
                               height={40}

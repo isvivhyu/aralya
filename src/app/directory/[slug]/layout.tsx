@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { supabaseServer } from "@/lib/supabase-server";
+import { optimizeImageUrl } from "@/lib/cloudinary";
 
 const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://aralya.com";
 
@@ -60,7 +61,7 @@ export async function generateMetadata({
           `View ${school.school} on Aralya. ${school.city ? `Located in ${school.city}.` : ""} Compare tuition, curriculum, and contact information.`;
 
         const imageUrl = school.logo_banner
-          ? (school.logo_banner.startsWith('http') ? school.logo_banner : `${baseUrl}${school.logo_banner}`)
+          ? (school.logo_banner.startsWith('http') ? optimizeImageUrl(school.logo_banner, 1200) : `${baseUrl}${school.logo_banner}`)
           : `${baseUrl}/images/Logo.png`;
 
         return {

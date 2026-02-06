@@ -14,6 +14,7 @@ import React, {
 } from "react";
 import { useSearchParams } from "next/navigation";
 import { LoadingSpinner, ButtonWithLoading } from "@/components/LoadingSpinner";
+import { optimizeImageUrl } from "@/lib/cloudinary";
 
 // Helper function to check if a school is in a specific city
 // Uses the same matching logic as SchoolService for consistency
@@ -995,7 +996,7 @@ const SchoolDirectoryContent = () => {
             {displayedSchools.map((school, index) => (
               <div key={`${school.school}-${index}`}>
                 <SchoolCard
-                  imageSrc={school.logo_banner}
+                  imageSrc={optimizeImageUrl(school.logo_banner)}
                   imageAlt={school.school}
                   schoolName={school.school}
                   location={school.city}
