@@ -484,7 +484,7 @@ const SchoolDetails = () => {
           </div>
 
           {/* Help Keep Information Accurate Section */}
-          <div className="w-full mt-10 rounded-3xl bg-white p-6 flex flex-col gap-4">
+          <div className="w-full mt-10 -mb-16 rounded-3xl bg-white p-6 flex flex-col gap-4">
             <div className="flex gap-2 items-center -ml-1 mb-2">
               <i className="ri-lightbulb-line text-[#0E1C29] md:text-2xl text-xl mt-0.5 ml-1"></i>
               <h4 className="md:text-2xl text-lg text-[#0E1C29] font-semibold">

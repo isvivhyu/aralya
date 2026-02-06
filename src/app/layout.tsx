@@ -18,7 +18,7 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-import DisclaimerPopup from "@/components/DisclaimerPopup";
+
 
 const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://aralya.com";
 
@@ -99,7 +99,7 @@ export default function RootLayout({
           <PageViewTracker />
         </Suspense>
         {children}
-        <DisclaimerPopup />
+
       </body>
     </html>
   );
