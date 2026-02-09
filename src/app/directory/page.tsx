@@ -569,25 +569,6 @@ const SchoolDirectoryContent = () => {
     };
   }, [currentPage, hasMore, isLoading, loadMoreSchools]);
 
-  if (initialLoading) {
-    return (
-      <>
-        <Navbar />
-        <section className="w-full md:px-10 px-5 pt-25 bg-white">
-          <h2 className="text-[#0E1C29] md:text-[56px] text-4xl font-normal text-center">
-            Explore Preschools
-          </h2>
-          <div className="w-full grid md:grid-cols-3 grid-cols-1 gap-5 mt-11">
-            {Array.from({ length: 6 }).map((_, index) => (
-              <SchoolCardSkeleton key={index} />
-            ))}
-          </div>
-        </section>
-        <Footer />
-      </>
-    );
-  }
-
   return (
     <>
       <section
@@ -927,11 +908,11 @@ const SchoolDirectoryContent = () => {
         <div className="mt-8 mb-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              {isFiltering ? (
+              {initialLoading || isFiltering ? (
                 <div className="flex items-center gap-2">
                   <LoadingSpinner size="sm" />
                   <h3 className="text-lg font-semibold text-[#0E1C29]">
-                    Filtering schools...
+                    {initialLoading ? "Loading schools..." : "Filtering schools..."}
                   </h3>
                 </div>
               ) : (
@@ -951,7 +932,7 @@ const SchoolDirectoryContent = () => {
                 </>
               )}
             </div>
-            {!isFiltering && (
+            {!initialLoading && !isFiltering && (
               <div className="text-sm text-gray-500">
                 Showing {displayedSchools.length} of {filteredSchools.length}
               </div>
@@ -959,7 +940,20 @@ const SchoolDirectoryContent = () => {
           </div>
         </div>
 
-        {isFiltering ? (
+        {initialLoading ? (
+          <div className="flex flex-col items-center justify-center py-20">
+            <div className="relative">
+              <div className="w-16 h-16 rounded-full border-4 border-[#774BE5]/20 border-t-[#774BE5] animate-spin" />
+              <div
+                className="absolute inset-0 w-16 h-16 rounded-full border-4 border-transparent border-b-[#9B6EF3]/50 animate-spin"
+                style={{ animationDirection: "reverse", animationDuration: "0.8s" }}
+              />
+            </div>
+            <p className="text-[#774BE5] font-medium text-lg mt-4 animate-pulse">
+              Loading schools...
+            </p>
+          </div>
+        ) : isFiltering ? (
           <div className="w-full grid md:grid-cols-3 grid-cols-1 gap-5 z-0">
             {Array.from({ length: 6 }).map((_, index) => (
               <SchoolCardSkeleton key={index} />

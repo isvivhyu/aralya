@@ -6,6 +6,7 @@ import GoogleAnalytics from "@/components/GoogleAnalytics";
 import MetaPixel from "@/components/MetaPixel";
 import MicrosoftClarity from "@/components/MicrosoftClarity";
 import PageViewTracker from "@/components/PageViewTracker";
+import PageLoadingIndicator from "@/components/PageLoadingIndicator";
 import { Suspense } from "react";
 
 const geistSans = Geist({
@@ -97,6 +98,9 @@ export default function RootLayout({
         <MicrosoftClarity />
         <Suspense fallback={null}>
           <PageViewTracker />
+        </Suspense>
+        <Suspense fallback={null}>
+          <PageLoadingIndicator />
         </Suspense>
         {children}
 

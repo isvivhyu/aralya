@@ -32,31 +32,6 @@ const Footer = () => {
               </Link>
             </div>
           </div>
-
-          <div className="max-w-4xl text-[#fefefe] text-sm leading-relaxed opacity-80 space-y-2">
-            <p>
-              <strong>Aralya</strong> is an independent information platform designed to help parents
-              explore and compare preschools. School names, logos, and trademarks
-              shown on this website belong to their respective owners and are used
-              for identification and informational purposes only. Aralya is not
-              affiliated with, endorsed by, or officially connected to any school
-              listed unless explicitly stated.
-            </p>
-            <p>
-              Information on Aralya is gathered from publicly available sources and
-              direct communication and may change over time. While we aim to keep
-              details accurate and up to date, parents are encouraged to confirm all
-              information directly with the school. Aralya does not accept
-              applications, process enrollments, or act as an agent or
-              representative of any school.
-            </p>
-            <p>
-              Content on this site is provided for general information only and
-              should not be considered professional or educational advice. If you
-              represent a school and would like information updated or removed,
-              please contact us.
-            </p>
-          </div>
         </div>
 
         <div className="flex flex-col">
@@ -72,6 +47,9 @@ const Footer = () => {
             </li>
             <li className="text-[#cfcfcf] font-medium hover:text-[#FFFFFF] transition-colors duration-500 ease-in-out delay-100">
               <Link href="/terms-of-services">Terms</Link>
+            </li>
+            <li className="text-[#cfcfcf] font-medium hover:text-[#FFFFFF] transition-colors duration-500 ease-in-out delay-100">
+              <Link href="/disclaimer">Disclaimer</Link>
             </li>
           </ul>
         </div>
