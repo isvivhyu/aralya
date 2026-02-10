@@ -155,7 +155,7 @@ const SchoolDetails = () => {
         <div className="w-full flex items-center justify-center md:px-10 pt-5 md:pt-0">
           <Navbar textColor="black" />
         </div>
-        <div className="pt-13 flex flex-col items-center md:w-[930px] w-full px-0 mt-28">
+        <div className="pt-13 flex flex-col items-center md:max-w-[1000px] w-full px-0 mt-28">
           {/* Header Skeleton */}
           <div className="rounded-[16px] bg-white p-4 flex md:flex-row flex-col gap-4 md:items-center w-full">
             <SkeletonLoader className="w-80 h-50" />
@@ -169,32 +169,32 @@ const SchoolDetails = () => {
             </div>
           </div>
 
-          {/* Contact Section Skeleton */}
-          <div className="rounded-[16px] bg-white p-4 mt-6 flex gap-4 items-center w-full">
-            <div className="flex flex-col gap-2 w-full">
-              <SkeletonLoader className="h-6 w-32" />
-              <div className="grid md:grid-cols-4 grid-cols-2 w-full gap-4">
-                {Array.from({ length: 4 }).map((_, index) => (
-                  <SkeletonLoader key={index} className="h-10 rounded-lg" />
-                ))}
+          {/* Two-column skeleton: Overview (left) + Contact (right) */}
+          <div className="w-full mt-6 grid grid-cols-1 md:grid-cols-[1fr_340px] gap-8 md:gap-10">
+            <div className="flex flex-col gap-10">
+              <div className="rounded-2xl p-8 w-full bg-white">
+                <div className="flex gap-2 items-center -ml-1 mb-4">
+                  <SkeletonLoader className="h-6 w-6 rounded" />
+                  <SkeletonLoader className="h-6 w-24" />
+                </div>
+                <div className="grid md:grid-cols-2 grid-cols-1 gap-x-12 gap-y-6 mt-8">
+                  {Array.from({ length: 6 }).map((_, index) => (
+                    <div key={index} className="flex flex-col gap-2">
+                      <SkeletonLoader className="h-5 w-32" />
+                      <SkeletonLoader className="h-4 w-full" />
+                    </div>
+                  ))}
+                </div>
               </div>
             </div>
-          </div>
-
-          {/* Overview Skeleton */}
-          <div className="w-full mt-11">
-            <div className="rounded-2xl p-8 w-full bg-white">
-              <div className="flex gap-2 items-center -ml-1 mb-4">
-                <SkeletonLoader className="h-6 w-6 rounded" />
-                <SkeletonLoader className="h-6 w-24" />
-              </div>
-              <div className="grid md:grid-cols-2 grid-cols-1 gap-x-12 gap-y-6 mt-8">
-                {Array.from({ length: 6 }).map((_, index) => (
-                  <div key={index} className="flex flex-col gap-2">
-                    <SkeletonLoader className="h-5 w-32" />
-                    <SkeletonLoader className="h-4 w-full" />
-                  </div>
-                ))}
+            <div className="md:sticky md:top-24">
+              <div className="rounded-2xl bg-white p-6 flex flex-col gap-4">
+                <SkeletonLoader className="h-6 w-32" />
+                <div className="grid grid-cols-2 gap-3">
+                  {Array.from({ length: 4 }).map((_, index) => (
+                    <SkeletonLoader key={index} className="h-12 rounded-full" />
+                  ))}
+                </div>
               </div>
             </div>
           </div>
@@ -210,7 +210,7 @@ const SchoolDetails = () => {
         <div className="w-full flex items-center justify-center md:px-10 pt-5 md:pt-0">
           <Navbar textColor="black" />
         </div>
-        <div className="pt-13 flex flex-col items-center md:w-[930px] w-full px-0 mt-28">
+        <div className="pt-13 flex flex-col items-center md:max-w-[1000px] w-full px-0 mt-28">
           <div className="rounded-[16px] bg-white p-8 text-center">
             <h1 className="text-4xl font-bold text-[#0E1C29] mb-4">
               School Not Found
@@ -239,7 +239,7 @@ const SchoolDetails = () => {
         </div>
 
         {/* Main Content */}
-        <div className="pt-13 flex flex-col items-center md:w-[930px] w-full px-0 mt-14">
+        <div className="pt-13 flex flex-col items-center md:max-w-[1000px] w-full px-0 mt-14">
           {/* Back to Browse Button */}
           <div className="w-full mb-4 relative flex items-center min-h-10">
             <Link
@@ -337,175 +337,180 @@ const SchoolDetails = () => {
             </div>
           </div>
 
-          {/* Contact Section */}
-          <div className="rounded-[16px] bg-white p-4 mt-6 flex gap-4 items-center w-full">
-            <div className="flex flex-col gap-2 w-full">
-              <h4 className="text-[#0E1C29] md:text-2xl text-base md:font-medium font-semibold">
-                Contact School
-              </h4>
+          {/* Grid: row1 = Overview | Contact (sticky, spans 3 rows), row2 = Location full width, row3 = Help full width */}
+          <div className="w-full mt-6 grid grid-cols-1 md:grid-cols-[1fr_340px] gap-8 md:gap-10 items-start overflow-visible">
+            {/* Row 1: Overview */}
+            <div className="min-w-0 md:row-start-1 md:col-start-1">
+              <div className="rounded-2xl p-8 w-full bg-white shadow-sm border border-gray-100">
+                <div className="flex gap-2 items-center -ml-1">
+                  <i className="ri-book-open-line text-[#0E1C29] md:text-2xl text-xl mt-0.5 ml-1"></i>
+                  <p className="md:text-2xl text-lg text-[#0E1C29] font-semibold">
+                    Overview
+                  </p>
+                </div>
 
-              <div className="grid md:grid-cols-4 grid-cols-2 w-full gap-4">
-                <Link
-                  href={`tel:${(school?.number || "").split(",")[0]?.trim() || ""}`}
-                  className="bg-[#774BE5] rounded-full px-4 py-2"
-                >
-                  <p className="text-white text-center font-semibold text-sm">
-                    Call
-                  </p>
-                </Link>
-                <Link
-                  href={`sms:${(school?.number || "").split(",")[0]?.trim() || ""}`}
-                  className="bg-[#774BE5] rounded-full px-4 py-2"
-                >
-                  <p className="text-white text-center font-semibold text-sm">
-                    Text
-                  </p>
-                </Link>
-                <Link
-                  href={school?.facebook || "#"}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="bg-[#774BE5] rounded-full px-4 py-2"
-                >
-                  <p className="text-white text-center font-semibold text-sm">
-                    Facebook
-                  </p>
-                </Link>
-                <Link
-                  href={`mailto:${school?.email || ""}`}
-                  className="bg-[#774BE5] rounded-full px-4 py-2"
-                >
-                  <p className="text-white text-center font-semibold text-sm">
-                    Email
-                  </p>
-                </Link>
+                <div className="grid md:grid-cols-2 grid-cols-1 gap-x-12 gap-y-6 mt-8">
+                  <div className="flex flex-col gap-2">
+                    <p className="md:text-xl text-base text-[#0E1C29] font-semibold">
+                      Curriculum
+                    </p>
+                    <p className="text-[#0E1C29] font-normal text-sm">
+                      {school?.curriculum || "Not specified"}
+                    </p>
+                  </div>
+
+                  <div className="flex flex-col gap-2">
+                    <p className="md:text-xl text-base text-[#0E1C29] font-semibold">
+                      Class Size
+                    </p>
+                    <p className="text-[#0E1C29] font-normal text-sm">
+                      {school?.class_size || "Not specified"}
+                    </p>
+                  </div>
+
+                  <div className="flex flex-col gap-2">
+                    <p className="md:text-xl text-base text-[#0E1C29] font-semibold">
+                      Schedule
+                    </p>
+                    <p className="text-[#0E1C29] font-normal text-sm">
+                      {school?.schedule || "Not specified"}
+                    </p>
+                  </div>
+
+                  <div className="flex flex-col gap-2">
+                    <p className="md:text-xl text-base text-[#0E1C29] font-semibold">
+                      Programs
+                    </p>
+                    <p className="text-[#0E1C29] font-normal text-sm">
+                      {school?.programs || "Not specified"}
+                    </p>
+                  </div>
+
+                  <div className="flex flex-col gap-2">
+                    <p className="md:text-xl text-base text-[#0E1C29] font-semibold">
+                      After-school Care
+                    </p>
+                    <p className="text-[#0E1C29] font-normal text-sm">
+                      {school?.care || "Not specified"}
+                    </p>
+                  </div>
+
+                  <div className="flex flex-col gap-2">
+                    <p className="md:text-xl text-base text-[#0E1C29] font-semibold">
+                      Special Education Support
+                    </p>
+                    <p className="text-[#0E1C29] font-normal text-sm">
+                      {school?.support || "Not specified"}
+                    </p>
+                  </div>
+                </div>
               </div>
             </div>
-          </div>
 
-          {/* Overview Section */}
-          <div className="w-full mt-11">
-            <div className="rounded-2xl p-8 w-full bg-white">
-              <div className="flex gap-2 items-center -ml-1">
-                <i className="ri-book-open-line text-[#0E1C29] md:text-2xl text-xl mt-0.5 ml-1"></i>
+            {/* Contact: col 2, spans rows 1–3 so sticky has a tall cell */}
+            <div className="md:col-start-2 md:row-start-1 md:row-span-3 md:self-start w-full">
+              <div className="sticky top-20 md:top-24">
+                <div className="rounded-2xl bg-white p-6 shadow-md border border-gray-100 flex flex-col gap-4">
+                  <h4 className="text-[#0E1C29] text-xl font-semibold">
+                    Contact School
+                  </h4>
+
+                  <div className="grid grid-cols-2 gap-3">
+                    <Link
+                      href={`tel:${(school?.number || "").split(",")[0]?.trim() || ""}`}
+                      className="bg-[#774BE5] hover:bg-[#6B3FD6] rounded-full px-4 py-3 transition-colors"
+                    >
+                      <p className="text-white text-center font-semibold text-sm">
+                        Call
+                      </p>
+                    </Link>
+                    <Link
+                      href={`sms:${(school?.number || "").split(",")[0]?.trim() || ""}`}
+                      className="bg-[#774BE5] hover:bg-[#6B3FD6] rounded-full px-4 py-3 transition-colors"
+                    >
+                      <p className="text-white text-center font-semibold text-sm">
+                        Text
+                      </p>
+                    </Link>
+                    <Link
+                      href={school?.facebook || "#"}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="bg-[#774BE5] hover:bg-[#6B3FD6] rounded-full px-4 py-3 transition-colors"
+                    >
+                      <p className="text-white text-center font-semibold text-sm">
+                        Facebook
+                      </p>
+                    </Link>
+                    <Link
+                      href={`mailto:${school?.email || ""}`}
+                      className="bg-[#774BE5] hover:bg-[#6B3FD6] rounded-full px-4 py-3 transition-colors"
+                    >
+                      <p className="text-white text-center font-semibold text-sm">
+                        Email
+                      </p>
+                    </Link>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Row 2: Location – full width (span both columns) */}
+            <div className="w-full md:row-start-2 md:col-start-1 md:col-span-2 rounded-3xl bg-white p-6 flex flex-col gap-4">
+              <div className="flex gap-2 items-center -ml-1 mb-2">
+                <i className="ri-map-pin-line text-[#0E1C29] md:text-2xl text-xl mt-0.5 ml-1"></i>
                 <p className="md:text-2xl text-lg text-[#0E1C29] font-semibold">
-                  Overview
+                  Location
                 </p>
               </div>
-
-              <div className="grid md:grid-cols-2 grid-cols-1 gap-x-12 gap-y-6 mt-8">
-                <div className="flex flex-col gap-2">
-                  <p className="md:text-xl text-base text-[#0E1C29] font-semibold">
-                    Curriculum
-                  </p>
-                  <p className="text-[#0E1C29] font-normal text-sm">
-                    {school?.curriculum || "Not specified"}
-                  </p>
-                </div>
-
-                <div className="flex flex-col gap-2">
-                  <p className="md:text-xl text-base text-[#0E1C29] font-semibold">
-                    Schedule
-                  </p>
-                  <p className="text-[#0E1C29] font-normal text-sm">
-                    {school?.schedule || "Not specified"}
-                  </p>
-                </div>
-
-                <div className="flex flex-col gap-2">
-                  <p className="md:text-xl text-base text-[#0E1C29] font-semibold">
-                    Class Size
-                  </p>
-                  <p className="text-[#0E1C29] font-normal text-sm">
-                    {school?.class_size || "Not specified"}
-                  </p>
-                </div>
-
-                <div className="flex flex-col gap-2">
-                  <p className="md:text-xl text-base text-[#0E1C29] font-semibold">
-                    Programs
-                  </p>
-                  <p className="text-[#0E1C29] font-normal text-sm">
-                    {school?.programs || "Not specified"}
-                  </p>
-                </div>
-
-                <div className="flex flex-col gap-2">
-                  <p className="md:text-xl text-base text-[#0E1C29] font-semibold">
-                    After-school Care
-                  </p>
-                  <p className="text-[#0E1C29] font-normal text-sm">
-                    {school?.care || "Not specified"}
-                  </p>
-                </div>
-
-                <div className="flex flex-col gap-2">
-                  <p className="md:text-xl text-base text-[#0E1C29] font-semibold">
-                    Special Education Support
-                  </p>
-                  <p className="text-[#0E1C29] font-normal text-sm">
-                    {school?.support || "Not specified"}
-                  </p>
-                </div>
+              <p className="text-[#0E1C29] font-normal text-sm">
+                {school?.location && school.location.trim() !== ""
+                  ? school.location
+                  : school?.city && school.city.trim() !== ""
+                    ? school.city
+                    : "Philippines"}
+              </p>
+              <div className="mt-4 flex md:justify-start">
+                <a
+                  href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
+                    school?.location && school.location.trim() !== ""
+                      ? `${school.location}, Philippines`
+                      : school?.city && school.city.trim() !== ""
+                        ? `${school.city}, Philippines`
+                        : "Philippines",
+                  )}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="bg-[#774BE5] rounded-full px-4 py-2 inline-flex items-center text-white font-semibold text-sm"
+                >
+                  Google Maps
+                </a>
               </div>
             </div>
-          </div>
 
-          {/* Location (opens Google Maps) */}
-          <div className="w-full mt-10 rounded-3xl bg-white p-6 flex flex-col gap-4">
-            <div className="flex gap-2 items-center -ml-1 mb-2">
-              <i className="ri-map-pin-line text-[#0E1C29] md:text-2xl text-xl mt-0.5 ml-1"></i>
-              <p className="md:text-2xl text-lg text-[#0E1C29] font-semibold">
-                Location
-              </p>
-            </div>
-            <p className="text-[#0E1C29] font-normal text-sm">
-              {school?.location && school.location.trim() !== ""
-                ? school.location
-                : school?.city && school.city.trim() !== ""
-                  ? school.city
-                  : "Philippines"}
-            </p>
-            <div className="mt-4 flex md:justify-start">
-              <a
-                href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
-                  school?.location && school.location.trim() !== ""
-                    ? `${school.location}, Philippines`
-                    : school?.city && school.city.trim() !== ""
-                      ? `${school.city}, Philippines`
-                      : "Philippines",
-                )}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="bg-[#774BE5] rounded-full px-4 py-2 inline-flex items-center text-white font-semibold text-sm"
-              >
-                Google Maps
-              </a>
-            </div>
-          </div>
-
-          {/* Help Keep Information Accurate Section */}
-          <div className="w-full mt-10 -mb-16 rounded-3xl bg-white p-6 flex flex-col gap-4">
-            <div className="flex gap-2 items-center -ml-1 mb-2">
-              <i className="ri-lightbulb-line text-[#0E1C29] md:text-2xl text-xl mt-0.5 ml-1"></i>
-              <h4 className="md:text-2xl text-lg text-[#0E1C29] font-semibold">
-                Help us keep this information accurate
-              </h4>
-            </div>
-            <div className="flex flex-col gap-2">
-              <p className="text-sm text-[#374151]">
-                If you notice outdated or incorrect details, message us on Facebook and we'll review it promptly.
-              </p>
-              <Link
-                href="https://web.facebook.com/people/Aralya/61578164295126"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="bg-[#774BE5] rounded-full px-4 py-2 w-fit mt-2 flex items-center hover:bg-[#6B3FD6] transition-colors"
-              >
-                <span className="text-white text-center font-semibold text-sm">
-                  Message on Facebook
-                </span>
-              </Link>
+            {/* Row 3: Help – full width (span both columns) */}
+            <div className="w-full -mb-16 md:row-start-3 md:col-start-1 md:col-span-2 rounded-3xl bg-white p-6 flex flex-col gap-4 shadow-sm border border-gray-100">
+              <div className="flex gap-2 items-center -ml-1 mb-2">
+                <i className="ri-lightbulb-line text-[#0E1C29] md:text-2xl text-xl mt-0.5 ml-1"></i>
+                <h4 className="md:text-2xl text-lg text-[#0E1C29] font-semibold">
+                  Help us keep this information accurate
+                </h4>
+              </div>
+              <div className="flex flex-col gap-2">
+                <p className="text-sm text-[#374151]">
+                  If you notice outdated or incorrect details, message us on Facebook and we'll review it promptly.
+                </p>
+                <Link
+                  href="https://web.facebook.com/people/Aralya/61578164295126"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="bg-[#774BE5] rounded-full px-4 py-2 w-fit mt-2 flex items-center hover:bg-[#6B3FD6] transition-colors"
+                >
+                  <span className="text-white text-center font-semibold text-sm">
+                    Message on Facebook
+                  </span>
+                </Link>
+              </div>
             </div>
           </div>
         </div>
