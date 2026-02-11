@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Navbar from "@/components/Navbar";
 import Image from "next/image";
 import Link from "next/link";
@@ -19,6 +19,10 @@ const SchoolDetails = () => {
   const [showShareModal, setShowShareModal] = useState(false);
   const [linkCopied, setLinkCopied] = useState(false);
   const [isDesktop, setIsDesktop] = useState(false);
+  const contactColumnRef = useRef<HTMLDivElement>(null);
+  const contactStickyRef = useRef<HTMLDivElement>(null);
+
+  const STICKY_TOP_PX = 96; // match top-24 (navbar clearance)
 
   // Get current page URL for sharing
   const getShareUrl = () => {
@@ -147,6 +151,114 @@ const SchoolDetails = () => {
 
     loadSchool();
   }, [slug]);
+
+  // Sticky Contact card: apply styles directly to DOM so it actually sticks (desktop only)
+  useEffect(() => {
+    if (!school) return;
+
+    let rafId: number;
+    let scrollTarget: Window | Element = window;
+    let timeoutId: ReturnType<typeof setTimeout>;
+
+    const updateSticky = () => {
+      const isMd = typeof window !== "undefined" && window.innerWidth >= 768;
+      const column = contactColumnRef.current;
+      const el = contactStickyRef.current;
+      if (!column || !el) return;
+      if (!isMd) {
+        el.style.position = "";
+        el.style.top = "";
+        el.style.left = "";
+        el.style.width = "";
+        return;
+      }
+      const colRect = column.getBoundingClientRect();
+      const cardRect = el.getBoundingClientRect();
+      const cardHeight = cardRect.height;
+      const stickZoneBottom = STICKY_TOP_PX + cardHeight;
+      const shouldStick =
+        cardRect.top <= STICKY_TOP_PX && colRect.bottom > stickZoneBottom;
+
+      if (shouldStick) {
+        el.style.position = "fixed";
+        el.style.top = `${STICKY_TOP_PX}px`;
+        el.style.left = `${colRect.left}px`;
+        el.style.width = `${colRect.width}px`;
+      } else {
+        el.style.position = "";
+        el.style.top = "";
+        el.style.left = "";
+        el.style.width = "";
+      }
+    };
+
+    const onScrollOrResize = () => {
+      rafId = requestAnimationFrame(updateSticky);
+    };
+
+    // Find scrollable ancestor (if any); otherwise use window
+    const getScrollParent = (node: HTMLElement | null): Element | null => {
+      if (!node) return null;
+      let p: HTMLElement | null = node.parentElement;
+      while (p) {
+        const style = getComputedStyle(p);
+        const oy = style.overflowY;
+        const o = style.overflow;
+        if (
+          (oy === "auto" || oy === "scroll" || o === "auto" || o === "scroll") &&
+          p.scrollHeight > p.clientHeight
+        ) {
+          return p;
+        }
+        p = p.parentElement;
+      }
+      return null;
+    };
+
+    const setup = () => {
+      const col = contactColumnRef.current;
+      const el = contactStickyRef.current;
+      if (!col || !el) return;
+      scrollTarget = getScrollParent(col) || window;
+      if (scrollTarget === window) {
+        // Page scroll can fire on window or documentElement depending on browser
+        window.addEventListener("scroll", onScrollOrResize, { passive: true });
+        document.documentElement.addEventListener("scroll", onScrollOrResize, {
+          passive: true,
+        });
+      } else {
+        scrollTarget.addEventListener("scroll", onScrollOrResize, {
+          passive: true,
+        });
+      }
+      window.addEventListener("resize", onScrollOrResize);
+      updateSticky();
+    };
+
+    timeoutId = setTimeout(setup, 150);
+
+    return () => {
+      clearTimeout(timeoutId);
+      cancelAnimationFrame(rafId);
+      if (scrollTarget === window) {
+        window.removeEventListener("scroll", onScrollOrResize);
+        document.documentElement.removeEventListener(
+          "scroll",
+          onScrollOrResize
+        );
+      } else {
+        scrollTarget.removeEventListener("scroll", onScrollOrResize);
+      }
+      window.removeEventListener("resize", onScrollOrResize);
+      const el = contactStickyRef.current;
+      if (el) {
+        el.style.position = "";
+        el.style.top = "";
+        el.style.left = "";
+        el.style.width = "";
+      }
+    };
+  }, [school]);
 
   // Show loading state
   if (loading) {
@@ -407,9 +519,12 @@ const SchoolDetails = () => {
               </div>
             </div>
 
-            {/* Contact: col 2, spans rows 1–3 so sticky has a tall cell */}
-            <div className="md:col-start-2 md:row-start-1 md:row-span-3 md:self-start w-full">
-              <div className="sticky top-20 md:top-24">
+            {/* Contact: col 2, spans rows 1–3; JS sticky keeps card fixed until column ends (no overlap with Location/Help) */}
+            <div
+              ref={contactColumnRef}
+              className="md:col-start-2 md:row-start-1 md:row-span-3 md:self-start w-full md:min-h-0"
+            >
+              <div ref={contactStickyRef} className="z-10 w-full">
                 <div className="rounded-2xl bg-white p-6 shadow-md border border-gray-100 flex flex-col gap-4">
                   <h4 className="text-[#0E1C29] text-xl font-semibold">
                     Contact School
