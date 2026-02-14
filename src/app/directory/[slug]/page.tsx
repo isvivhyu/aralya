@@ -394,7 +394,7 @@ const SchoolDetails = () => {
                 </h4>
 
                 <div
-                  className="flex items-center gap-2 cursor-pointer border border-black rounded-lg px-2 py-1 hover:bg-gray-50 transition-colors"
+                  className="flex items-center gap-2 cursor-pointer bg-[#774BE5] rounded-full px-2 py-1"
                   onClick={() => {
                     // On mobile, directly trigger native share
                     if (!isDesktop) {
@@ -405,10 +405,7 @@ const SchoolDetails = () => {
                     }
                   }}
                 >
-                  <i className="ri-upload-line text-black text-lg"></i>
-                  <p className="text-base font-medium text-black underline">
-                    Share
-                  </p>
+                  <i className="ri-share-2-line text-white text-xl"></i>
                 </div>
               </div>
               <div className="flex items-center my-1 gap-2 flex-wrap">
@@ -752,8 +749,7 @@ const SchoolDetails = () => {
                     onClick={handleNativeShare}
                     className="w-full bg-[#774BE5] hover:bg-[#6B3FD6] text-white rounded-full px-4 py-3 flex items-center justify-center gap-2 font-semibold transition-colors"
                   >
-                    <i className="ri-share-line text-lg"></i>
-                    <span>Share</span>
+                    <i className="ri-share-2-line text-lg"></i>
                   </button>
 
                   {/* Copy Link as secondary option */}

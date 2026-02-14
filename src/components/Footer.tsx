@@ -35,7 +35,7 @@ const Footer = () => {
         </div>
 
         <div className="flex flex-col">
-          <ul className="flex md:flex-row flex-col gap-8">
+          <ul className="flex md:flex-row flex-col gap-5">
             <li className="text-[#cfcfcf] font-medium hover:text-[#FFFFFF] transition-colors duration-500 ease-in-out delay-100">
               <Link href="/contact">Contact</Link>
             </li>

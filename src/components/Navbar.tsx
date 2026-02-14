@@ -56,23 +56,37 @@ const Navbar = ({ textColor = "white" }: NavbarProps) => {
         <div className="flex items-center justify-between w-full">
           <Link href="/" className="hidden md:block">
             {isScrolling && isDesktop ? (
-              <Image
-                src="/images/logo-white.png"
-                alt="logo"
-                width={150}
-                height={150}
-              />
+              <div className="flex items-center gap-2">
+                <Image
+                  src="/images/logo-icons.png"
+                  alt="logo"
+                  width={45}
+                  height={45}
+                />
+                <Image
+                  src="/images/logo-white.png"
+                  alt="logo"
+                  width={150}
+                  height={150}
+                />
+              </div>
             ) : (
               <Image
                 src="/images/Logo.png"
                 alt="logo"
                 width={200}
                 height={200}
-                style={{ height: 'auto' }}
+                style={{ height: "auto" }}
               />
             )}
           </Link>
-          <Link href="/" className="block md:hidden">
+          <Link href="/" className="flex items-center gap-2 md:hidden">
+            <Image
+              src="/images/logo-icons.png"
+              alt="logo"
+              width={45}
+              height={45}
+            />
             <Image
               src="/images/logo-white.png"
               alt="logo"
@@ -170,3 +184,4 @@ const Navbar = ({ textColor = "white" }: NavbarProps) => {
 };
 
 export default Navbar;
+
